@@ -3,7 +3,11 @@ package jp.co.fssoft.guchitter.activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import jp.co.fssoft.guchitter.R
+import jp.co.fssoft.guchitter.widget.TweetRecycleView
+import jp.co.fssoft.guchitter.widget.TweetScrollEvent
 
 class MainActivity : RootActivity()
 {
@@ -37,7 +41,13 @@ class MainActivity : RootActivity()
                 startActivity(Intent(application, AuthenticationActivity::class.java))
             }
         }
-        getAllTweet()
+        getPrevHomeTweet(database.writableDatabase)
+        findViewById<RecyclerView>(R.id.tweet_recycle_view).apply {
+            setHasFixedSize(true)
+            adapter = TweetRecycleView(db, 0) {}
+            layoutManager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, false)
+            addOnScrollListener(TweetScrollEvent())
+        }
         Log.d(TAG, "[END]onCreate(${savedInstanceState})")
     }
 }

@@ -29,9 +29,11 @@ class TwitterApiAccessToken : TwitterApiCommon("https://api.twitter.com/oauth/ac
      */
     override fun start(db: SQLiteDatabase, additionalHeaderParams: Map<String, String>?, callback: ((String?)->Unit)?)
     {
+        Log.d(TAG, "[START]start(${db}, ${additionalHeaderParams}, ${callback})")
         this.db = db
         this.callback = callback
         startMain(db, null, additionalHeaderParams)
+        Log.d(TAG, "[END]start(${db}, ${additionalHeaderParams}, ${callback})")
     }
 
     /**
