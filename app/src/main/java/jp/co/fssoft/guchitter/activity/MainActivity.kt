@@ -37,19 +37,57 @@ class MainActivity : RootActivity()
          * なければ認証
          */
         val db = database.readableDatabase
-        db.rawQuery("SELECT * FROM t_users WHERE this = 1", null).use {
-            if (it.count != 1) {
+        db.rawQuery("SELECT * FROM t_users WHERE current = 1", null).use {
+            if (it.count == 0) {
                 startActivity(Intent(application, AuthenticationActivity::class.java))
             }
         }
-        getPrevHomeTweet(database.writableDatabase)
-        findViewById<RecyclerView>(R.id.tweet_recycle_view).apply {
-            setHasFixedSize(true)
-            adapter = TweetRecycleView(db, 0) {}
-            layoutManager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, false)
-            addOnScrollListener(TweetScrollEvent())
-            addItemDecoration(DividerItemDecoration(this@MainActivity, DividerItemDecoration.VERTICAL))
-        }
         Log.d(TAG, "[END]onCreate(${savedInstanceState})")
+    }
+
+    /**
+     * TODO
+     *
+     */
+    override fun onStart()
+    {
+        super.onStart()
+
+        Log.d(TAG, "[START]onStart()")
+
+        val db = database.readableDatabase
+        db.rawQuery("SELECT user_id FROM t_users WHERE current = 1", null).use {
+            if (it.count == 1) {
+                it.moveToFirst()
+                findViewById<RecyclerView>(R.id.tweet_recycle_view).apply {
+                    setHasFixedSize(true)
+                    val userId = it.getLong(it.getColumnIndex("user_id"))
+                    layoutManager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, false)
+                    adapter = TweetRecycleView(database.readableDatabase) {}
+                    addItemDecoration(DividerItemDecoration(this@MainActivity, DividerItemDecoration.VERTICAL))
+                    addOnScrollListener(TweetScrollEvent(
+                        {
+                            callback -> getNextHomeTweet(database.writableDatabase, userId, false) {
+                                runOnUiThread {
+                                    (adapter as TweetRecycleView).tweetObjects = getCurrentHomeTweet(db, userId)
+                                    adapter?.notifyDataSetChanged()
+                                    callback()
+                                }
+                            }
+                        },
+                        {
+                            callback -> getPrevHomeTweet(database.writableDatabase, userId, false) {
+                                runOnUiThread {
+                                    (adapter as TweetRecycleView).tweetObjects = getCurrentHomeTweet(db, userId)
+                                    adapter?.notifyDataSetChanged()
+                                    callback()
+                                }
+                            }
+                        }
+                    ))
+                }
+            }
+        }
+        Log.d(TAG, "[END]onStart()")
     }
 }

@@ -94,17 +94,17 @@ class TweetViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
     /**
      *
      */
-    val space1: Space = view.findViewById(R.id.tweet_recycle_view_space1)
+    private val space1: Space = view.findViewById(R.id.tweet_recycle_view_space1)
 
     /**
      *
      */
-    val space2: Space = view.findViewById(R.id.tweet_recycle_view_space2)
+    private val space2: Space = view.findViewById(R.id.tweet_recycle_view_space2)
 
     /**
      *
      */
-    val space3: Space = view.findViewById(R.id.tweet_recycle_view_space3)
+    private val space3: Space = view.findViewById(R.id.tweet_recycle_view_space3)
 
     /**
      *
@@ -180,7 +180,7 @@ class TweetViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
  * TODO
  *
  */
-class TweetRecycleView(private val db: SQLiteDatabase, private val userId: Long, callback: (Int)->Unit) : RecyclerView.Adapter<TweetViewHolder>()
+class TweetRecycleView(private val db: SQLiteDatabase, callback: (Int)->Unit) : RecyclerView.Adapter<TweetViewHolder>()
 {
     companion object
     {
@@ -189,6 +189,8 @@ class TweetRecycleView(private val db: SQLiteDatabase, private val userId: Long,
          */
         private val TAG = TweetRecycleView::class.qualifiedName
     }
+
+    public var tweetObjects: List<TweetObject> = mutableListOf()
 
     /**
      * TODO
@@ -213,27 +215,29 @@ class TweetRecycleView(private val db: SQLiteDatabase, private val userId: Long,
     {
         Log.d(TAG, "[START]onBindViewHolder(${holder}, ${position})")
 
-        var query = "SELECT data FROM t_timelines WHERE user_id = ${userId} ORDER BY tweet_id DESC LIMIT 1 OFFSET ${position}";
-        if (userId == 0L) {
-            query = "SELECT data FROM t_timelines WHERE home = 1 ORDER BY tweet_id DESC LIMIT 1 OFFSET ${position}";
+        val tweet = tweetObjects[position]
+
+        holder.nameText.text = tweet.user.name
+        holder.mainText.text = tweet.text
+        holder.replyBtn.setImageResource(R.drawable.tweet_reply)
+
+        holder.favoriteBtn.setImageResource(R.drawable.tweet_favorite)
+        if (tweet.isFavorited == true) {
+            holder.favoriteBtn.setImageResource(R.drawable.tweet_favorited)
+        }
+        if (tweet.favorites != 0) {
+            holder.favoriteText.text = tweet.favorites.toString()
         }
 
-        db.rawQuery(query, null).use {
-            it.moveToFirst()
-            val tweet = Utility.jsonDecode(TweetObject.serializer(), it.getString(it.getColumnIndex("data")))
-            holder.nameText.text = tweet.user.name
-            holder.mainText.text = tweet.text
-            holder.favoriteBtn.setImageResource(R.drawable.tweet_favorite)
-            if (tweet.isFavorited == true) {
-                holder.favoriteBtn.setImageResource(R.drawable.tweet_favorited)
-            }
-            holder.retweetBtn.setImageResource(R.drawable.tweet_retweet)
-            if (tweet.retweeted == true) {
-                holder.retweetBtn.setImageResource(R.drawable.tweet_retweeted)
-            }
-            val image = "${Utility.Companion.ImagePrefix.USER}_${URLUtil.guessFileName(tweet.user.profileImageUrl, null, null)}"
-            holder.icon.setImageBitmap(Utility.circleTransform(BitmapFactory.decodeStream(holder.icon.context.openFileInput(image))))
+        holder.retweetBtn.setImageResource(R.drawable.tweet_retweet)
+        if (tweet.retweeted == true) {
+            holder.retweetBtn.setImageResource(R.drawable.tweet_retweeted)
         }
+        if (tweet.retweets != 0) {
+            holder.retweetText.text = tweet.retweets.toString()
+        }
+        val image = "${Utility.Companion.ImagePrefix.USER}_${URLUtil.guessFileName(tweet.user.profileImageUrl, null, null)}"
+        holder.icon.setImageBitmap(Utility.circleTransform(BitmapFactory.decodeStream(holder.icon.context.openFileInput(image))))
 
         Log.d(TAG, "[END]onBindViewHolder(${holder}, ${position})")
     }
@@ -245,21 +249,9 @@ class TweetRecycleView(private val db: SQLiteDatabase, private val userId: Long,
      */
     override fun getItemCount(): Int
     {
+        Log.d(TAG, "[START]getItemCount() -> ${tweetObjects.size}")
 
-        Log.d(TAG, "[START]getItemCount()")
-
-        var query = "SELECT id FROM t_timelines WHERE user_id = ${userId}";
-        if (userId == 0L) {
-            query = "SELECT id FROM t_timelines WHERE home = 1"
-        }
-        var count = 0
-        db.rawQuery(query, null).use {
-            count = it.count
-        }
-
-        Log.d(TAG, "[END]getItemCount() -> ${count}")
-
-        return count
+        return tweetObjects.size
     }
 }
 
@@ -269,7 +261,7 @@ class TweetRecycleView(private val db: SQLiteDatabase, private val userId: Long,
  * @property top
  * @property bottom
  */
-class TweetScrollEvent(private val top: (() -> Unit)? = null, private val bottom: (() -> Unit)? = null) : RecyclerView.OnScrollListener()
+class TweetScrollEvent(private val top: ((()->Unit)->Unit)? = null, private val bottom: ((()->Unit)->Unit)? = null) : RecyclerView.OnScrollListener()
 {
     companion object
     {
@@ -277,6 +269,27 @@ class TweetScrollEvent(private val top: (() -> Unit)? = null, private val bottom
          *
          */
         private val TAG = TweetScrollEvent::class.qualifiedName
+
+        private var lock = false
+    }
+
+    /**
+     *
+     */
+    init {
+        top?.let {
+            if (lock == false) {
+                lock = true
+                it(::unlock)
+            }
+        }
+    }
+
+    private fun unlock()
+    {
+        Log.d(TAG, "[START]unlock()")
+        lock = false
+        Log.d(TAG, "[END]unlock()")
     }
 
     /**
@@ -295,12 +308,22 @@ class TweetScrollEvent(private val top: (() -> Unit)? = null, private val bottom
         if (layoutManager.findFirstVisibleItemPosition() == 0) {
             if (recyclerView.getChildAt(0).top == 0) {
                 Log.d(TAG, "top()")
-                top?.let { it() }
+                top?.let {
+                    if (lock == false) {
+                        lock = true
+                        it(::unlock)
+                    }
+                }
             }
         }
         if (recyclerView.adapter?.itemCount == layoutManager.findFirstVisibleItemPosition() + recyclerView.childCount) {
             Log.d(TAG, "bottom()")
-            bottom?.let { it() }
+            bottom?.let {
+                if (lock == false) {
+                    lock = true
+                    it(::unlock)
+                }
+            }
         }
         Log.d(TAG, "[END]onScrolled(${recyclerView}, ${dx}, ${dy})")
     }

@@ -10,6 +10,7 @@ import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import java.io.BufferedInputStream
+import java.io.File
 import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
@@ -134,38 +135,48 @@ class Utility
          * @param context
          * @param prefix
          * @param url
+         * @param sync
          * @param callback
          */
-        public fun saveImage(context: Context, prefix: ImagePrefix, url: String, callback: (()->Unit)? = null)
+        public fun saveImage(context: Context, prefix: ImagePrefix, url: String, sync: Boolean = true, callback: (()->Unit)? = null)
         {
             Log.d(TAG, "[START]saveImage(${context}, ${prefix}, ${url}, ${callback})")
-            val runnable = Runnable {
-                Log.d(TAG, "[START][THREAD]saveImage(${context}, ${prefix}, ${url}, ${callback})")
-                val con = URL(url).openConnection() as HttpsURLConnection
-                con.addRequestProperty("Accept-Encoding", "gzip")
-                con.connect()
-                val encoding = con.getHeaderField("Content-Encoding")
-                val stream =
-                    if (encoding != null) {
-                        BufferedInputStream(GZIPInputStream(con.inputStream))
-                    }
-                    else {
-                        BufferedInputStream(con.inputStream)
-                    }
-                val file = "${prefix}_${URLUtil.guessFileName(url, null, null)}"
-                context.openFileOutput(file, Context.MODE_PRIVATE).use {
-                    while (true) {
-                        val line = stream.read()
-                        if (line == -1) {
-                            break
+            val file = "${prefix}_${URLUtil.guessFileName(url, null, null)}"
+            val path = "${context.filesDir}/${file}"
+            if (File(path).exists() == false) {
+                val runnable = Runnable {
+                    Log.d(
+                        TAG,
+                        "[START][THREAD]saveImage(${context}, ${prefix}, ${url}, ${callback})"
+                    )
+                    val con = URL(url).openConnection() as HttpsURLConnection
+                    con.addRequestProperty("Accept-Encoding", "gzip")
+                    con.connect()
+                    val encoding = con.getHeaderField("Content-Encoding")
+                    val stream =
+                        if (encoding != null) {
+                            BufferedInputStream(GZIPInputStream(con.inputStream))
+                        } else {
+                            BufferedInputStream(con.inputStream)
                         }
-                        it.write(line)
+                    context.openFileOutput(file, Context.MODE_PRIVATE).use {
+                        while (true) {
+                            val line = stream.read()
+                            if (line == -1) {
+                                break
+                            }
+                            it.write(line)
+                        }
                     }
+                    callback?.let { it() }
+                    Log.d(TAG, "[END][THREAD]saveImage(${context}, ${prefix}, ${url}, ${callback})")
                 }
-                callback?.let{it()}
-                Log.d(TAG, "[END][THREAD]saveImage(${context}, ${prefix}, ${url}, ${callback})")
+                val thread = Thread(runnable)
+                thread.start()
+                if (sync == true) {
+                    thread.join()
+                }
             }
-            Thread(runnable).start()
             Log.d(TAG, "[END]saveImage(${context}, ${prefix}, ${url}, ${callback})")
         }
 

@@ -36,7 +36,7 @@ class TwitterApiUsersShow : TwitterApiCommon("https://api.twitter.com/1.1/users/
      *
      * @param result
      */
-    override fun finish(result: String)
+    override fun finish(result: String?)
     {
         Log.d(TAG, "[START]finish(${result})")
         TODO("Not yet implemented")

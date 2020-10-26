@@ -38,7 +38,7 @@ class TwitterApiRequestToken : TwitterApiCommon("https://api.twitter.com/oauth/r
      *
      * @param result
      */
-    override fun finish(result: String)
+    override fun finish(result: String?)
     {
         Log.d(TAG, "[START]finish(${result})")
         callback?.let { it(result) }

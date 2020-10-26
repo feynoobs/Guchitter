@@ -16,7 +16,8 @@ class DatabaseHelper(context: Context): SQLiteOpenHelper(context, "guchitter.db"
                         screen_name TEXT NOT NULL,
                         oauth_token TEXT NOT NULL,
                         oauth_token_secret TEXT NOT NULL,
-                        this INTEGER NOT NULL DEFAULT 0,
+                        my INTEGER DEFAULT NULL,
+                        current INTEGER DEFAULT NULL,
                         data JSON DEFAULT NULL,
                         created_at TEXT NOT NULL,
                         updated_at TEXT NOT NULL 
@@ -30,16 +31,20 @@ class DatabaseHelper(context: Context): SQLiteOpenHelper(context, "guchitter.db"
         )
         db?.execSQL(
             """
-                CREATE INDEX index_this ON t_users (this)
+                CREATE UNIQUE INDEX unique_my ON t_users (my)
             """
         )
         db?.execSQL(
             """
-                    CREATE TABLE t_timelines(
+                CREATE UNIQUE INDEX unique_current ON t_users (current)
+            """
+        )
+        db?.execSQL(
+            """
+                    CREATE TABLE t_time_lines(
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         tweet_id INTEGER NOT NULL,
                         user_id INTEGER NOT NULL,
-                        home INTEGER NOT NULL DEFAULT 0,
                         data JSON DEFAULT NULL,
                         created_at TEXT NOT NULL,
                         updated_at TEXT NOT NULL  
@@ -48,12 +53,24 @@ class DatabaseHelper(context: Context): SQLiteOpenHelper(context, "guchitter.db"
         )
         db?.execSQL(
             """
-                CREATE UNIQUE INDEX unique_tweet_id ON t_timelines (tweet_id)
+                CREATE UNIQUE INDEX unique_tweet_id ON t_time_lines (tweet_id)
             """
         )
         db?.execSQL(
             """
-                CREATE INDEX index_user_id ON t_timelines (user_id)
+                CREATE INDEX index_user_id ON t_time_lines (user_id)
+            """
+        )
+        db?.execSQL(
+            """
+                    CREATE TABLE r_home_tweets(
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        user_id INTEGER NOT NULL,
+                        tweet_id INTEGER NOT NULL,
+                        my INTEGER DEFAULT NULL,
+                        created_at TEXT NOT NULL,
+                        updated_at TEXT NOT NULL  
+                    )
             """
         )
     }
