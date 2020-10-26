@@ -43,7 +43,7 @@ abstract class TwitterApiCommon(private val entryPoint: String, private val meth
      *
      * @param result
      */
-    abstract fun finish(result: String)
+    abstract fun finish(result: String?)
 
     /**
      * TODO
@@ -142,6 +142,9 @@ abstract class TwitterApiCommon(private val entryPoint: String, private val meth
                     builder.append(line)
                 }
                 finish(builder.toString())
+            }
+            else {
+                finish(null)
             }
             con.disconnect()
 
