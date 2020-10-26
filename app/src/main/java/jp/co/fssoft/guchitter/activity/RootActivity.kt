@@ -3,9 +3,12 @@ package jp.co.fssoft.guchitter.activity
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import jp.co.fssoft.guchitter.api.TweetObject
 import jp.co.fssoft.guchitter.api.TwitterApiStatusesHomeTimeline
 import jp.co.fssoft.guchitter.api.TwitterApiStatusesUserTimeline
 import jp.co.fssoft.guchitter.database.DatabaseHelper
+import jp.co.fssoft.guchitter.utility.Utility
+import kotlinx.serialization.builtins.list
 
 open class RootActivity : AppCompatActivity()
 {
@@ -87,8 +90,12 @@ open class RootActivity : AppCompatActivity()
             requestMap["max_id"] = tweetMaxId.toString()
         }
         TwitterApiStatusesHomeTimeline().start(db, requestMap) {
-            if (recursive == true) {
-                if (it != null) {
+            it?.let {
+                val jsonList = Utility.jsonListDecode(TweetObject.serializer().list, it)
+                jsonList.forEach {
+                    Utility.saveImage(applicationContext, Utility.Companion.ImagePrefix.USER, it.user.profileImageUrl)
+                }
+                if (recursive == true) {
                     getPrevHomeTweet(db, recursive)
                 }
             }

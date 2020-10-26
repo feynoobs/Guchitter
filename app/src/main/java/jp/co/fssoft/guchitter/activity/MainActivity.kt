@@ -3,6 +3,7 @@ package jp.co.fssoft.guchitter.activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import jp.co.fssoft.guchitter.R
@@ -47,6 +48,7 @@ class MainActivity : RootActivity()
             adapter = TweetRecycleView(db, 0) {}
             layoutManager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, false)
             addOnScrollListener(TweetScrollEvent())
+            addItemDecoration(DividerItemDecoration(this@MainActivity, DividerItemDecoration.VERTICAL))
         }
         Log.d(TAG, "[END]onCreate(${savedInstanceState})")
     }

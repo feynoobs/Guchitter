@@ -49,6 +49,7 @@ class TwitterApiStatusesHomeTimeline : TwitterApiCommon("https://api.twitter.com
         db.beginTransaction()
         try {
             jsonList.forEach {
+                Log.e(TAG, it.toString())
                 db.rawQuery("SELECT id, home FROM t_timelines WHERE tweet_id = ${it.id}", null).use { cursor ->
                     if (cursor.count != 1) {
                         val values = ContentValues()

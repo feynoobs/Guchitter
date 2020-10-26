@@ -7,7 +7,10 @@
     <ImageButton
         android:id="@+id/tweet_recycle_view_user_icon"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
+        android:background="@null" />
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -36,7 +39,10 @@
             <ImageButton
                 android:id="@+id/tweet_recycle_view_reply_button"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:scaleType="centerInside"
+                android:adjustViewBounds="true"
+                android:background="@null" />
             <TextView
                 android:id="@+id/tweet_recycle_view_reply_count"
                 android:layout_height="wrap_content"
@@ -48,7 +54,10 @@
             <ImageButton
                 android:id="@+id/tweet_recycle_view_retweet_button"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:scaleType="centerInside"
+                android:adjustViewBounds="true"
+                android:background="@null" />
             <TextView
                 android:id="@+id/tweet_recycle_view_retweet_count"
                 android:layout_height="wrap_content"
@@ -62,7 +71,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:scaleType="centerInside"
-                android:adjustViewBounds="true"/>
+                android:adjustViewBounds="true"
+                android:background="@null" />
             <TextView
                 android:id="@+id/tweet_recycle_view_favorite_count"
                 android:layout_height="wrap_content"
@@ -74,7 +84,10 @@
             <ImageButton
                 android:id="@+id/tweet_recycle_view_share_button"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:scaleType="centerInside"
+                android:adjustViewBounds="true"
+                android:background="@null" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

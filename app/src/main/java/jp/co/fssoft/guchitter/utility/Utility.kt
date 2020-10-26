@@ -1,7 +1,10 @@
 package jp.co.fssoft.guchitter.utility
 
 import android.content.Context
+import android.graphics.*
+import android.net.Uri
 import android.util.Log
+import android.webkit.URLUtil
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
@@ -120,55 +123,79 @@ class Utility
             return format.format(date)
         }
 
+        enum class ImagePrefix(val prefix: String)
+        {
+            USER("user")
+        }
+
         /**
          * TODO
          *
          * @param context
-         * @param urls
+         * @param prefix
+         * @param url
          * @param callback
          */
-        public fun saveImage(context: Context, urls: Array<String>, callback: (()->Unit)? = null)
+        public fun saveImage(context: Context, prefix: ImagePrefix, url: String, callback: (()->Unit)? = null)
         {
-            Log.d(TAG, "[START]saveImage()")
-            urls.forEach {
-                val runnable = Runnable {
-                    Log.d(TAG, "[START]saveImage()[THREAD]")
-                    val url = URL(it)
-                    val con = url.openConnection() as HttpsURLConnection
-                    con.addRequestProperty("Accept-Encoding", "gzip")
-                    con.connect()
-
-                    val encoding = con.getHeaderField("Content-Encoding")
-                    val stream =
-                        if (encoding != null) {
-                            BufferedInputStream(GZIPInputStream(con.inputStream))
-                        }
-                        else {
-                            BufferedInputStream(con.inputStream)
-                        }
-                    val file = it.substring(it.lastIndexOf('/') + 1)
-                    context.openFileOutput(file, Context.MODE_PRIVATE).use {
-                        while (true) {
-                            val line = stream.read()
-                            if (line == -1) {
-                                break
-                            }
-                            it.write(line)
-                        }
+            Log.d(TAG, "[START]saveImage(${context}, ${prefix}, ${url}, ${callback})")
+            val runnable = Runnable {
+                Log.d(TAG, "[START][THREAD]saveImage(${context}, ${prefix}, ${url}, ${callback})")
+                val con = URL(url).openConnection() as HttpsURLConnection
+                con.addRequestProperty("Accept-Encoding", "gzip")
+                con.connect()
+                val encoding = con.getHeaderField("Content-Encoding")
+                val stream =
+                    if (encoding != null) {
+                        BufferedInputStream(GZIPInputStream(con.inputStream))
                     }
-                    con.disconnect()
-                    Log.d(TAG, "[END]saveImage()[THREAD]")
+                    else {
+                        BufferedInputStream(con.inputStream)
+                    }
+                val file = "${prefix}_${URLUtil.guessFileName(url, null, null)}"
+                context.openFileOutput(file, Context.MODE_PRIVATE).use {
+                    while (true) {
+                        val line = stream.read()
+                        if (line == -1) {
+                            break
+                        }
+                        it.write(line)
+                    }
                 }
-                val thread = Thread(runnable)
-                thread.start()
-                if (callback != null) {
-                    thread.join()
-                }
+                callback?.let{it()}
+                Log.d(TAG, "[END][THREAD]saveImage(${context}, ${prefix}, ${url}, ${callback})")
             }
-            if (callback != null) {
-                callback()
+            Thread(runnable).start()
+            Log.d(TAG, "[END]saveImage(${context}, ${prefix}, ${url}, ${callback})")
+        }
+
+        /**
+         * TODO
+         *
+         * @param source
+         * @return
+         */
+        public fun circleTransform(source: Bitmap) : Bitmap
+        {
+            val size = Math.min(source.width, source.height)
+            val x = (source.width - size) / 2
+            val y = (source.height - size) / 2
+            val squaredBitmap = Bitmap.createBitmap(source, x, y, size, size)
+            val paint = Paint()
+            val shader = BitmapShader(squaredBitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
+            paint.shader = shader
+            paint.isAntiAlias = true
+            val bitmap = Bitmap.createBitmap(size, size, source.config)
+            val canvas = Canvas(bitmap);
+            canvas.drawCircle(size / 2f, size / 2f, size / 2f, paint)
+
+            if (source !== squaredBitmap) {
+                source.recycle()
             }
-            Log.d(TAG, "[END]saveImage()")
+            squaredBitmap.recycle()
+
+            return bitmap
         }
     }
+
 }

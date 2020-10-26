@@ -1,17 +1,15 @@
 package jp.co.fssoft.guchitter.widget
 
 import android.content.Context
-import android.content.Context.WINDOW_SERVICE
 import android.database.sqlite.SQLiteDatabase
+import android.graphics.BitmapFactory
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.*
+import android.webkit.URLUtil
 import android.widget.ImageButton
-import android.widget.LinearLayout
 import android.widget.Space
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import jp.co.fssoft.guchitter.R
@@ -113,10 +111,9 @@ class TweetViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
      */
     init
     {
-        Log.d(TAG, "${(view.context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay}")
-        Log.d(TAG, "${(view as LinearLayout).width}")
-        Log.d(TAG, "${ContextCompat.getSystemService(view.context, WINDOW_SERVICE::class.java)}")
-        val display = (ContextCompat.getSystemService(view.context, WINDOW_SERVICE::class.java) as WindowManager).defaultDisplay
+        Log.d(TAG, "[START]init")
+
+        val display = (view.context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay
         val size = DisplayMetrics()
         display.getRealMetrics(size)
 
@@ -175,78 +172,7 @@ class TweetViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
         params.height = params.width
         shareBtn.layoutParams = params
 
-
-        view.viewTreeObserver.addOnGlobalLayoutListener(object: ViewTreeObserver.OnGlobalLayoutListener {
-            /**
-             * TODO
-             *
-             */
-            override fun onGlobalLayout()
-            {
-                if (view.measuredWidth > 0) {
-                    if (view.measuredHeight > 0) {
-//                        view.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                        /*
-                        var params: ViewGroup.LayoutParams = icon.layoutParams
-                        params.width = (view.width * 0.2).toInt()
-                        params.height = params.width
-                        icon.layoutParams = params
-
-                        params = replyBtn.layoutParams
-                        params.width = (view.width * 0.8 * 0.25 * 0.333).toInt()
-                        params.height = params.width
-                        replyBtn.layoutParams = params
-
-                        params = replyText.layoutParams
-                        params.width = (view.width * 0.8 * 0.25 * 0.333).toInt()
-                        params.height = params.width
-                        replyText.layoutParams = params
-
-                        params = space1.layoutParams
-                        params.width = (view.width * 0.8 * 0.25 * 0.333).toInt()
-                        params.height = params.width
-                        space1.layoutParams = params
-
-                        params = favoriteBtn.layoutParams
-                        params.width = (view.width * 0.8 * 0.25 * 0.3333).toInt()
-                        params.height = params.width
-                        favoriteBtn.layoutParams = params
-
-                        params = favoriteText.layoutParams
-                        params.width = (view.width * 0.8 * 0.25 * 0.333).toInt()
-                        params.height = params.width
-                        favoriteText.layoutParams = params
-
-                        params = space2.layoutParams
-                        params.width = (view.width * 0.8 * 0.25 * 0.333).toInt()
-                        params.height = params.width
-                        space2.layoutParams = params
-
-                        params = retweetBtn.layoutParams
-                        params.width = (view.width * 0.8 * 0.25 * 0.333).toInt()
-                        params.height = params.width
-                        retweetBtn.layoutParams = params
-
-                        params = retweetText.layoutParams
-                        params.width = (view.width * 0.8 * 0.25 * 0.333).toInt()
-                        params.height = params.width
-                        retweetText.layoutParams = params
-
-                        params = space3.layoutParams
-                        params.width = (view.width * 0.8 * 0.25 * 0.333).toInt()
-                        params.height = params.width
-                        space3.layoutParams = params
-
-                        params = shareBtn.layoutParams
-                        params.width = (view.width * 0.8 * 0.25 * 0.333).toInt()
-                        params.height = params.width
-                        shareBtn.layoutParams = params
-
-                         */
-                    }
-                }
-            }
-        })
+        Log.d(TAG, "[END]init")
     }
 }
 
@@ -298,6 +224,15 @@ class TweetRecycleView(private val db: SQLiteDatabase, private val userId: Long,
             holder.nameText.text = tweet.user.name
             holder.mainText.text = tweet.text
             holder.favoriteBtn.setImageResource(R.drawable.tweet_favorite)
+            if (tweet.isFavorited == true) {
+                holder.favoriteBtn.setImageResource(R.drawable.tweet_favorited)
+            }
+            holder.retweetBtn.setImageResource(R.drawable.tweet_retweet)
+            if (tweet.retweeted == true) {
+                holder.retweetBtn.setImageResource(R.drawable.tweet_retweeted)
+            }
+            val image = "${Utility.Companion.ImagePrefix.USER}_${URLUtil.guessFileName(tweet.user.profileImageUrl, null, null)}"
+            holder.icon.setImageBitmap(Utility.circleTransform(BitmapFactory.decodeStream(holder.icon.context.openFileInput(image))))
         }
 
         Log.d(TAG, "[END]onBindViewHolder(${holder}, ${position})")
