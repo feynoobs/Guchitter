@@ -5,17 +5,19 @@ import android.util.Log
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.appcompat.app.AppCompatActivity
 import jp.co.fssoft.guchitter.R
 import jp.co.fssoft.guchitter.api.TwitterApiAccessToken
 import jp.co.fssoft.guchitter.api.TwitterApiCommon
 import jp.co.fssoft.guchitter.api.TwitterApiRequestToken
+import jp.co.fssoft.guchitter.database.DatabaseHelper
 import jp.co.fssoft.guchitter.utility.Utility
 
 /**
  * TODO
  *
  */
-class AuthenticationActivity : RootActivity()
+class AuthenticationActivity : AppCompatActivity()
 {
 
     companion object
@@ -24,6 +26,13 @@ class AuthenticationActivity : RootActivity()
          *
          */
         private val TAG = AuthenticationActivity::class.qualifiedName
+    }
+
+    /**
+     *
+     */
+    private val database by lazy {
+        DatabaseHelper(applicationContext)
     }
 
     /**

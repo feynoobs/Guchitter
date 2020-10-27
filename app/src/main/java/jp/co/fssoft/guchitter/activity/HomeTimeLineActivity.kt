@@ -3,6 +3,8 @@ package jp.co.fssoft.guchitter.activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.LinearLayout
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -10,14 +12,14 @@ import jp.co.fssoft.guchitter.R
 import jp.co.fssoft.guchitter.widget.TweetRecycleView
 import jp.co.fssoft.guchitter.widget.TweetScrollEvent
 
-class MainActivity : RootActivity()
+class HomeTimeLineActivity : RootActivity()
 {
     companion object
     {
         /**
          *
          */
-        private val TAG = MainActivity::class.qualifiedName
+        private val TAG = HomeTimeLineActivity::class.qualifiedName
     }
 
     /**
@@ -30,7 +32,10 @@ class MainActivity : RootActivity()
         super.onCreate(savedInstanceState)
 
         Log.d(TAG, "[START]onCreate(${savedInstanceState})")
-        setContentView(R.layout.main_activity)
+
+        val contents: LinearLayout = findViewById(R.id.contents)
+        contents.removeAllViews()
+        layoutInflater.inflate(R.layout.main_activity, contents)
 
         /***********************************************
          * ユーザーデータがあるか確認する
@@ -62,9 +67,9 @@ class MainActivity : RootActivity()
                 findViewById<RecyclerView>(R.id.tweet_recycle_view).apply {
                     setHasFixedSize(true)
                     val userId = it.getLong(it.getColumnIndex("user_id"))
-                    layoutManager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, false)
+                    layoutManager = LinearLayoutManager(this@HomeTimeLineActivity, LinearLayoutManager.VERTICAL, false)
                     adapter = TweetRecycleView(database.readableDatabase) {}
-                    addItemDecoration(DividerItemDecoration(this@MainActivity, DividerItemDecoration.VERTICAL))
+                    addItemDecoration(DividerItemDecoration(this@HomeTimeLineActivity, DividerItemDecoration.VERTICAL))
                     addOnScrollListener(TweetScrollEvent(
                         {
                             callback -> getNextHomeTweet(database.writableDatabase, userId, false) {

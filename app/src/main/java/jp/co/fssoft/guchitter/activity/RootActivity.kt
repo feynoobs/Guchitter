@@ -1,8 +1,10 @@
 package jp.co.fssoft.guchitter.activity
 
 import android.database.sqlite.SQLiteDatabase
+import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import jp.co.fssoft.guchitter.R
 import jp.co.fssoft.guchitter.api.TweetObject
 import jp.co.fssoft.guchitter.api.TwitterApiStatusesHomeTimeline
 import jp.co.fssoft.guchitter.api.TwitterApiStatusesUserTimeline
@@ -21,10 +23,10 @@ open class RootActivity : AppCompatActivity()
 
     }
 
+    /**
+     *
+     */
     protected val database by lazy {
-        /**
-         *
-         */
         DatabaseHelper(applicationContext)
     }
 
@@ -236,5 +238,13 @@ open class RootActivity : AppCompatActivity()
             }
         }
         Log.d(TAG, "[END]getPrevHomeTweet(${db}, ${userId}, ${recursive})")
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
+        super.onCreate(savedInstanceState)
+        Log.d(TAG, "[START]onCreate(${savedInstanceState})")
+        setContentView(R.layout.root_activity)
+        Log.d(TAG, "[END]onCreate(${savedInstanceState})")
     }
 }
