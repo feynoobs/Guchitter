@@ -13,12 +13,11 @@ class DatabaseHelper(context: Context): SQLiteOpenHelper(context, "guchitter.db"
                     CREATE TABLE t_users(
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         user_id INTEGER NOT NULL,
-                        screen_name TEXT NOT NULL,
-                        oauth_token TEXT NOT NULL,
-                        oauth_token_secret TEXT NOT NULL,
+                        oauth_token TEXT DEFAULT NULL,
+                        oauth_token_secret TEXT DEFAULT NULL,
                         my INTEGER DEFAULT NULL,
                         current INTEGER DEFAULT NULL,
-                        data JSON DEFAULT NULL,
+                        data JSON,
                         created_at TEXT NOT NULL,
                         updated_at TEXT NOT NULL 
                     )
@@ -45,7 +44,9 @@ class DatabaseHelper(context: Context): SQLiteOpenHelper(context, "guchitter.db"
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         tweet_id INTEGER NOT NULL,
                         user_id INTEGER NOT NULL,
-                        data JSON DEFAULT NULL,
+                        retweet_original_tweet_id INTEGER DEFAULT NULL,
+                        retweet_original_user_id INTEGER DEFAULT NULL,
+                        data JSON,
                         created_at TEXT NOT NULL,
                         updated_at TEXT NOT NULL  
                     )

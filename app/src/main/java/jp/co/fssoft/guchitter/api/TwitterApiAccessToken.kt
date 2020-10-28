@@ -30,7 +30,7 @@ class TwitterApiAccessToken : TwitterApiCommon("https://api.twitter.com/oauth/ac
     override fun start(db: SQLiteDatabase, additionalHeaderParams: Map<String, String>?, callback: ((String?)->Unit)?)
     {
         Log.d(TAG, "[START]start(${db}, ${additionalHeaderParams}, ${callback})")
-        this.db = db
+//        this.db = db
         this.callback = callback
         startMain(db, null, additionalHeaderParams)
         Log.d(TAG, "[END]start(${db}, ${additionalHeaderParams}, ${callback})")
@@ -44,7 +44,7 @@ class TwitterApiAccessToken : TwitterApiCommon("https://api.twitter.com/oauth/ac
     override fun finish(result: String?)
     {
         Log.d(TAG, "[START]finish(${result})")
-
+/*
         result?.let {
             val token = Utility.splitQuery(result)
 
@@ -70,13 +70,12 @@ class TwitterApiAccessToken : TwitterApiCommon("https://api.twitter.com/oauth/ac
                 values = ContentValues()
                 values.put("oauth_token", token["oauth_token"])
                 values.put("oauth_token_secret", token["oauth_token_secret"])
-                values.put("screen_name", token["screen_name"])
                 values.put("user_id", token["user_id"]?.toLong())
                 values.put("my", my)
                 values.put("current", 1)
-                values.put("created_at", Utility.now())
                 values.put("updated_at", Utility.now())
                 if (insert == true) {
+                    values.put("created_at", Utility.now())
                     db.insert("t_users", null, values)
                 }
                 else {
@@ -88,6 +87,7 @@ class TwitterApiAccessToken : TwitterApiCommon("https://api.twitter.com/oauth/ac
                 db.endTransaction()
             }
         }
+*/
         callback?.let { it(result) }
 
         Log.d(TAG, "[END]finish(${result})")

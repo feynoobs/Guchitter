@@ -50,13 +50,13 @@ abstract class TwitterApiCommon(private val entryPoint: String, private val meth
      *
      * @param db
      * @param requestParams
-     * @param additionalHeaderParams
+     * @param additionalParams
      */
-    protected fun startMain(db: SQLiteDatabase, requestParams: Map<String, String>? = null, additionalHeaderParams: Map<String, String>? = null)
+    protected fun startMain(db: SQLiteDatabase, requestParams: Map<String, String>? = null, additionalParams: Map<String, String>? = null)
     {
-        Log.d(TAG, "[START]startMain(${db}, ${requestParams}, ${additionalHeaderParams})")
+        Log.d(TAG, "[START]startMain(${db}, ${requestParams}, ${additionalParams})")
         val runnable = Runnable {
-            Log.d(TAG, "[START]startMain(${db}, ${requestParams}, ${additionalHeaderParams})[THREAD]")
+            Log.d(TAG, "[START]startMain(${db}, ${requestParams}, ${additionalParams})[THREAD]")
 
             val headerParams = mutableMapOf(
                 "oauth_consumer_key"     to API_KEY,
@@ -66,7 +66,7 @@ abstract class TwitterApiCommon(private val entryPoint: String, private val meth
                 "oauth_version"          to "1.0"
             )
             var signatureKey = URLEncoder.encode(API_SECRET, "UTF-8") + "&"
-            additionalHeaderParams?.forEach { (k, v) ->
+            additionalParams?.forEach { (k, v) ->
                 if (k != "oauth_token_secret") {
                     headerParams[k] = v
                 }
@@ -75,7 +75,7 @@ abstract class TwitterApiCommon(private val entryPoint: String, private val meth
                 }
             }
             requestParams?.let { headerParams.putAll(it) }
-            db.rawQuery("SELECT * FROM t_users", null).use {
+            db.rawQuery("SELECT * FROM t_users WHERE current = 1", null).use {
                 if (it.count == 1) {
                     it.moveToFirst()
                     headerParams["oauth_token"] = it.getString(it.getColumnIndex("oauth_token"))
@@ -148,10 +148,10 @@ abstract class TwitterApiCommon(private val entryPoint: String, private val meth
             }
             con.disconnect()
 
-            Log.d(TAG, "[END]startMain(${db}, ${requestParams}, ${additionalHeaderParams})[THREAD]")
+            Log.d(TAG, "[END]startMain(${db}, ${requestParams}, ${additionalParams})[THREAD]")
         }
         Thread(runnable).start()
 
-        Log.d(TAG, "[END]startMain(${db}, ${requestParams}, ${additionalHeaderParams})")
+        Log.d(TAG, "[END]startMain(${db}, ${requestParams}, ${additionalParams})")
     }
 }

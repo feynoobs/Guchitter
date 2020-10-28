@@ -63,6 +63,11 @@ class Utility
             return Json.stringify(serializer, values)
         }
 
+        public fun <T> jsonListEncode(serializer: KSerializer<List<T>>, values: List<T>): String
+        {
+            return Json.stringify(serializer, values)
+        }
+
 
         /**
          * TODO

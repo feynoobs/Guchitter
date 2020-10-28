@@ -217,8 +217,14 @@ class TweetRecycleView(private val db: SQLiteDatabase, callback: (Int)->Unit) : 
 
         val tweet = tweetObjects[position]
 
-        holder.nameText.text = tweet.user.name
-        holder.mainText.text = tweet.text
+        holder.nameText.text = tweet.user?.name
+        holder.mainText.text =
+            if (tweet.retweetedTweet == null) {
+                tweet.text
+            }
+            else {
+                tweet.retweetedTweet.text
+            }
         holder.replyBtn.setImageResource(R.drawable.tweet_reply)
 
         holder.favoriteBtn.setImageResource(R.drawable.tweet_favorite)
@@ -236,7 +242,13 @@ class TweetRecycleView(private val db: SQLiteDatabase, callback: (Int)->Unit) : 
         if (tweet.retweets != 0) {
             holder.retweetText.text = tweet.retweets.toString()
         }
-        val image = "${Utility.Companion.ImagePrefix.USER}_${URLUtil.guessFileName(tweet.user.profileImageUrl, null, null)}"
+        val image: String =
+            if (tweet.retweetedTweet == null) {
+                "${Utility.Companion.ImagePrefix.USER}_${URLUtil.guessFileName(tweet.user?.profileImageUrl, null, null)}"
+            }
+            else {
+                "${Utility.Companion.ImagePrefix.USER}_${URLUtil.guessFileName(tweet.retweetedTweet.user?.profileImageUrl, null, null)}"
+            }
         holder.icon.setImageBitmap(Utility.circleTransform(BitmapFactory.decodeStream(holder.icon.context.openFileInput(image))))
 
         Log.d(TAG, "[END]onBindViewHolder(${holder}, ${position})")

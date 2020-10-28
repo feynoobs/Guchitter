@@ -8,6 +8,7 @@ import jp.co.fssoft.guchitter.R
 import jp.co.fssoft.guchitter.api.TweetObject
 import jp.co.fssoft.guchitter.api.TwitterApiStatusesHomeTimeline
 import jp.co.fssoft.guchitter.api.TwitterApiStatusesUserTimeline
+import jp.co.fssoft.guchitter.api.UserObject
 import jp.co.fssoft.guchitter.database.DatabaseHelper
 import jp.co.fssoft.guchitter.utility.Utility
 import kotlinx.serialization.builtins.list
@@ -83,7 +84,7 @@ open class RootActivity : AppCompatActivity()
         val query =
             """
                 SELECT 
-                    t_time_lines.data 
+                    t_time_lines.user_id, t_time_lines.data 
                 FROM 
                     t_time_lines
                 INNER JOIN
@@ -97,7 +98,14 @@ open class RootActivity : AppCompatActivity()
         db.rawQuery(query, null).use {
             var movable = it.moveToFirst()
             while (movable) {
-                tweetObjects.add(Utility.jsonDecode(TweetObject.serializer(), it.getString(it.getColumnIndex("data"))))
+                val userId = it.getLong(it.getColumnIndex("user_id"))
+                val tweetObject = Utility.jsonDecode(TweetObject.serializer(), it.getString(it.getColumnIndex("data")))
+                db.rawQuery("SELECT data FROM t_users WHERE user_id = ${userId}", null).use {
+                    it.moveToFirst()
+                    val userObject = Utility.jsonDecode(UserObject.serializer(), it.getString(it.getColumnIndex("data")))
+                    tweetObject.user = userObject
+                }
+                tweetObjects.add(tweetObject)
                 movable = it.moveToNext()
             }
         }
@@ -135,6 +143,7 @@ open class RootActivity : AppCompatActivity()
         db.rawQuery(query, null).use {
             if (it.count == 1) {
                 it.moveToFirst()
+                tweetMaxId = it.getLong(it.getColumnIndex("tweet_id"))
             }
         }
         val requestMap = mutableMapOf(
@@ -151,7 +160,11 @@ open class RootActivity : AppCompatActivity()
             if (it != null) {
                 val jsonList = Utility.jsonListDecode(TweetObject.serializer().list, it)
                 jsonList.forEach {
-                    Utility.saveImage(applicationContext, Utility.Companion.ImagePrefix.USER, it.user.profileImageUrl)
+                    var tweetObject = it
+                    if (it.retweetedTweet != null) {
+                        tweetObject = it.retweetedTweet
+                    }
+                    Utility.saveImage(applicationContext, Utility.Companion.ImagePrefix.USER, tweetObject.user!!.profileImageUrl)
                 }
                 if (recursive == true) {
                     if (jsonList.isEmpty() != false) {
@@ -219,7 +232,7 @@ open class RootActivity : AppCompatActivity()
             if (it != null) {
                 val jsonList = Utility.jsonListDecode(TweetObject.serializer().list, it)
                 jsonList.forEach {
-                    Utility.saveImage(applicationContext, Utility.Companion.ImagePrefix.USER, it.user.profileImageUrl)
+                    Utility.saveImage(applicationContext, Utility.Companion.ImagePrefix.USER, it.user!!.profileImageUrl)
                 }
                 if (recursive == true) {
                     if (jsonList.isEmpty() != false) {
@@ -240,6 +253,11 @@ open class RootActivity : AppCompatActivity()
         Log.d(TAG, "[END]getPrevHomeTweet(${db}, ${userId}, ${recursive})")
     }
 
+    /**
+     * TODO
+     *
+     * @param savedInstanceState
+     */
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)

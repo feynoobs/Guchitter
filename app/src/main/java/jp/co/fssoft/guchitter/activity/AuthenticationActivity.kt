@@ -10,6 +10,7 @@ import jp.co.fssoft.guchitter.R
 import jp.co.fssoft.guchitter.api.TwitterApiAccessToken
 import jp.co.fssoft.guchitter.api.TwitterApiCommon
 import jp.co.fssoft.guchitter.api.TwitterApiRequestToken
+import jp.co.fssoft.guchitter.api.TwitterApiUsersShow
 import jp.co.fssoft.guchitter.database.DatabaseHelper
 import jp.co.fssoft.guchitter.utility.Utility
 
@@ -44,11 +45,15 @@ class AuthenticationActivity : AppCompatActivity()
     private fun shouldOverrideUrlLoadingCommon(url: String, token: Map<String, String>)
     {
         Log.d(TAG, "[START]shouldOverrideUrlLoadingCommon(${url}, ${token})")
-        val query = url.toString().replace("${TwitterApiCommon.CALLBACK_URL}?", "")
+        val query = url.replace("${TwitterApiCommon.CALLBACK_URL}?", "")
         val resultMap = Utility.splitQuery(query).toMutableMap()
         resultMap["oauth_token_secret"] = token["oauth_token_secret"] as String
-        TwitterApiAccessToken().start(database.writableDatabase, resultMap) {
-            finish()
+        TwitterApiAccessToken().start(database.readableDatabase, resultMap) {
+            val resultMap = Utility.splitQuery(it!!).toMutableMap()
+            resultMap.remove("screen_name")
+            TwitterApiUsersShow().start(database.writableDatabase, resultMap) {
+                finish()
+            }
         }
         Log.d(TAG, "[END]shouldOverrideUrlLoadingCommon(${url}, ${token})")
     }
