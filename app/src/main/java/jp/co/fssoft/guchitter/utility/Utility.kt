@@ -63,6 +63,14 @@ class Utility
             return Json.stringify(serializer, values)
         }
 
+        /**
+         * TODO
+         *
+         * @param T
+         * @param serializer
+         * @param values
+         * @return
+         */
         public fun <T> jsonListEncode(serializer: KSerializer<List<T>>, values: List<T>): String
         {
             return Json.stringify(serializer, values)
@@ -129,7 +137,12 @@ class Utility
             return format.format(date)
         }
 
-        enum class ImagePrefix(val prefix: String)
+        /**
+         * TODO
+         *
+         * @property prefix
+         */
+        enum class ImagePrefix(private val prefix: String)
         {
             USER("user")
         }
@@ -213,5 +226,4 @@ class Utility
             return bitmap
         }
     }
-
 }

@@ -44,8 +44,6 @@ class DatabaseHelper(context: Context): SQLiteOpenHelper(context, "guchitter.db"
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         tweet_id INTEGER NOT NULL,
                         user_id INTEGER NOT NULL,
-                        retweet_original_tweet_id INTEGER DEFAULT NULL,
-                        retweet_original_user_id INTEGER DEFAULT NULL,
                         data JSON,
                         created_at TEXT NOT NULL,
                         updated_at TEXT NOT NULL  

@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.LinearLayout
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -35,7 +34,7 @@ class HomeTimeLineActivity : RootActivity()
 
         val contents: LinearLayout = findViewById(R.id.contents)
         contents.removeAllViews()
-        layoutInflater.inflate(R.layout.main_activity, contents)
+        layoutInflater.inflate(R.layout.home_time_line_activity, contents)
 
         /***********************************************
          * ユーザーデータがあるか確認する
@@ -68,7 +67,22 @@ class HomeTimeLineActivity : RootActivity()
                     setHasFixedSize(true)
                     val userId = it.getLong(it.getColumnIndex("user_id"))
                     layoutManager = LinearLayoutManager(this@HomeTimeLineActivity, LinearLayoutManager.VERTICAL, false)
-                    adapter = TweetRecycleView(database.readableDatabase) {}
+                    adapter = TweetRecycleView(database.readableDatabase) { commonId, type ->
+                        when (type) {
+                            TweetRecycleView.Companion.ButtonType.FAVORITE -> {
+
+                            }
+                            TweetRecycleView.Companion.ButtonType.RETWEET -> {
+
+                            }
+                            TweetRecycleView.Companion.ButtonType.USER -> {
+                                val intent = Intent(applicationContext, UserTimeLineActivity::class.java).apply {
+                                    putExtra("user_id", commonId)
+                                }
+                                startActivity(intent)
+                            }
+                        }
+                    }
                     addItemDecoration(DividerItemDecoration(this@HomeTimeLineActivity, DividerItemDecoration.VERTICAL))
                     addOnScrollListener(TweetScrollEvent(
                         {

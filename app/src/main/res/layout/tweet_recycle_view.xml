@@ -47,10 +47,6 @@
                 android:id="@+id/tweet_recycle_view_reply_count"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"/>
-            <Space
-                android:id="@+id/tweet_recycle_view_space1"
-                android:layout_height="match_parent"
-                android:layout_width="1dp"/>
             <ImageButton
                 android:id="@+id/tweet_recycle_view_retweet_button"
                 android:layout_width="wrap_content"
@@ -62,10 +58,6 @@
                 android:id="@+id/tweet_recycle_view_retweet_count"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"/>
-            <Space
-                android:id="@+id/tweet_recycle_view_space2"
-                android:layout_height="match_parent"
-                android:layout_width="1dp"/>
             <ImageButton
                 android:id="@+id/tweet_recycle_view_favorite_button"
                 android:layout_width="wrap_content"
@@ -77,12 +69,20 @@
                 android:id="@+id/tweet_recycle_view_favorite_count"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"/>
-            <Space
-                android:id="@+id/tweet_recycle_view_space3"
-                android:layout_height="match_parent"
-                android:layout_width="1dp"/>
             <ImageButton
                 android:id="@+id/tweet_recycle_view_share_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scaleType="centerInside"
+                android:adjustViewBounds="true"
+                android:background="@null" />
+            <android.widget.Space
+                android:id="@+id/tweet_recycle_view_space"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                />
+            <ImageButton
+                android:id="@+id/tweet_recycle_view_transfer_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:scaleType="centerInside"

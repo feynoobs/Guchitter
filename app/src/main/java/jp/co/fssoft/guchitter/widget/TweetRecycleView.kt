@@ -89,22 +89,18 @@ class TweetViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
     /**
      *
      */
+    val transferBtn: ImageButton = view.findViewById(R.id.tweet_recycle_view_transfer_button)
+
+
+    /**
+     *
+     */
     val shareBtn: ImageButton = view.findViewById(R.id.tweet_recycle_view_share_button)
 
     /**
      *
      */
-    private val space1: Space = view.findViewById(R.id.tweet_recycle_view_space1)
-
-    /**
-     *
-     */
-    private val space2: Space = view.findViewById(R.id.tweet_recycle_view_space2)
-
-    /**
-     *
-     */
-    private val space3: Space = view.findViewById(R.id.tweet_recycle_view_space3)
+    private val space: Space = view.findViewById(R.id.tweet_recycle_view_space)
 
     /**
      *
@@ -123,54 +119,52 @@ class TweetViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
         icon.layoutParams = params
 
         params = replyBtn.layoutParams
-        params.width = (size.widthPixels * 0.8 * 0.25 * 0.333).toInt()
+        params.width = (size.widthPixels * 0.8 * 0.2 * 0.25).toInt()
         params.height = params.width
         replyBtn.layoutParams = params
+        replyBtn.setImageResource(R.drawable.tweet_reply)
 
         params = replyText.layoutParams
-        params.width = (size.widthPixels * 0.8 * 0.25 * 0.333).toInt()
+        params.width = (size.widthPixels * 0.8 * 0.2 * 0.75).toInt()
         params.height = params.width
         replyText.layoutParams = params
 
-        params = space1.layoutParams
-        params.width = (size.widthPixels * 0.8 * 0.25 * 0.333).toInt()
-        params.height = params.width
-        space1.layoutParams = params
-
         params = favoriteBtn.layoutParams
-        params.width = (size.widthPixels * 0.8 * 0.25 * 0.3333).toInt()
+        params.width = (size.widthPixels * 0.8 * 0.2 * 0.25).toInt()
         params.height = params.width
         favoriteBtn.layoutParams = params
 
         params = favoriteText.layoutParams
-        params.width = (size.widthPixels * 0.8 * 0.25 * 0.333).toInt()
+        params.width = (size.widthPixels * 0.8 * 0.2 * 0.75).toInt()
         params.height = params.width
         favoriteText.layoutParams = params
 
-        params = space2.layoutParams
-        params.width = (size.widthPixels * 0.8 * 0.25 * 0.333).toInt()
-        params.height = params.width
-        space2.layoutParams = params
-
         params = retweetBtn.layoutParams
-        params.width = (size.widthPixels * 0.8 * 0.25 * 0.333).toInt()
+        params.width = (size.widthPixels * 0.8 * 0.2 * 0.25).toInt()
         params.height = params.width
         retweetBtn.layoutParams = params
 
         params = retweetText.layoutParams
-        params.width = (size.widthPixels * 0.8 * 0.25 * 0.333).toInt()
+        params.width = (size.widthPixels * 0.8 * 0.2 * 0.75).toInt()
         params.height = params.width
         retweetText.layoutParams = params
 
-        params = space3.layoutParams
-        params.width = (size.widthPixels * 0.8 * 0.25 * 0.333).toInt()
-        params.height = params.width
-        space3.layoutParams = params
-
-        params = shareBtn.layoutParams
-        params.width = (size.widthPixels * 0.8 * 0.25 * 0.333).toInt()
+        params = transferBtn.layoutParams
+        params.width = (size.widthPixels * 0.8 * 0.2 * 0.25).toInt()
         params.height = params.width
         shareBtn.layoutParams = params
+        transferBtn.setImageResource(R.drawable.tweet_transfer)
+
+        params = space.layoutParams
+        params.width = (size.widthPixels * 0.8 * 0.2 * 0.75).toInt()
+        params.height = params.width
+        space.layoutParams = params
+
+        params = shareBtn.layoutParams
+        params.width = (size.widthPixels * 0.8 * 0.2 * 0.25).toInt()
+        params.height = params.width
+        shareBtn.layoutParams = params
+        shareBtn.setImageResource(R.drawable.tweet_share)
 
         Log.d(TAG, "[END]init")
     }
@@ -180,7 +174,7 @@ class TweetViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
  * TODO
  *
  */
-class TweetRecycleView(private val db: SQLiteDatabase, callback: (Int)->Unit) : RecyclerView.Adapter<TweetViewHolder>()
+class TweetRecycleView(private val db: SQLiteDatabase, private val callback: (Long, ButtonType)->Unit) : RecyclerView.Adapter<TweetViewHolder>()
 {
     companion object
     {
@@ -188,6 +182,19 @@ class TweetRecycleView(private val db: SQLiteDatabase, callback: (Int)->Unit) : 
          *
          */
         private val TAG = TweetRecycleView::class.qualifiedName
+
+        /**
+         * TODO
+         *
+         * @property effect
+         */
+        enum class ButtonType(private val effect: Int)
+        {
+            FAVORITE(1),
+            RETWEET(2),
+            SHARE(3),
+            USER(4)
+        }
     }
 
     public var tweetObjects: List<TweetObject> = mutableListOf()
@@ -225,23 +232,6 @@ class TweetRecycleView(private val db: SQLiteDatabase, callback: (Int)->Unit) : 
             else {
                 tweet.retweetedTweet.text
             }
-        holder.replyBtn.setImageResource(R.drawable.tweet_reply)
-
-        holder.favoriteBtn.setImageResource(R.drawable.tweet_favorite)
-        if (tweet.isFavorited == true) {
-            holder.favoriteBtn.setImageResource(R.drawable.tweet_favorited)
-        }
-        if (tweet.favorites != 0) {
-            holder.favoriteText.text = tweet.favorites.toString()
-        }
-
-        holder.retweetBtn.setImageResource(R.drawable.tweet_retweet)
-        if (tweet.retweeted == true) {
-            holder.retweetBtn.setImageResource(R.drawable.tweet_retweeted)
-        }
-        if (tweet.retweets != 0) {
-            holder.retweetText.text = tweet.retweets.toString()
-        }
         val image: String =
             if (tweet.retweetedTweet == null) {
                 "${Utility.Companion.ImagePrefix.USER}_${URLUtil.guessFileName(tweet.user?.profileImageUrl, null, null)}"
@@ -250,6 +240,38 @@ class TweetRecycleView(private val db: SQLiteDatabase, callback: (Int)->Unit) : 
                 "${Utility.Companion.ImagePrefix.USER}_${URLUtil.guessFileName(tweet.retweetedTweet.user?.profileImageUrl, null, null)}"
             }
         holder.icon.setImageBitmap(Utility.circleTransform(BitmapFactory.decodeStream(holder.icon.context.openFileInput(image))))
+        holder.icon.setOnClickListener {
+            if (tweet.retweetedTweet == null) {
+                callback(tweet.user!!.id, ButtonType.USER)
+            }
+            else {
+                callback(tweet.retweetedTweet.user!!.id, ButtonType.USER)
+            }
+        }
+
+        holder.favoriteBtn.setImageResource(R.drawable.tweet_favorite)
+        if (tweet.isFavorited == true) {
+            holder.favoriteBtn.setImageResource(R.drawable.tweet_favorited)
+        }
+        holder.favoriteBtn.setOnClickListener {
+            callback(tweet.id, ButtonType.FAVORITE)
+        }
+
+        if (tweet.favorites != 0) {
+            holder.favoriteText.text = tweet.favorites.toString()
+        }
+
+        holder.retweetBtn.setImageResource(R.drawable.tweet_retweet)
+        if (tweet.retweeted == true) {
+            holder.retweetBtn.setImageResource(R.drawable.tweet_retweeted)
+        }
+        holder.retweetBtn.setOnClickListener {
+            callback(tweet.id, ButtonType.RETWEET)
+        }
+
+        if (tweet.retweets != 0) {
+            holder.retweetText.text = tweet.retweets.toString()
+        }
 
         Log.d(TAG, "[END]onBindViewHolder(${holder}, ${position})")
     }

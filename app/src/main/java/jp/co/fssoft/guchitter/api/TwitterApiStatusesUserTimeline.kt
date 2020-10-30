@@ -12,7 +12,7 @@ import kotlinx.serialization.builtins.list
  * TODO
  *
  */
-class TwitterApiStatusesUserTimeline : TwitterApiCommon("https://api.twitter.com/1.1/statuses/user_timeline.json", "GET")
+class TwitterApiStatusesUserTimeline(private val userId: Long) : TwitterApiCommon("https://api.twitter.com/1.1/statuses/user_timeline.json", "GET")
 {
     companion object
     {
