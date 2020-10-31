@@ -53,14 +53,14 @@ class TwitterApiStatusesHomeTimeline(private val userId: Long) : TwitterApiCommo
                 jsonList.forEach {
                     var insert = true
                     var values = ContentValues()
-                    val tweetUserId =
+                    val userIdFromTweet =
                         if (it.retweetedTweet == null) {
                             it.user?.id
                         }
                         else {
                             it.retweetedTweet.user!!.id
                         }
-                    val tweetData =
+                    val userDataFromTweet =
                         if (it.retweetedTweet == null) {
                             it.user
                         }
@@ -68,10 +68,10 @@ class TwitterApiStatusesHomeTimeline(private val userId: Long) : TwitterApiCommo
                             it.retweetedTweet.user
                         }
 
-                    values.put("user_id", tweetUserId)
-                    values.put("data", Utility.jsonEncode(UserObject.serializer(), tweetData!!))
+                    values.put("user_id", userIdFromTweet)
+                    values.put("data", Utility.jsonEncode(UserObject.serializer(), userDataFromTweet!!))
                     values.put("updated_at", Utility.now())
-                    db.rawQuery("SELECT id FROM t_users WHERE user_id = ${tweetUserId}", null).use {
+                    db.rawQuery("SELECT id FROM t_users WHERE user_id = ${userIdFromTweet}", null).use {
                         if (it.count == 1) {
                             insert = false
                         }
@@ -81,7 +81,7 @@ class TwitterApiStatusesHomeTimeline(private val userId: Long) : TwitterApiCommo
                         db.insert("t_users", null, values)
                     }
                     else {
-                        db.update("t_users", values, "user_id = ${tweetUserId}", null)
+                        db.update("t_users", values, "user_id = ${userIdFromTweet}", null)
                     }
 
                     values = ContentValues()

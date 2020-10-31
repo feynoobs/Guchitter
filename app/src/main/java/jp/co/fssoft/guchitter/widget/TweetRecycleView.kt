@@ -235,6 +235,14 @@ class TweetRecycleView(private val db: SQLiteDatabase, private val callback: (Lo
             else {
                 tweet.retweetedTweet!!.user?.name
             }
+        holder.nameText.setOnClickListener {
+            if (tweet.retweetedTweet == null) {
+                callback(tweet.user!!.id, ButtonType.USER)
+            }
+            else {
+                callback(tweet.retweetedTweet.user!!.id, ButtonType.USER)
+            }
+        }
         holder.mainText.text =
             if (tweet.retweetedTweet == null) {
                 tweet.text

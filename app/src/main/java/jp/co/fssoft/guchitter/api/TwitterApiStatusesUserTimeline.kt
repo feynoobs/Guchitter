@@ -51,17 +51,46 @@ class TwitterApiStatusesUserTimeline(private val userId: Long) : TwitterApiCommo
             db.beginTransaction()
             try {
                 jsonList.forEach {
-                    db.rawQuery("SELECT id FROM t_time_lines WHERE tweet_id = ${it.id}", null).use { cursor ->
-                        if (cursor.count == 0) {
-                            val values = ContentValues()
-                            values.put("tweet_id", it.id)
-                            values.put("user_id", it.user?.id)
-                            values.put("data", Utility.jsonEncode(TweetObject.serializer(), it))
-                            values.put("created_at", Utility.now())
-                            values.put("updated_at", Utility.now())
-                            db.insert("t_time_lines", null, values)
+                    var insert = true
+                    var values = ContentValues()
+                    val userId =
+                        if (it.retweetedTweet == null) {
+                            it.user?.id
+                        }
+                        else {
+                            it.retweetedTweet.user!!.id
+                        }
+                    val userData =
+                        if (it.retweetedTweet == null) {
+                            it.user
+                        }
+                        else {
+                            it.retweetedTweet.user
+                        }
+
+                    values.put("user_id", userId)
+                    values.put("data", Utility.jsonEncode(UserObject.serializer(), userData!!))
+                    values.put("updated_at", Utility.now())
+                    db.rawQuery("SELECT id FROM t_users WHERE user_id = ${userId}", null).use {
+                        if (it.count == 1) {
+                            insert = false
                         }
                     }
+                    if (insert == true) {
+                        values.put("created_at", Utility.now())
+                        db.insert("t_users", null, values)
+                    }
+                    else {
+                        db.update("t_users", values, "user_id = ${userId}", null)
+                    }
+
+                    values = ContentValues()
+                    values.put("tweet_id", it.id)
+                    values.put("user_id", it.user?.id)
+                    values.put("data", Utility.jsonEncode(TweetObject.serializer(), it))
+                    values.put("created_at", Utility.now())
+                    values.put("updated_at", Utility.now())
+                    db.insert("t_time_lines", null, values)
                 }
                 db.setTransactionSuccessful()
             }

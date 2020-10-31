@@ -1,7 +1,9 @@
 package jp.co.fssoft.guchitter.activity
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.animation.AnimationUtils
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,17 +26,15 @@ class UserTimeLineActivity : RootActivity()
         private val TAG = UserTimeLineActivity::class.qualifiedName
     }
 
+
     /**
      * TODO
      *
-     * @param savedInstanceState
+     * @param userId
      */
-    override fun onCreate(savedInstanceState: Bundle?)
+    private fun displayUserTweets(userId: Long)
     {
-        super.onCreate(savedInstanceState)
-        Log.d(TAG, "[START]onCreate(${savedInstanceState})")
-
-        val userId = intent.getLongExtra("user_id", 0)
+        Log.d(TAG, "[START]displayUserTweets(${userId})")
 
         val contents: LinearLayout = findViewById(R.id.contents)
         contents.removeAllViews()
@@ -44,6 +44,14 @@ class UserTimeLineActivity : RootActivity()
             layoutManager = LinearLayoutManager(this@UserTimeLineActivity, LinearLayoutManager.VERTICAL, false)
             adapter = TweetRecycleView(database.readableDatabase) { commonId, type ->
                 when (type) {
+                    TweetRecycleView.Companion.ButtonType.USER -> {
+                        if (userId == commonId) {
+                            startAnimation(AnimationUtils.loadAnimation(applicationContext, R.anim.shake))
+                        }
+                        else {
+                            displayUserTweets(commonId)
+                        }
+                    }
                 }
             }
             addItemDecoration(DividerItemDecoration(this@UserTimeLineActivity, DividerItemDecoration.VERTICAL))
@@ -73,8 +81,20 @@ class UserTimeLineActivity : RootActivity()
                 }
             ))
         }
+        Log.d(TAG, "[END]displayUserTweets(${userId})")
+    }
 
+    /**
+     * TODO
+     *
+     * @param savedInstanceState
+     */
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
+        super.onCreate(savedInstanceState)
 
+        Log.d(TAG, "[START]onCreate(${savedInstanceState})")
+        displayUserTweets(intent.getLongExtra("user_id", 0))
         Log.d(TAG, "[END]onCreate(${savedInstanceState})")
     }
 }
