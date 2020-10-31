@@ -46,8 +46,6 @@ class TwitterApiStatusesUserTimeline(private val userId: Long) : TwitterApiCommo
     override fun finish(result: String?)
     {
         Log.d(TAG, "[START]finish(${result})")
-        // debug
-        // Log.e(TAG, result)
         result?.let {
             val jsonList = Utility.jsonListDecode(TweetObject.serializer().list, result)
             db.beginTransaction()

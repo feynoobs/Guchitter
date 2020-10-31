@@ -10,9 +10,10 @@
         android:layout_height="wrap_content"
         android:scaleType="fitCenter"
         android:adjustViewBounds="true"
-        android:background="@null" />
+        android:background="@null"
+        android:padding="8dp" />
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
         <LinearLayout
@@ -30,10 +31,11 @@
         </LinearLayout>
         <TextView
             android:id="@+id/tweet_recycle_view_main"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent" />
-        <LinearLayout
+            android:layout_height="match_parent"
             android:layout_width="wrap_content"
+            android:padding="8dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
             <ImageButton
@@ -46,7 +48,7 @@
             <TextView
                 android:id="@+id/tweet_recycle_view_reply_count"
                 android:layout_height="wrap_content"
-                android:layout_width="wrap_content"/>
+                android:layout_width="wrap_content" />
             <ImageButton
                 android:id="@+id/tweet_recycle_view_retweet_button"
                 android:layout_width="wrap_content"

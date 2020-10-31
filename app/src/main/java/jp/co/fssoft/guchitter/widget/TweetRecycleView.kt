@@ -7,6 +7,7 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.*
 import android.webkit.URLUtil
+import android.widget.AbsListView
 import android.widget.ImageButton
 import android.widget.Space
 import android.widget.TextView
@@ -114,54 +115,54 @@ class TweetViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
         display.getRealMetrics(size)
 
         var params: ViewGroup.LayoutParams = icon.layoutParams
-        params.width = (size.widthPixels * 0.2).toInt()
+        params.width = (size.widthPixels * 0.16).toInt()
         params.height = params.width
         icon.layoutParams = params
 
         params = replyBtn.layoutParams
-        params.width = (size.widthPixels * 0.8 * 0.2 * 0.25).toInt()
+        params.width = (size.widthPixels * 0.84 * 0.2 * 0.25).toInt()
         params.height = params.width
         replyBtn.layoutParams = params
         replyBtn.setImageResource(R.drawable.tweet_reply)
 
         params = replyText.layoutParams
-        params.width = (size.widthPixels * 0.8 * 0.2 * 0.75).toInt()
-        params.height = params.width
+        params.width = (size.widthPixels * 0.84 * 0.2 * 0.75).toInt()
+        params.height = params.width / 3
         replyText.layoutParams = params
 
         params = favoriteBtn.layoutParams
-        params.width = (size.widthPixels * 0.8 * 0.2 * 0.25).toInt()
+        params.width = (size.widthPixels * 0.84 * 0.2 * 0.25).toInt()
         params.height = params.width
         favoriteBtn.layoutParams = params
 
         params = favoriteText.layoutParams
-        params.width = (size.widthPixels * 0.8 * 0.2 * 0.75).toInt()
-        params.height = params.width
+        params.width = (size.widthPixels * 0.84 * 0.2 * 0.75).toInt()
+        params.height = params.width / 3
         favoriteText.layoutParams = params
 
         params = retweetBtn.layoutParams
-        params.width = (size.widthPixels * 0.8 * 0.2 * 0.25).toInt()
+        params.width = (size.widthPixels * 0.84 * 0.2 * 0.25).toInt()
         params.height = params.width
         retweetBtn.layoutParams = params
 
         params = retweetText.layoutParams
-        params.width = (size.widthPixels * 0.8 * 0.2 * 0.75).toInt()
-        params.height = params.width
+        params.width = (size.widthPixels * 0.84 * 0.2 * 0.75).toInt()
+        params.height = params.width / 3
         retweetText.layoutParams = params
 
         params = transferBtn.layoutParams
-        params.width = (size.widthPixels * 0.8 * 0.2 * 0.25).toInt()
+        params.width = (size.widthPixels * 0.84 * 0.2 * 0.25).toInt()
         params.height = params.width
         shareBtn.layoutParams = params
         transferBtn.setImageResource(R.drawable.tweet_transfer)
 
         params = space.layoutParams
-        params.width = (size.widthPixels * 0.8 * 0.2 * 0.75).toInt()
-        params.height = params.width
+        params.width = (size.widthPixels * 0.84 * 0.2 * 0.75).toInt()
+        params.height = params.width / 3
         space.layoutParams = params
 
         params = shareBtn.layoutParams
-        params.width = (size.widthPixels * 0.8 * 0.2 * 0.25).toInt()
+        params.width = (size.widthPixels * 0.84 * 0.2 * 0.25).toInt()
         params.height = params.width
         shareBtn.layoutParams = params
         shareBtn.setImageResource(R.drawable.tweet_share)
@@ -197,6 +198,9 @@ class TweetRecycleView(private val db: SQLiteDatabase, private val callback: (Lo
         }
     }
 
+    /**
+     *
+     */
     public var tweetObjects: List<TweetObject> = mutableListOf()
 
     /**
@@ -224,7 +228,13 @@ class TweetRecycleView(private val db: SQLiteDatabase, private val callback: (Lo
 
         val tweet = tweetObjects[position]
 
-        holder.nameText.text = tweet.user?.name
+        holder.nameText.text =
+            if (tweet.retweetedTweet == null) {
+                tweet.user?.name
+            }
+            else {
+                tweet.retweetedTweet!!.user?.name
+            }
         holder.mainText.text =
             if (tweet.retweetedTweet == null) {
                 tweet.text
@@ -256,10 +266,18 @@ class TweetRecycleView(private val db: SQLiteDatabase, private val callback: (Lo
         holder.favoriteBtn.setOnClickListener {
             callback(tweet.id, ButtonType.FAVORITE)
         }
-
-        if (tweet.favorites != 0) {
-            holder.favoriteText.text = tweet.favorites.toString()
+        holder.favoriteText.text = ""
+        if (tweet.retweetedTweet == null) {
+            if (tweet.favorites != 0) {
+                holder.favoriteText.text = String.format("%,d", tweet.favorites)
+            }
         }
+        else {
+            if (tweet.retweetedTweet.favorites != 0) {
+                holder.favoriteText.text = String.format("%,d", tweet.retweetedTweet.favorites)
+            }
+        }
+
 
         holder.retweetBtn.setImageResource(R.drawable.tweet_retweet)
         if (tweet.retweeted == true) {
@@ -269,8 +287,16 @@ class TweetRecycleView(private val db: SQLiteDatabase, private val callback: (Lo
             callback(tweet.id, ButtonType.RETWEET)
         }
 
-        if (tweet.retweets != 0) {
-            holder.retweetText.text = tweet.retweets.toString()
+        holder.retweetText.text = ""
+        if (tweet.retweetedTweet == null) {
+            if (tweet.retweets != 0) {
+                holder.retweetText.text = String.format("%,d", tweet.retweets)
+            }
+        }
+        else {
+            if (tweet.retweetedTweet.retweets != 0) {
+                holder.retweetText.text = String.format("%,d", tweet.retweetedTweet.retweets)
+            }
         }
 
         Log.d(TAG, "[END]onBindViewHolder(${holder}, ${position})")
@@ -304,7 +330,15 @@ class TweetScrollEvent(private val top: ((()->Unit)->Unit)? = null, private val 
          */
         private val TAG = TweetScrollEvent::class.qualifiedName
 
-        private var lock = false
+        /**
+         *
+         */
+        private var topLock = false
+
+        /**
+         *
+         */
+        private var bottomLock = false
     }
 
     /**
@@ -312,18 +346,61 @@ class TweetScrollEvent(private val top: ((()->Unit)->Unit)? = null, private val 
      */
     init {
         top?.let {
-            if (lock == false) {
-                lock = true
-                it(::unlock)
+            if (topLock == false) {
+                topLock = true
+                it(::topUnlock)
             }
         }
     }
 
-    private fun unlock()
+    /**
+     * TODO
+     *
+     */
+    private fun topUnlock()
     {
-        Log.d(TAG, "[START]unlock()")
-        lock = false
-        Log.d(TAG, "[END]unlock()")
+        Log.d(TAG, "[START]topUnlock()")
+        topLock = false
+        Log.d(TAG, "[END]topUnlock()")
+    }
+
+    /**
+     * TODO
+     *
+     */
+    private fun bottomUnlock()
+    {
+        Log.d(TAG, "[START]bottomUnlock()")
+        bottomLock = false
+        Log.d(TAG, "[END]bottomUnlock()")
+    }
+
+    private fun reload(recyclerView: RecyclerView)
+    {
+        Log.d(TAG, "[START]reload(${recyclerView})")
+
+        val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+        if (layoutManager.findFirstVisibleItemPosition() == 0) {
+            if (recyclerView.getChildAt(0).top == 0) {
+                Log.d(TAG, "top()")
+                top?.let {
+                    if (topLock == false) {
+                        topLock = true
+                        it(::topUnlock)
+                    }
+                }
+            }
+        }
+        if (recyclerView.adapter?.itemCount == layoutManager.findFirstVisibleItemPosition() + recyclerView.childCount) {
+            Log.d(TAG, "bottom()")
+            bottom?.let {
+                if (bottomLock == false) {
+                    bottomLock = true
+                    it(::bottomUnlock)
+                }
+            }
+        }
+        Log.d(TAG, "[END]reload(${recyclerView})")
     }
 
     /**
@@ -336,29 +413,26 @@ class TweetScrollEvent(private val top: ((()->Unit)->Unit)? = null, private val 
     override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int)
     {
         super.onScrolled(recyclerView, dx, dy)
-        Log.d(TAG, "[START]onScrolled(${recyclerView}, ${dx}, ${dy})")
 
-        val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-        if (layoutManager.findFirstVisibleItemPosition() == 0) {
-            if (recyclerView.getChildAt(0).top == 0) {
-                Log.d(TAG, "top()")
-                top?.let {
-                    if (lock == false) {
-                        lock = true
-                        it(::unlock)
-                    }
-                }
-            }
-        }
-        if (recyclerView.adapter?.itemCount == layoutManager.findFirstVisibleItemPosition() + recyclerView.childCount) {
-            Log.d(TAG, "bottom()")
-            bottom?.let {
-                if (lock == false) {
-                    lock = true
-                    it(::unlock)
-                }
-            }
-        }
+        Log.d(TAG, "[START]onScrolled(${recyclerView}, ${dx}, ${dy})")
+        reload(recyclerView)
         Log.d(TAG, "[END]onScrolled(${recyclerView}, ${dx}, ${dy})")
+    }
+
+    /**
+     * TODO
+     *
+     * @param recyclerView
+     * @param newState
+     */
+    override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int)
+    {
+        super.onScrollStateChanged(recyclerView, newState)
+
+        Log.d(TAG, "[START]onScrollStateChanged(${recyclerView}, ${newState})")
+        if (newState == AbsListView.OnScrollListener.SCROLL_STATE_FLING) {
+            reload(recyclerView)
+        }
+        Log.d(TAG, "[START]onScrollStateChanged(${recyclerView}, ${newState})")
     }
 }

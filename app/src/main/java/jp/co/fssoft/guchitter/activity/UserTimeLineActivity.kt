@@ -1,6 +1,5 @@
 package jp.co.fssoft.guchitter.activity
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.LinearLayout
@@ -52,18 +51,23 @@ class UserTimeLineActivity : RootActivity()
                 {
                     callback -> getNextUserTweet(database.writableDatabase, userId, false) {
                         runOnUiThread {
+                            val beforeCount = (adapter as TweetRecycleView).tweetObjects.size
                             (adapter as TweetRecycleView).tweetObjects = getCurrentUserTweet(database.readableDatabase, userId)
+                            val afterCount = (adapter as TweetRecycleView).tweetObjects.size
                             adapter?.notifyDataSetChanged()
                             callback()
+                            layoutManager!!.scrollToPosition(afterCount - beforeCount + 1)
                         }
                     }
                 },
                 {
                     callback -> getPrevUserTweet(database.writableDatabase, userId, false) {
                         runOnUiThread {
+                            val beforeCount = (adapter as TweetRecycleView).tweetObjects.size
                             (adapter as TweetRecycleView).tweetObjects = getCurrentUserTweet(database.readableDatabase, userId)
                             adapter?.notifyDataSetChanged()
                             callback()
+                            layoutManager!!.scrollToPosition(beforeCount)
                         }
                     }
                 }

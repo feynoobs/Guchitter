@@ -83,7 +83,7 @@ open class RootActivity : AppCompatActivity()
      */
     protected fun getNextUserTweet(db: SQLiteDatabase, userId: Long, recursive: Boolean = false, callback: (()->Unit)? = null)
     {
-        Log.d(TAG, "[START]getNextUserTweet(${db}, ${userId}, ${recursive})")
+        Log.d(TAG, "[START]getNextUserTweet(${db}, ${userId}, ${recursive}, ${callback})")
 
         var tweetMaxId = 0L
         val query =
@@ -144,7 +144,7 @@ open class RootActivity : AppCompatActivity()
             }
         }
 
-        Log.d(TAG, "[END]getNextUserTweet(${db}, ${userId}, ${recursive})")
+        Log.d(TAG, "[END]getNextUserTweet(${db}, ${userId}, ${recursive}, ${callback})")
     }
 
     /**
@@ -157,7 +157,7 @@ open class RootActivity : AppCompatActivity()
      */
     protected fun getPrevUserTweet(db: SQLiteDatabase, userId: Long, recursive: Boolean = false, callback: (()->Unit)? = null)
     {
-        Log.d(TAG, "[START]getPrevUserTweet(${db}, ${userId}, ${recursive})")
+        Log.d(TAG, "[START]getPrevUserTweet(${db}, ${userId}, ${recursive}, ${callback})")
 
         var tweetMinId = 0L
         val query =
@@ -218,7 +218,7 @@ open class RootActivity : AppCompatActivity()
                 callback?.let { it() }
             }
         }
-        Log.d(TAG, "[END]getPrevUserTweet(${db}, ${userId}, ${recursive})")
+        Log.d(TAG, "[END]getPrevUserTweet(${db}, ${userId}, ${recursive}, ${callback})")
     }
 
 
@@ -275,7 +275,7 @@ open class RootActivity : AppCompatActivity()
      */
     protected fun getNextHomeTweet(db: SQLiteDatabase, userId: Long, recursive: Boolean = false, callback: (()->Unit)? = null)
     {
-        Log.d(TAG, "[START]getNextHomeTweet(${db}, ${userId}, ${recursive})")
+        Log.d(TAG, "[START]getNextHomeTweet(${db}, ${userId}, ${recursive}, ${callback})")
         var tweetMaxId = 0L
         val query =
             """
@@ -335,7 +335,7 @@ open class RootActivity : AppCompatActivity()
                 callback?.let { it() }
             }
         }
-        Log.d(TAG, "[END]getNextHomeTweet(${db}, ${userId}, ${recursive})")
+        Log.d(TAG, "[END]getNextHomeTweet(${db}, ${userId}, ${recursive}, ${callback})")
     }
 
     /**

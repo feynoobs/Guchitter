@@ -72,6 +72,11 @@ class DatabaseHelper(context: Context): SQLiteOpenHelper(context, "guchitter.db"
                     )
             """
         )
+        db?.execSQL(
+            """
+                CREATE UNIQUE INDEX unique_user_id_tweet_id ON r_home_tweets (user_id, tweet_id)
+            """
+        )
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int)
