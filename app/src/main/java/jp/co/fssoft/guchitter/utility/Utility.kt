@@ -144,7 +144,8 @@ class Utility
          */
         enum class ImagePrefix(private val prefix: String)
         {
-            USER("user")
+            USER("user"),
+            BANNER("banner")
         }
 
         /**
@@ -154,12 +155,19 @@ class Utility
          * @param prefix
          * @param url
          * @param sync
+         * @param saveAs
          * @param callback
          */
-        public fun saveImage(context: Context, prefix: ImagePrefix, url: String, sync: Boolean = true, callback: (()->Unit)? = null)
+        public fun saveImage(context: Context, prefix: ImagePrefix, url: String, sync: Boolean = true, saveAs: String? = null, callback: (()->Unit)? = null)
         {
             Log.d(TAG, "[START]saveImage(${context}, ${prefix}, ${url}, ${callback})")
-            val file = "${prefix}_${URLUtil.guessFileName(url, null, null)}"
+            val file =
+                if (saveAs == null) {
+                    "${prefix}_${URLUtil.guessFileName(url, null, null)}"
+                }
+                else {
+                    "${prefix}_${saveAs}"
+                }
             val path = "${context.filesDir}/${file}"
             if (File(path).exists() == false) {
                 val runnable = Runnable {

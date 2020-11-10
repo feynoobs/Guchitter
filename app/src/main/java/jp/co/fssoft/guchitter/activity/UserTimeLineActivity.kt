@@ -42,14 +42,28 @@ class UserTimeLineActivity : RootActivity()
         findViewById<RecyclerView>(R.id.tweet_recycle_view).apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(this@UserTimeLineActivity, LinearLayoutManager.VERTICAL, false)
-            adapter = TweetRecycleView(database.readableDatabase) { commonId, type ->
+            adapter = TweetRecycleView(database.readableDatabase) { commonId, type, posotion ->
                 when (type) {
                     TweetRecycleView.Companion.ButtonType.USER -> {
                         if (userId == commonId) {
-                            startAnimation(AnimationUtils.loadAnimation(applicationContext, R.anim.shake))
+                            layoutManager!!.findViewByPosition(posotion)?.startAnimation(AnimationUtils.loadAnimation(applicationContext, R.anim.shake))
                         }
                         else {
-                            displayUserTweets(commonId)
+                            val intent = Intent(applicationContext, UserTimeLineActivity::class.java)
+                            intent.putExtra("user_id", commonId)
+                            startActivity(intent)
+                        }
+                    }
+                }
+            }
+            runOnUiThread {
+                (adapter as TweetRecycleView).tweetObjects = getCurrentHomeTweet(database.readableDatabase, userId)
+                adapter?.notifyDataSetChanged()
+                if ((adapter as TweetRecycleView).tweetObjects.isEmpty() == true) {
+                    getNextHomeTweet(database.writableDatabase, userId, false) {
+                        runOnUiThread {
+                            (adapter as TweetRecycleView).tweetObjects = getCurrentHomeTweet(database.readableDatabase, userId)
+                            adapter?.notifyDataSetChanged()
                         }
                     }
                 }

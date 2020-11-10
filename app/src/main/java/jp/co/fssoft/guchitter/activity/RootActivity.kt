@@ -3,6 +3,7 @@ package jp.co.fssoft.guchitter.activity
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.util.Log
+import android.webkit.URLUtil
 import androidx.appcompat.app.AppCompatActivity
 import jp.co.fssoft.guchitter.R
 import jp.co.fssoft.guchitter.api.TweetObject
@@ -59,6 +60,11 @@ open class RootActivity : AppCompatActivity()
             var movable = it.moveToFirst()
             while (movable) {
                 val tweetObject = Utility.jsonDecode(TweetObject.serializer(), it.getString(it.getColumnIndex("data")))
+                Utility.saveImage(applicationContext, Utility.Companion.ImagePrefix.USER, tweetObject.user!!.profileImageUrl)
+                tweetObject.user!!.profileBannerUrl?.let {
+                    val file = URLUtil.guessFileName(it, null, null).removeSuffix(".bin")
+                    Utility.saveImage(applicationContext, Utility.Companion.ImagePrefix.BANNER, "${it}/300x100", true, file)
+                }
                 db.rawQuery("SELECT data FROM t_users WHERE user_id = ${userId}", null).use {
                     it.moveToFirst()
                     val userObject = Utility.jsonDecode(UserObject.serializer(), it.getString(it.getColumnIndex("data")))
@@ -126,6 +132,10 @@ open class RootActivity : AppCompatActivity()
                         tweetObject = it.retweetedTweet
                     }
                     Utility.saveImage(applicationContext, Utility.Companion.ImagePrefix.USER, tweetObject.user!!.profileImageUrl)
+                    tweetObject.user!!.profileBannerUrl?.let {
+                        val file = URLUtil.guessFileName(it, null, null).removeSuffix(".bin")
+                        Utility.saveImage(applicationContext, Utility.Companion.ImagePrefix.BANNER, "${it}/300x100", true, file)
+                    }
                 }
                 if (recursive == true) {
                     if (jsonList.isEmpty() != false) {
@@ -201,6 +211,10 @@ open class RootActivity : AppCompatActivity()
                         tweetObject = it.retweetedTweet
                     }
                     Utility.saveImage(applicationContext, Utility.Companion.ImagePrefix.USER, tweetObject.user!!.profileImageUrl)
+                    tweetObject.user!!.profileBannerUrl?.let {
+                        val file = URLUtil.guessFileName(it, null, null).removeSuffix(".bin")
+                        Utility.saveImage(applicationContext, Utility.Companion.ImagePrefix.BANNER, "${it}/300x100", true, file)
+                    }
                 }
                 if (recursive == true) {
                     if (jsonList.isEmpty() != false) {
@@ -318,6 +332,10 @@ open class RootActivity : AppCompatActivity()
                         tweetObject = it.retweetedTweet
                     }
                     Utility.saveImage(applicationContext, Utility.Companion.ImagePrefix.USER, tweetObject.user!!.profileImageUrl)
+                    tweetObject.user!!.profileBannerUrl?.let {
+                        val file = URLUtil.guessFileName(it, null, null).removeSuffix(".bin")
+                        Utility.saveImage(applicationContext, Utility.Companion.ImagePrefix.BANNER, "${it}/300x100", true, file)
+                    }
                 }
                 if (recursive == true) {
                     if (jsonList.isEmpty() != false) {
@@ -385,7 +403,15 @@ open class RootActivity : AppCompatActivity()
             if (it != null) {
                 val jsonList = Utility.jsonListDecode(TweetObject.serializer().list, it)
                 jsonList.forEach {
-                    Utility.saveImage(applicationContext, Utility.Companion.ImagePrefix.USER, it.user!!.profileImageUrl)
+                    var tweetObject = it
+                    if (it.retweetedTweet != null) {
+                        tweetObject = it.retweetedTweet
+                    }
+                    Utility.saveImage(applicationContext, Utility.Companion.ImagePrefix.USER, tweetObject.user!!.profileImageUrl)
+                    tweetObject.user!!.profileBannerUrl?.let {
+                        val file = URLUtil.guessFileName(it, null, null).removeSuffix(".bin")
+                        Utility.saveImage(applicationContext, Utility.Companion.ImagePrefix.BANNER, "${it}/300x100", true, file)
+                    }
                 }
                 if (recursive == true) {
                     if (jsonList.isEmpty() != false) {

@@ -67,7 +67,7 @@ class HomeTimeLineActivity : RootActivity()
                     setHasFixedSize(true)
                     val userId = it.getLong(it.getColumnIndex("user_id"))
                     layoutManager = LinearLayoutManager(this@HomeTimeLineActivity, LinearLayoutManager.VERTICAL, false)
-                    adapter = TweetRecycleView(database.readableDatabase) { commonId, type ->
+                    adapter = TweetRecycleView(database.readableDatabase) { commonId, type, position ->
                         when (type) {
                             TweetRecycleView.Companion.ButtonType.FAVORITE -> {
 
@@ -80,6 +80,18 @@ class HomeTimeLineActivity : RootActivity()
                                     putExtra("user_id", commonId)
                                 }
                                 startActivity(intent)
+                            }
+                        }
+                    }
+                    runOnUiThread {
+                        (adapter as TweetRecycleView).tweetObjects = getCurrentHomeTweet(db, userId)
+                        adapter?.notifyDataSetChanged()
+                        if ((adapter as TweetRecycleView).tweetObjects.isEmpty() == true) {
+                            getNextHomeTweet(database.writableDatabase, userId, false) {
+                                runOnUiThread {
+                                    (adapter as TweetRecycleView).tweetObjects = getCurrentHomeTweet(db, userId)
+                                    adapter?.notifyDataSetChanged()
+                                }
                             }
                         }
                     }

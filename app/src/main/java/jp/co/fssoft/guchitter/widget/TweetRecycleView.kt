@@ -175,7 +175,7 @@ class TweetViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
  * TODO
  *
  */
-class TweetRecycleView(private val db: SQLiteDatabase, private val callback: (Long, ButtonType)->Unit) : RecyclerView.Adapter<TweetViewHolder>()
+class TweetRecycleView(private val db: SQLiteDatabase, private val callback: (Long, ButtonType, Int)->Unit) : RecyclerView.Adapter<TweetViewHolder>()
 {
     companion object
     {
@@ -237,10 +237,10 @@ class TweetRecycleView(private val db: SQLiteDatabase, private val callback: (Lo
             }
         holder.nameText.setOnClickListener {
             if (tweet.retweetedTweet == null) {
-                callback(tweet.user!!.id, ButtonType.USER)
+                callback(tweet.user!!.id, ButtonType.USER, position)
             }
             else {
-                callback(tweet.retweetedTweet.user!!.id, ButtonType.USER)
+                callback(tweet.retweetedTweet.user!!.id, ButtonType.USER, position)
             }
         }
         holder.mainText.text =
@@ -260,10 +260,10 @@ class TweetRecycleView(private val db: SQLiteDatabase, private val callback: (Lo
         holder.icon.setImageBitmap(Utility.circleTransform(BitmapFactory.decodeStream(holder.icon.context.openFileInput(image))))
         holder.icon.setOnClickListener {
             if (tweet.retweetedTweet == null) {
-                callback(tweet.user!!.id, ButtonType.USER)
+                callback(tweet.user!!.id, ButtonType.USER, position)
             }
             else {
-                callback(tweet.retweetedTweet.user!!.id, ButtonType.USER)
+                callback(tweet.retweetedTweet.user!!.id, ButtonType.USER, position)
             }
         }
 
@@ -272,7 +272,7 @@ class TweetRecycleView(private val db: SQLiteDatabase, private val callback: (Lo
             holder.favoriteBtn.setImageResource(R.drawable.tweet_favorited)
         }
         holder.favoriteBtn.setOnClickListener {
-            callback(tweet.id, ButtonType.FAVORITE)
+            callback(tweet.id, ButtonType.FAVORITE, position)
         }
         holder.favoriteText.text = ""
         if (tweet.retweetedTweet == null) {
@@ -292,7 +292,7 @@ class TweetRecycleView(private val db: SQLiteDatabase, private val callback: (Lo
             holder.retweetBtn.setImageResource(R.drawable.tweet_retweeted)
         }
         holder.retweetBtn.setOnClickListener {
-            callback(tweet.id, ButtonType.RETWEET)
+            callback(tweet.id, ButtonType.RETWEET, position)
         }
 
         holder.retweetText.text = ""
@@ -352,6 +352,7 @@ class TweetScrollEvent(private val top: ((()->Unit)->Unit)? = null, private val 
     /**
      *
      */
+    /*
     init {
         top?.let {
             if (topLock == false) {
@@ -360,6 +361,7 @@ class TweetScrollEvent(private val top: ((()->Unit)->Unit)? = null, private val 
             }
         }
     }
+    */
 
     /**
      * TODO
