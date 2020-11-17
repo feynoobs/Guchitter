@@ -86,6 +86,7 @@ class TwitterApiStatusesUserTimeline(private val userId: Long) : TwitterApiCommo
 
                     values = ContentValues()
                     values.put("tweet_id", it.id)
+                    values.put("reply_tweet_id", it.replyTweetId)
                     values.put("user_id", it.user?.id)
                     values.put("data", Utility.jsonEncode(TweetObject.serializer(), it))
                     values.put("created_at", Utility.now())

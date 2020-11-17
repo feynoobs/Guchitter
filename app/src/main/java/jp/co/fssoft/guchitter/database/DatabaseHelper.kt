@@ -43,6 +43,7 @@ class DatabaseHelper(context: Context): SQLiteOpenHelper(context, "guchitter.db"
                     CREATE TABLE t_time_lines(
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         tweet_id INTEGER NOT NULL,
+                        reply_tweet_id INTEGER DEFAULT NULL,
                         user_id INTEGER NOT NULL,
                         data JSON,
                         created_at TEXT NOT NULL,
@@ -53,6 +54,11 @@ class DatabaseHelper(context: Context): SQLiteOpenHelper(context, "guchitter.db"
         db?.execSQL(
             """
                 CREATE UNIQUE INDEX unique_tweet_id ON t_time_lines (tweet_id)
+            """
+        )
+        db?.execSQL(
+            """
+                CREATE INDEX index_reply_tweet_id ON t_time_lines (reply_tweet_id)
             """
         )
         db?.execSQL(
