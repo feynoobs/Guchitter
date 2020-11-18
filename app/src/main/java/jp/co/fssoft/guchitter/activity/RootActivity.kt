@@ -125,7 +125,7 @@ open class RootActivity : AppCompatActivity()
                 FROM 
                     t_time_lines
                 WHERE
-                    user_id = ${userId} AND reply_tweet_id IS NULL
+                    user_id = ${userId} 
                 ORDER BY
                     tweet_id
                 DESC

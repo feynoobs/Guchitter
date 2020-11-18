@@ -15,10 +15,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import jp.co.fssoft.guchitter.R
 import jp.co.fssoft.guchitter.utility.Utility
-import jp.co.fssoft.guchitter.widget.TweetRecycleView
 import jp.co.fssoft.guchitter.widget.TweetScrollEvent
 import jp.co.fssoft.guchitter.widget.TweetWrapRecycleView
-import org.w3c.dom.Text
 
 /**
  * TODO
@@ -82,12 +80,12 @@ class UserTimeLineActivity : RootActivity()
         findViewById<TextView>(R.id.user_timeline_header_tweets).apply {
             text = String.format("%,d", userObject.tweets)
         }
-        findViewById<RecyclerView>(R.id.tweet_recycle_view).apply {
+        findViewById<RecyclerView>(R.id.tweet_wrap_recycle_view).apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(this@UserTimeLineActivity, LinearLayoutManager.VERTICAL, false)
-            adapter = TweetRecycleView { commonId, type, posotion ->
+            adapter = TweetWrapRecycleView { commonId, type, posotion ->
                 when (type) {
-                    TweetRecycleView.Companion.ButtonType.USER -> {
+                    TweetWrapRecycleView.Companion.ButtonType.USER -> {
                         if (userId == commonId) {
                             layoutManager!!.findViewByPosition(posotion)?.startAnimation(AnimationUtils.loadAnimation(applicationContext, R.anim.shake))
                         }
@@ -116,9 +114,9 @@ class UserTimeLineActivity : RootActivity()
                 {
                     callback -> getNextUserTweet(database.writableDatabase, userId, false) {
                         runOnUiThread {
-                            val beforeCount = (adapter as TweetRecycleView).tweetObjects.size
+                            val beforeCount = (adapter as TweetWrapRecycleView).tweetObjects.size
                             (adapter as TweetWrapRecycleView).tweetObjects = getCurrentUserTweet(database.readableDatabase, userId)
-                            val afterCount = (adapter as TweetRecycleView).tweetObjects.size
+                            val afterCount = (adapter as TweetWrapRecycleView).tweetObjects.size
                             adapter?.notifyDataSetChanged()
                             callback()
                             layoutManager!!.scrollToPosition(afterCount - beforeCount + 1)
@@ -128,7 +126,7 @@ class UserTimeLineActivity : RootActivity()
                 {
                     callback -> getPrevUserTweet(database.writableDatabase, userId, false) {
                         runOnUiThread {
-                            val beforeCount = (adapter as TweetRecycleView).tweetObjects.size
+                            val beforeCount = (adapter as TweetWrapRecycleView).tweetObjects.size
                             (adapter as TweetWrapRecycleView).tweetObjects = getCurrentUserTweet(database.readableDatabase, userId)
                             adapter?.notifyDataSetChanged()
                             callback()

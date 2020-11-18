@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import jp.co.fssoft.guchitter.R
-import jp.co.fssoft.guchitter.widget.TweetRecycleView
 import jp.co.fssoft.guchitter.widget.TweetScrollEvent
 import jp.co.fssoft.guchitter.widget.TweetWrapRecycleView
 
@@ -70,13 +69,13 @@ class HomeTimeLineActivity : RootActivity()
                     layoutManager = LinearLayoutManager(this@HomeTimeLineActivity, LinearLayoutManager.VERTICAL, false)
                     adapter = TweetWrapRecycleView{commonId, type, position ->
                         when (type) {
-                            TweetRecycleView.Companion.ButtonType.FAVORITE -> {
+                            TweetWrapRecycleView.Companion.ButtonType.FAVORITE -> {
 
                             }
-                            TweetRecycleView.Companion.ButtonType.RETWEET -> {
+                            TweetWrapRecycleView.Companion.ButtonType.RETWEET -> {
 
                             }
-                            TweetRecycleView.Companion.ButtonType.USER -> {
+                            TweetWrapRecycleView.Companion.ButtonType.USER -> {
                                 val intent = Intent(applicationContext, UserTimeLineActivity::class.java).apply {
                                     putExtra("user_id", commonId)
                                 }

@@ -3,6 +3,7 @@ package jp.co.fssoft.guchitter.api
 import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
 import android.util.Log
+import java.lang.Exception
 import java.net.URL
 import java.net.URLEncoder
 import java.util.zip.GZIPInputStream
@@ -119,34 +120,42 @@ abstract class TwitterApiCommon(private val entryPoint: String, private val meth
                 }
 
             val con = url.openConnection() as HttpsURLConnection
-            con.requestMethod = method
-            if (method == "POST") {
-                con.doOutput = true
-            }
-            con.addRequestProperty("Authorization", "OAuth ${header}")
-            con.addRequestProperty("Accept-Encoding", "gzip")
-            con.connect()
-            Log.d(TAG, con.responseCode.toString())
-
-            if (con.responseCode == 200) {
-                val encoding = con.getHeaderField("Content-Encoding")
-                val reader =
-                    if (encoding != null) {
-                        GZIPInputStream(con.inputStream).bufferedReader()
-                    } else {
-                        con.inputStream.bufferedReader()
-                    }
-                val builder = StringBuilder()
-                while (true) {
-                    val line = reader.readLine() ?: break
-                    builder.append(line)
+            var result: String? = null
+            /***********************************************
+             * ネットワーク非接続時例外が返ってくる
+             */
+            try {
+                con.requestMethod = method
+                if (method == "POST") {
+                    con.doOutput = true
                 }
-                finish(builder.toString())
+                con.addRequestProperty("Authorization", "OAuth ${header}")
+                con.addRequestProperty("Accept-Encoding", "gzip")
+                con.connect()
+                Log.d(TAG, con.responseCode.toString())
+                if (con.responseCode == 200) {
+                    val encoding = con.getHeaderField("Content-Encoding")
+                    val reader =
+                        if (encoding != null) {
+                            GZIPInputStream(con.inputStream).bufferedReader()
+                        } else {
+                            con.inputStream.bufferedReader()
+                        }
+                    val builder = StringBuilder()
+                    while (true) {
+                        val line = reader.readLine() ?: break
+                        builder.append(line)
+                    }
+                    result = builder.toString()
+                }
             }
-            else {
-                finish(null)
+            catch (e: Exception) {
+                Log.e(TAG, e.toString())
             }
-            con.disconnect()
+            finally {
+                finish(result)
+                con.disconnect()
+            }
 
             Log.d(TAG, "[END]startMain(${db}, ${requestParams}, ${additionalParams})[THREAD]")
         }
