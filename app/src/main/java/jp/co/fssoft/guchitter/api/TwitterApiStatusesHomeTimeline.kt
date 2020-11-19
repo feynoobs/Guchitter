@@ -5,7 +5,6 @@ import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import jp.co.fssoft.guchitter.utility.Utility
 import kotlinx.serialization.builtins.list
-import kotlin.system.exitProcess
 
 /**
  * TODO

@@ -1,10 +1,8 @@
 package jp.co.fssoft.guchitter.api
 
 import android.content.ContentValues
-import android.content.Intent
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
-import jp.co.fssoft.guchitter.activity.AuthenticationActivity
 import jp.co.fssoft.guchitter.utility.Utility
 import kotlinx.serialization.builtins.list
 

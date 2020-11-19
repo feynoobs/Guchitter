@@ -1,9 +1,7 @@
 package jp.co.fssoft.guchitter.api
 
-import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
-import jp.co.fssoft.guchitter.utility.Utility
 
 /**
  * TODO

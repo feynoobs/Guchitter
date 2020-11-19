@@ -9,6 +9,7 @@ data class TweetObject(
     val id: Long,
     @SerialName("full_text") val text: String,
     val entities: EntitiesObject,
+    @SerialName("extended_entities") val extendedEntities: ExtendedEntitiesObject? = null,
     val source: String,
     @SerialName("in_reply_to_status_id") val replyTweetId: Long?,
 //    @SerialName("in_reply_to_user_id") val replyUserId: Long?,
@@ -28,11 +29,16 @@ data class TweetObject(
 @Serializable
 data class EntitiesObject(
     @SerialName("hashtags") val hashTags: List<HashTagObject>,
-    @SerialName("media") val medias: List<MediaObject>? = null,
+//    @SerialName("media") val medias: List<MediaObject>? = null,
     val urls: List<UrlObject>,
     @SerialName("user_mentions") val userMentions: List<UserMentionObject>,
     val symbols: List<SymbolObject>,
     val polls: List<PollObject>? = null
+)
+
+@Serializable
+data class ExtendedEntitiesObject(
+    @SerialName("media") val medias: List<MediaObject>? = null
 )
 
 @Serializable

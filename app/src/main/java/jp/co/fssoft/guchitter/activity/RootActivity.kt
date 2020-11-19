@@ -11,6 +11,10 @@ import jp.co.fssoft.guchitter.database.DatabaseHelper
 import jp.co.fssoft.guchitter.utility.Utility
 import kotlinx.serialization.builtins.list
 
+/**
+ * TODO
+ *
+ */
 open class RootActivity : AppCompatActivity()
 {
     companion object
@@ -76,12 +80,19 @@ open class RootActivity : AppCompatActivity()
         Log.d(TAG, "[END]getTweetsCommon(${db}, ${api}, ${request}, ${callback}, ${userId}, ${recursive})")
     }
 
-    private fun getReplyTweets(db: SQLiteDatabase, tweetId: Long, replies: MutableList<TweetObject>)
+    /**
+     * TODO
+     *
+     * @param db
+     * @param tweetId
+     * @param replies
+     */
+    private fun getReplyHomeTweets(db: SQLiteDatabase, tweetId: Long, replies: MutableList<TweetObject>)
     {
         val query =
             """
                 SELECT 
-                    tweet_id, reply_tweet_id, user_id, data 
+                    tweet_id, user_id, data 
                 FROM 
                     t_time_lines
                 WHERE
@@ -101,10 +112,56 @@ open class RootActivity : AppCompatActivity()
                     tweetObject.user = userObject
                 }
                 replies.add(tweetObject)
-                getReplyTweets(db, it.getLong(it.getColumnIndex("tweet_id")), replies)
+                getReplyHomeTweets(db, it.getLong(it.getColumnIndex("tweet_id")), replies)
                 movable = it.moveToNext()
             }
         }
+    }
+
+
+    /**
+     * TODO
+     *
+     * @param db
+     * @param replyTweetId
+     * @param replies
+     */
+    private fun getReplyUserTweets(db: SQLiteDatabase, replyTweetId: Long, replies: MutableList<TweetObject>)
+    {
+        Log.d(TAG, "[START]getReplyUserTweets(${db}, ${replyTweetId}, ${replies})")
+
+        val query =
+            """
+                SELECT 
+                    reply_tweet_id, user_id, data 
+                FROM 
+                    t_time_lines
+                WHERE
+                    tweet_id = ${replyTweetId}
+                ORDER BY
+                    tweet_id
+                DESC
+            """
+        db.rawQuery(query, null).use {
+            var movable = it.moveToFirst()
+            while (movable) {
+                val userId = it.getLong(it.getColumnIndex("user_id"))
+                val tweetObject = Utility.jsonDecode(TweetObject.serializer(), it.getString(it.getColumnIndex("data")))
+                db.rawQuery("SELECT data FROM t_users WHERE user_id = ${userId}", null).use {
+                    it.moveToFirst()
+                    val userObject = Utility.jsonDecode(UserObject.serializer(), it.getString(it.getColumnIndex("data")))
+                    tweetObject.user = userObject
+                }
+                replies.add(0, tweetObject)
+                if (it.isNull(it.getColumnIndex("reply_tweet_id")) == false) {
+                    getReplyUserTweets(db, it.getLong(it.getColumnIndex("reply_tweet_id")), replies)
+                }
+
+                movable = it.moveToNext()
+            }
+        }
+
+        Log.d(TAG, "[END]getReplyUserTweets(${db}, ${replyTweetId}, ${replies})")
     }
 
     /**
@@ -140,12 +197,34 @@ open class RootActivity : AppCompatActivity()
                     tweetObject.user = userObject
                 }
                 tweetObjects.add(mutableListOf(tweetObject))
-                getReplyTweets(db, tweetObject.id, tweetObjects.last())
+                tweetObject.replyTweetId?.let {
+                    getReplyUserTweets(db, it, tweetObjects.last())
+                }
                 movable = it.moveToNext()
             }
         }
-        Log.d(TAG, "[END]getCurrentUserTweet(${db}, ${userId})")
 
+        /***********************************************
+         * 先祖が共通かつ1件しかないツイートは消しておく
+         */
+        var refI = 0
+        while (refI < tweetObjects.size - 1) {
+            outer@for (i in 0 until tweetObjects.size) {
+                refI = i
+                if (tweetObjects[i].size == 1) {
+                    for (j in 0 until tweetObjects.size) {
+                        if (i != j) {
+                            if (tweetObjects[i][0].id == tweetObjects[j][0].id) {
+                                tweetObjects.removeAt(i)
+                                break@outer
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Log.d(TAG, "[END]getCurrentUserTweet(${db}, ${userId})")
         return tweetObjects
     }
 
@@ -298,7 +377,7 @@ open class RootActivity : AppCompatActivity()
                     tweetObject.user = userObject
                 }
                 tweetObjects.add(mutableListOf(tweetObject))
-                getReplyTweets(db, tweetObject.id, tweetObjects.last())
+                getReplyHomeTweets(db, tweetObject.id, tweetObjects.last())
 
                 movable = it.moveToNext()
             }
