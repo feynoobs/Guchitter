@@ -60,6 +60,11 @@ open class RootActivity : AppCompatActivity()
                         val file = URLUtil.guessFileName(it, null, null).removeSuffix(".bin")
                         Utility.saveImage(applicationContext, Utility.Companion.ImagePrefix.BANNER, "${it}/300x100", true, file)
                     }
+                    tweetObject.extendedEntities?.let {
+                        it.medias.forEach {
+                            Utility.saveImage(applicationContext, Utility.Companion.ImagePrefix.PICTURE, it.mediaUrl, true)
+                        }
+                    }
                 }
                 if (recursive != null) {
                     if (jsonList.isEmpty() != false) {

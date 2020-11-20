@@ -2,15 +2,13 @@ package jp.co.fssoft.guchitter.utility
 
 import android.content.Context
 import android.graphics.*
-import android.net.Uri
 import android.util.Log
 import android.webkit.URLUtil
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
-import java.io.BufferedInputStream
-import java.io.File
+import java.io.*
 import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
@@ -145,7 +143,8 @@ class Utility
         enum class ImagePrefix(private val prefix: String)
         {
             USER("user"),
-            BANNER("banner")
+            BANNER("banner"),
+            PICTURE("picture")
         }
 
         /**
@@ -168,8 +167,8 @@ class Utility
                 else {
                     "${prefix}_${saveAs}"
                 }
-            val path = "${context.filesDir}/${file}"
-            if (File(path).exists() == false) {
+            val fileObject = File("${context.cacheDir}/${file}")
+            if (fileObject.exists() == false) {
                 val runnable = Runnable {
                     Log.d(
                         TAG,
@@ -181,17 +180,17 @@ class Utility
                     val encoding = con.getHeaderField("Content-Encoding")
                     val stream =
                         if (encoding != null) {
-                            BufferedInputStream(GZIPInputStream(con.inputStream))
+                            GZIPInputStream(con.inputStream)
                         } else {
-                            BufferedInputStream(con.inputStream)
+                            con.inputStream
                         }
-                    context.openFileOutput(file, Context.MODE_PRIVATE).use {
+                    FileOutputStream(fileObject).use {
                         while (true) {
-                            val line = stream.read()
-                            if (line == -1) {
+                            val c = stream.read()
+                            if (c == -1) {
                                 break
                             }
-                            it.write(line)
+                            it.write(c)
                         }
                     }
                     callback?.let { it() }
@@ -204,6 +203,25 @@ class Utility
                 }
             }
             Log.d(TAG, "[END]saveImage(${context}, ${prefix}, ${url}, ${callback})")
+        }
+
+        /**
+         * TODO
+         *
+         * @param context
+         * @param path
+         * @param prefix
+         * @return
+         */
+        public fun loadImageStream(context: Context, path: String,  prefix: ImagePrefix) : FileInputStream?
+        {
+            var result: FileInputStream? = null
+            val fileObject = File("${context.cacheDir}/${prefix}_${URLUtil.guessFileName(path, null, null)}")
+            if (fileObject.exists() == true) {
+                result = FileInputStream(fileObject)
+            }
+
+            return result
         }
 
         /**

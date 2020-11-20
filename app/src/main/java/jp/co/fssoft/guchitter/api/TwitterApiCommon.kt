@@ -3,6 +3,7 @@ package jp.co.fssoft.guchitter.api
 import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
 import android.util.Log
+import java.io.BufferedReader
 import java.lang.Exception
 import java.net.URL
 import java.net.URLEncoder
@@ -135,18 +136,12 @@ abstract class TwitterApiCommon(private val entryPoint: String, private val meth
                 Log.d(TAG, con.responseCode.toString())
                 if (con.responseCode == 200) {
                     val encoding = con.getHeaderField("Content-Encoding")
-                    val reader =
+                    result =
                         if (encoding != null) {
-                            GZIPInputStream(con.inputStream).bufferedReader()
+                            GZIPInputStream(con.inputStream).bufferedReader().use(BufferedReader::readText)
                         } else {
-                            con.inputStream.bufferedReader()
+                            con.inputStream.bufferedReader().use(BufferedReader::readText)
                         }
-                    val builder = StringBuilder()
-                    while (true) {
-                        val line = reader.readLine() ?: break
-                        builder.append(line)
-                    }
-                    result = builder.toString()
                 }
             }
             catch (e: Exception) {

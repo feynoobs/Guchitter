@@ -69,7 +69,7 @@ class UserTimeLineActivity : RootActivity()
             layoutParams.height = layoutParams.width
         }
         findViewById<ImageButton>(R.id.user_timeline_activity_header_user_icon).apply {
-            setImageBitmap(Utility.circleTransform(BitmapFactory.decodeStream(openFileInput("${Utility.Companion.ImagePrefix.USER}_${URLUtil.guessFileName(userObject.profileImageUrl, null, null)}"))))
+            setImageBitmap(Utility.circleTransform(BitmapFactory.decodeStream(Utility.loadImageStream(applicationContext, userObject.profileImageUrl, Utility.Companion.ImagePrefix.USER))))
             layoutParams.width = size.heightPixels / 16
             layoutParams.height = layoutParams.width
         }

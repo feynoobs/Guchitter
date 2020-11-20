@@ -212,6 +212,11 @@ internal class TweetViewHolder(private val view: View) : RecyclerView.ViewHolder
     /**
      *
      */
+    val mediaLayout: LinearLayout = view.findViewById(R.id.tweet_media_layout)
+
+    /**
+     *
+     */
     init
     {
         Log.d(TAG, "[START]init")
@@ -298,81 +303,81 @@ internal class TweetRecycleView(private val callback: (Long, TweetWrapRecycleVie
     override fun onBindViewHolder(holder: TweetViewHolder, position: Int)
     {
         Log.d(TAG, "[START]onBindViewHolder(${holder}, ${position})")
+        val tweet = tweetObjects[position]
         holder.nameText.text =
-            if (tweetObjects[position].retweetedTweet == null) {
-                tweetObjects[position].user?.name
+            if (tweet.retweetedTweet == null) {
+                tweet.user?.name
             }
             else {
-                tweetObjects[position].retweetedTweet!!.user?.name
+                tweet.retweetedTweet!!.user?.name
             }
         holder.nameText.setOnClickListener {
-            if (tweetObjects[position].retweetedTweet == null) {
-                callback(tweetObjects[position].user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, position)
+            if (tweet.retweetedTweet == null) {
+                callback(tweet.user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, position)
             }
             else {
-                callback(tweetObjects[position].retweetedTweet?.user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, position)
+                callback(tweet.retweetedTweet?.user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, position)
             }
         }
         holder.mainText.text =
-            if (tweetObjects[position].retweetedTweet == null) {
-                tweetObjects[position].text
+            if (tweet.retweetedTweet == null) {
+                tweet.text
             }
             else {
-                tweetObjects[position].retweetedTweet?.text
+                tweet.retweetedTweet?.text
             }
-        val image: String =
-            if (tweetObjects[position].retweetedTweet == null) {
-                "${Utility.Companion.ImagePrefix.USER}_${URLUtil.guessFileName(tweetObjects[position].user?.profileImageUrl, null, null)}"
-            }
-            else {
-                "${Utility.Companion.ImagePrefix.USER}_${URLUtil.guessFileName(tweetObjects[position].retweetedTweet?.user?.profileImageUrl, null, null)}"
-            }
-        holder.icon.setImageBitmap(Utility.circleTransform(BitmapFactory.decodeStream(holder.icon.context.openFileInput(image))))
+        if (tweet.retweetedTweet == null) {
+            holder.icon.setImageBitmap(Utility.circleTransform(BitmapFactory.decodeStream(Utility.loadImageStream(holder.icon.context, tweet.user?.profileImageUrl!!, Utility.Companion.ImagePrefix.USER))))
+        }
+        else {
+            holder.icon.setImageBitmap(Utility.circleTransform(BitmapFactory.decodeStream(Utility.loadImageStream(holder.icon.context, tweet.retweetedTweet.user?.profileImageUrl!!, Utility.Companion.ImagePrefix.USER))))
+        }
+
         holder.icon.setOnClickListener {
-            if (tweetObjects[position].retweetedTweet == null) {
-                callback(tweetObjects[position].user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, position)
+            if (tweet.retweetedTweet == null) {
+                callback(tweet.user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, position)
             }
             else {
-                callback(tweetObjects[position].retweetedTweet?.user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, position)
+                callback(tweet.retweetedTweet?.user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, position)
             }
         }
 
         holder.favoriteBtn.setImageResource(R.drawable.tweet_favorite)
-        if (tweetObjects[position].isFavorited == true) {
+        if (tweet.isFavorited == true) {
             holder.favoriteBtn.setImageResource(R.drawable.tweet_favorited)
         }
         holder.favoriteBtn.setOnClickListener {
-            callback(tweetObjects[position].id, TweetWrapRecycleView.Companion.ButtonType.FAVORITE, position)
+            callback(tweet.id, TweetWrapRecycleView.Companion.ButtonType.FAVORITE, position)
         }
         holder.favoriteText.text = ""
-        if (tweetObjects[position].retweetedTweet == null) {
-            if (tweetObjects[position].favorites != 0) {
-                holder.favoriteText.text = String.format("%,d", tweetObjects[position].favorites)
+        if (tweet.retweetedTweet == null) {
+            if (tweet.favorites != 0) {
+                holder.favoriteText.text = String.format("%,d", tweet.favorites)
             }
         }
         else {
-            if (tweetObjects[position].retweetedTweet?.favorites != 0) {
-                holder.favoriteText.text = String.format("%,d", tweetObjects[position].retweetedTweet?.favorites)
+            if (tweet.retweetedTweet?.favorites != 0) {
+                holder.favoriteText.text = String.format("%,d", tweet.retweetedTweet?.favorites)
             }
         }
 
         holder.retweetBtn.setImageResource(R.drawable.tweet_retweet)
-        if (tweetObjects[position].retweeted == true) {
+        if (tweet.retweeted == true) {
             holder.retweetBtn.setImageResource(R.drawable.tweet_retweeted)
         }
         holder.retweetBtn.setOnClickListener {
-            callback(tweetObjects[position].id, TweetWrapRecycleView.Companion.ButtonType.RETWEET, position)
+            callback(tweet.id, TweetWrapRecycleView.Companion.ButtonType.RETWEET, position)
         }
 
         holder.retweetText.text = ""
-        if (tweetObjects[position].retweetedTweet == null) {
-            if (tweetObjects[position].retweets != 0) {
-                holder.retweetText.text = String.format("%,d", tweetObjects[position].retweets)
+        if (tweet.retweetedTweet == null) {
+            if (tweet.retweets != 0) {
+                holder.retweetText.text = String.format("%,d", tweet.retweets)
             }
         }
         else {
-            if (tweetObjects[position].retweetedTweet?.retweets != 0) {
-                holder.retweetText.text = String.format("%,d", tweetObjects[position].retweetedTweet?.retweets)
+            if (tweet.retweetedTweet?.retweets != 0) {
+                holder.retweetText.text = String.format("%,d", tweet.retweetedTweet?.retweets)
             }
         }
 
@@ -382,6 +387,37 @@ internal class TweetRecycleView(private val callback: (Long, TweetWrapRecycleVie
 
         if (position == tweetObjects.size - 1) {
             holder.lowerLine.visibility = View.INVISIBLE
+        }
+
+        if (tweet.extendedEntities?.medias?.isEmpty() == false) {
+            holder.mediaLayout.removeAllViews()
+            val inflater = LayoutInflater.from(holder.mediaLayout.context)
+             when (tweet.extendedEntities?.medias?.size) {
+                1 ->
+                    inflater.inflate(R.layout.tweet_recycle_view_item_one_photo, holder.mediaLayout)
+                2 ->
+                     inflater.inflate(R.layout.tweet_recycle_view_item_two_photo, holder.mediaLayout)
+                3 ->
+                    inflater.inflate(R.layout.tweet_recycle_view_item_three_photo, holder.mediaLayout)
+                4 ->
+                     inflater.inflate(R.layout.tweet_recycle_view_item_four_photo, holder.mediaLayout)
+            }
+            tweet.extendedEntities?.medias.forEachIndexed { index, mediaObject ->
+                val item: ImageView? =
+                    when (index) {
+                        0 ->
+                            holder.mediaLayout.findViewById(R.id.tweet_recycle_view_1st_image)
+                        1 ->
+                            holder.mediaLayout.findViewById(R.id.tweet_recycle_view_2nd_image)
+                        2 ->
+                            holder.mediaLayout.findViewById(R.id.tweet_recycle_view_3rd_image)
+                        3 ->
+                            holder.mediaLayout.findViewById(R.id.tweet_recycle_view_4th_image)
+                        else ->
+                            null
+                    }
+                item?.setImageBitmap(BitmapFactory.decodeStream(Utility.loadImageStream(holder.mediaLayout.context, mediaObject.mediaUrl, Utility.Companion.ImagePrefix.PICTURE)))
+            }
         }
 
         Log.d(TAG, "[END]onBindViewHolder(${holder}, ${position})")

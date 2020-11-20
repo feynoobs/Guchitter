@@ -38,7 +38,7 @@ data class EntitiesObject(
 
 @Serializable
 data class ExtendedEntitiesObject(
-    @SerialName("media") val medias: List<MediaObject>? = null
+    @SerialName("media") val medias: List<MediaObject>
 )
 
 @Serializable

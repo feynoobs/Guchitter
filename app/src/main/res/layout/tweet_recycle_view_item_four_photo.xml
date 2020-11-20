@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ImageView
+        android:id="@+id/tweet_recycle_view_1st_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <ImageView
+        android:id="@+id/tweet_recycle_view_2nd_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toStartOf="@+id/tweet_recycle_view_1st_image" />
+    <ImageView
+        android:id="@+id/tweet_recycle_view_3rd_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tweet_recycle_view_1st_image" />
+    <ImageView
+        android:id="@+id/tweet_recycle_view_4th_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toStartOf="@+id/tweet_recycle_view_3rd_image" />
+
+</RelativeLayout>
