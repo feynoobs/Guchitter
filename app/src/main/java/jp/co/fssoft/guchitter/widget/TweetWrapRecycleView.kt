@@ -2,6 +2,7 @@ package jp.co.fssoft.guchitter.widget
 
 import android.content.Context
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.*
@@ -309,14 +310,14 @@ internal class TweetRecycleView(private val callback: (Long, TweetWrapRecycleVie
                 tweet.user?.name
             }
             else {
-                tweet.retweetedTweet!!.user?.name
+                tweet.retweetedTweet.user?.name
             }
         holder.nameText.setOnClickListener {
             if (tweet.retweetedTweet == null) {
                 callback(tweet.user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, position)
             }
             else {
-                callback(tweet.retweetedTweet?.user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, position)
+                callback(tweet.retweetedTweet.user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, position)
             }
         }
         holder.mainText.text =
@@ -324,7 +325,7 @@ internal class TweetRecycleView(private val callback: (Long, TweetWrapRecycleVie
                 tweet.text
             }
             else {
-                tweet.retweetedTweet?.text
+                tweet.retweetedTweet.text
             }
         if (tweet.retweetedTweet == null) {
             holder.icon.setImageBitmap(Utility.circleTransform(BitmapFactory.decodeStream(Utility.loadImageStream(holder.icon.context, tweet.user?.profileImageUrl!!, Utility.Companion.ImagePrefix.USER))))
@@ -338,7 +339,7 @@ internal class TweetRecycleView(private val callback: (Long, TweetWrapRecycleVie
                 callback(tweet.user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, position)
             }
             else {
-                callback(tweet.retweetedTweet?.user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, position)
+                callback(tweet.retweetedTweet.user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, position)
             }
         }
 
@@ -356,7 +357,7 @@ internal class TweetRecycleView(private val callback: (Long, TweetWrapRecycleVie
             }
         }
         else {
-            if (tweet.retweetedTweet?.favorites != 0) {
+            if (tweet.retweetedTweet.favorites != 0) {
                 holder.favoriteText.text = String.format("%,d", tweet.retweetedTweet?.favorites)
             }
         }
@@ -376,7 +377,7 @@ internal class TweetRecycleView(private val callback: (Long, TweetWrapRecycleVie
             }
         }
         else {
-            if (tweet.retweetedTweet?.retweets != 0) {
+            if (tweet.retweetedTweet.retweets != 0) {
                 holder.retweetText.text = String.format("%,d", tweet.retweetedTweet?.retweets)
             }
         }
@@ -392,7 +393,7 @@ internal class TweetRecycleView(private val callback: (Long, TweetWrapRecycleVie
         if (tweet.extendedEntities?.medias?.isEmpty() == false) {
             holder.mediaLayout.removeAllViews()
             val inflater = LayoutInflater.from(holder.mediaLayout.context)
-             when (tweet.extendedEntities?.medias?.size) {
+             when (tweet.extendedEntities.medias.size) {
                 1 ->
                     inflater.inflate(R.layout.tweet_recycle_view_item_one_photo, holder.mediaLayout)
                 2 ->
@@ -402,7 +403,12 @@ internal class TweetRecycleView(private val callback: (Long, TweetWrapRecycleVie
                 4 ->
                      inflater.inflate(R.layout.tweet_recycle_view_item_four_photo, holder.mediaLayout)
             }
-            tweet.extendedEntities?.medias.forEachIndexed { index, mediaObject ->
+
+            val display = (holder.mediaLayout.context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay
+            val size = DisplayMetrics()
+            display.getRealMetrics(size)
+
+            tweet.extendedEntities.medias.forEachIndexed { index, mediaObject ->
                 val item: ImageView? =
                     when (index) {
                         0 ->
@@ -416,7 +422,10 @@ internal class TweetRecycleView(private val callback: (Long, TweetWrapRecycleVie
                         else ->
                             null
                     }
-                item?.setImageBitmap(BitmapFactory.decodeStream(Utility.loadImageStream(holder.mediaLayout.context, mediaObject.mediaUrl, Utility.Companion.ImagePrefix.PICTURE)))
+                val bitmap = BitmapFactory.decodeStream(Utility.loadImageStream(holder.mediaLayout.context, mediaObject.mediaUrl, Utility.Companion.ImagePrefix.PICTURE))
+                item?.layoutParams?.width = (size.widthPixels - holder.icon.layoutParams.width) / tweet.extendedEntities.medias.size
+                item?.layoutParams?.height = item?.layoutParams?.width!! * bitmap.height / bitmap.width
+                item?.setImageBitmap(bitmap)
             }
         }
 

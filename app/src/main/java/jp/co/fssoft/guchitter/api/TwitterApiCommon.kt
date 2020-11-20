@@ -137,7 +137,7 @@ abstract class TwitterApiCommon(private val entryPoint: String, private val meth
                 if (con.responseCode == 200) {
                     val encoding = con.getHeaderField("Content-Encoding")
                     result =
-                        if (encoding != null) {
+                       if (encoding != null) {
                             GZIPInputStream(con.inputStream).bufferedReader().use(BufferedReader::readText)
                         } else {
                             con.inputStream.bufferedReader().use(BufferedReader::readText)
