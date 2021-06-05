@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import jp.co.fssoft.guchitter.R
 import jp.co.fssoft.guchitter.api.*
 import jp.co.fssoft.guchitter.database.DatabaseHelper
+import jp.co.fssoft.guchitter.utility.Imager
 import jp.co.fssoft.guchitter.utility.Utility
 import kotlinx.serialization.builtins.list
 
@@ -55,14 +56,14 @@ open class RootActivity : AppCompatActivity()
                     if (it.retweetedTweet != null) {
                         tweetObject = it.retweetedTweet
                     }
-                    Utility.saveImage(applicationContext, Utility.Companion.ImagePrefix.USER, tweetObject.user!!.profileImageUrl)
+                    Imager().saveImage(applicationContext, Imager.Companion.ImagePrefix.USER, tweetObject.user!!.profileImageUrl)
                     tweetObject.user!!.profileBannerUrl?.let {
                         val file = URLUtil.guessFileName(it, null, null).removeSuffix(".bin")
-                        Utility.saveImage(applicationContext, Utility.Companion.ImagePrefix.BANNER, "${it}/300x100", true, file)
+                        Imager().saveImage(applicationContext, Imager.Companion.ImagePrefix.BANNER, "${it}/300x100", file)
                     }
                     tweetObject.extendedEntities?.let {
                         it.medias.forEach {
-                            Utility.saveImage(applicationContext, Utility.Companion.ImagePrefix.PICTURE, it.mediaUrl, true)
+                            Imager().saveImage(applicationContext, Imager.Companion.ImagePrefix.PICTURE, it.mediaUrl)
                         }
                     }
                 }
@@ -210,21 +211,29 @@ open class RootActivity : AppCompatActivity()
         }
 
         /***********************************************
-         * 先祖が共通かつ1件しかないツイートは消しておく
+         * 先祖が共通なツイートは消しておく
          */
-        var refI = 0
-        while (refI < tweetObjects.size - 1) {
-            outer@for (i in 0 until tweetObjects.size) {
-                refI = i
-                if (tweetObjects[i].size == 1) {
-                    for (j in 0 until tweetObjects.size) {
-                        if (i != j) {
-                            if (tweetObjects[i][0].id == tweetObjects[j][0].id) {
-                                tweetObjects.removeAt(i)
-                                break@outer
+        var nextI = 0
+        while (nextI < tweetObjects.size) {
+            for (i in nextI until tweetObjects.size) {
+                val removeIndex = mutableListOf<Int>()
+                nextI = i + 1
+                for (j in i + 1 until tweetObjects.size) {
+                    if (tweetObjects[i].size > tweetObjects[j].size) {
+                        var removeable = true
+                        for (k in 0 until tweetObjects[j].size) {
+                            if (tweetObjects[i][k].id != tweetObjects[j][k].id) {
+                                removeable = false
+                                break
                             }
                         }
+                        if (removeable == true) {
+                            removeIndex.add(0, j)
+                        }
                     }
+                }
+                removeIndex.forEach {
+                    tweetObjects.removeAt(it)
                 }
             }
         }
@@ -267,7 +276,7 @@ open class RootActivity : AppCompatActivity()
             }
         }
         val requestMap = mutableMapOf(
-            "count" to 10.toString(),
+            "count" to 200.toString(),
             "exclude_replies" to false.toString(),
             "contributor_details" to false.toString(),
             "include_rts" to true.toString(),
@@ -322,7 +331,7 @@ open class RootActivity : AppCompatActivity()
             }
         }
         val requestMap = mutableMapOf(
-            "count" to 10.toString(),
+            "count" to 200.toString(),
             "exclude_replies" to false.toString(),
             "contributor_details" to false.toString(),
             "include_rts" to true.toString(),
@@ -426,7 +435,7 @@ open class RootActivity : AppCompatActivity()
             }
         }
         val requestMap = mutableMapOf(
-            "count" to 10.toString(),
+            "count" to 200.toString(),
             "exclude_replies" to false.toString(),
             "contributor_details" to false.toString(),
             "include_rts" to true.toString(),
@@ -478,7 +487,7 @@ open class RootActivity : AppCompatActivity()
             }
         }
         val requestMap = mutableMapOf(
-            "count" to 10.toString(),
+            "count" to 200.toString(),
             "exclude_replies" to false.toString(),
             "contributor_details" to false.toString(),
             "include_rts" to true.toString(),

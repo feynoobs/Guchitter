@@ -8,15 +8,16 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
-import android.webkit.URLUtil
 import android.widget.*
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import jp.co.fssoft.guchitter.R
+import jp.co.fssoft.guchitter.utility.Imager
 import jp.co.fssoft.guchitter.utility.Utility
 import jp.co.fssoft.guchitter.widget.TweetScrollEvent
 import jp.co.fssoft.guchitter.widget.TweetWrapRecycleView
+import java.io.FileInputStream
 
 /**
  * TODO
@@ -69,7 +70,9 @@ class UserTimeLineActivity : RootActivity()
             layoutParams.height = layoutParams.width
         }
         findViewById<ImageButton>(R.id.user_timeline_activity_header_user_icon).apply {
-            setImageBitmap(Utility.circleTransform(BitmapFactory.decodeStream(Utility.loadImageStream(applicationContext, userObject.profileImageUrl, Utility.Companion.ImagePrefix.USER))))
+            Imager().loadImage(applicationContext, userObject.profileImageUrl, Imager.Companion.ImagePrefix.USER) {
+                setImageBitmap(Utility.circleTransform(BitmapFactory.decodeStream(FileInputStream(it))))
+            }
             layoutParams.width = size.heightPixels / 16
             layoutParams.height = layoutParams.width
         }
@@ -83,11 +86,12 @@ class UserTimeLineActivity : RootActivity()
         findViewById<RecyclerView>(R.id.tweet_wrap_recycle_view).apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(this@UserTimeLineActivity, LinearLayoutManager.VERTICAL, false)
-            adapter = TweetWrapRecycleView { commonId, type, posotion ->
+            adapter = TweetWrapRecycleView { commonId, type, parentPosition, childPosition ->
                 when (type) {
                     TweetWrapRecycleView.Companion.ButtonType.USER -> {
                         if (userId == commonId) {
-                            layoutManager!!.findViewByPosition(posotion)?.startAnimation(AnimationUtils.loadAnimation(applicationContext, R.anim.shake))
+                            val target = layoutManager?.findViewByPosition(parentPosition)?.findViewById<RecyclerView>(R.id.tweet_recycle_view)?.layoutManager?.findViewByPosition(childPosition)
+                            target?.startAnimation(AnimationUtils.loadAnimation(applicationContext, R.anim.shake))
                         }
                         else {
                             val intent = Intent(applicationContext, UserTimeLineActivity::class.java)
@@ -98,12 +102,12 @@ class UserTimeLineActivity : RootActivity()
                 }
             }
             runOnUiThread {
-                (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(database.readableDatabase, userId)
+                (adapter as TweetWrapRecycleView).tweetObjects = getCurrentUserTweet(database.readableDatabase, userId)
                 adapter?.notifyDataSetChanged()
                 if ((adapter as TweetWrapRecycleView).tweetObjects.isEmpty() == true) {
                     getNextHomeTweet(database.writableDatabase, userId, false) {
                         runOnUiThread {
-                            (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(database.readableDatabase, userId)
+                            (adapter as TweetWrapRecycleView).tweetObjects = getCurrentUserTweet(database.readableDatabase, userId)
                             adapter?.notifyDataSetChanged()
                         }
                     }

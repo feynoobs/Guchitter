@@ -2,17 +2,17 @@ package jp.co.fssoft.guchitter.widget
 
 import android.content.Context
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.*
-import android.webkit.URLUtil
 import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import jp.co.fssoft.guchitter.R
 import jp.co.fssoft.guchitter.api.TweetObject
+import jp.co.fssoft.guchitter.utility.Imager
 import jp.co.fssoft.guchitter.utility.Utility
+import java.io.FileInputStream
 
 /**
  * TODO
@@ -44,7 +44,7 @@ class TweetWrapViewHolder(view: View) : RecyclerView.ViewHolder(view)
  *
  * @property callback
  */
-class TweetWrapRecycleView(private val callback: (Long, ButtonType, Int)->Unit) : RecyclerView.Adapter<TweetWrapViewHolder>()
+class TweetWrapRecycleView(private val callback: (Long, ButtonType, Int, Int)->Unit) : RecyclerView.Adapter<TweetWrapViewHolder>()
 {
     companion object
     {
@@ -95,7 +95,7 @@ class TweetWrapRecycleView(private val callback: (Long, ButtonType, Int)->Unit) 
         Log.d(TAG, "[START]onBindViewHolder(${holder}, ${position})")
         holder.tweetsView.findViewById<RecyclerView>(R.id.tweet_recycle_view).apply {
             setHasFixedSize(true)
-            adapter = TweetRecycleView(callback)
+            adapter = TweetRecycleView(position, callback)
             (adapter as TweetRecycleView).tweetObjects = tweetObjects[position]
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         }
@@ -267,7 +267,7 @@ internal class TweetViewHolder(private val view: View) : RecyclerView.ViewHolder
  * TODO
  *
  */
-internal class TweetRecycleView(private val callback: (Long, TweetWrapRecycleView.Companion.ButtonType, Int)->Unit) : RecyclerView.Adapter<TweetViewHolder>()
+internal class TweetRecycleView(private val parentPosition: Int, private val callback: (Long, TweetWrapRecycleView.Companion.ButtonType, Int, Int)->Unit) : RecyclerView.Adapter<TweetViewHolder>()
 {
     companion object
     {
@@ -314,10 +314,10 @@ internal class TweetRecycleView(private val callback: (Long, TweetWrapRecycleVie
             }
         holder.nameText.setOnClickListener {
             if (tweet.retweetedTweet == null) {
-                callback(tweet.user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, position)
+                callback(tweet.user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, parentPosition, position)
             }
             else {
-                callback(tweet.retweetedTweet.user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, position)
+                callback(tweet.retweetedTweet.user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, parentPosition, position)
             }
         }
         holder.mainText.text =
@@ -328,18 +328,26 @@ internal class TweetRecycleView(private val callback: (Long, TweetWrapRecycleVie
                 tweet.retweetedTweet.text
             }
         if (tweet.retweetedTweet == null) {
-            holder.icon.setImageBitmap(Utility.circleTransform(BitmapFactory.decodeStream(Utility.loadImageStream(holder.icon.context, tweet.user?.profileImageUrl!!, Utility.Companion.ImagePrefix.USER))))
+            Imager().loadImage(holder.icon.context, tweet.user?.profileImageUrl!!, Imager.Companion.ImagePrefix.USER) {
+                holder.icon.post {
+                    holder.icon.setImageBitmap(Utility.circleTransform(BitmapFactory.decodeStream(FileInputStream(it))))
+                }
+            }
         }
         else {
-            holder.icon.setImageBitmap(Utility.circleTransform(BitmapFactory.decodeStream(Utility.loadImageStream(holder.icon.context, tweet.retweetedTweet.user?.profileImageUrl!!, Utility.Companion.ImagePrefix.USER))))
+            Imager().loadImage(holder.icon.context, tweet.retweetedTweet.user?.profileImageUrl!!, Imager.Companion.ImagePrefix.USER) {
+                holder.icon.post {
+                    holder.icon.setImageBitmap(Utility.circleTransform(BitmapFactory.decodeStream(FileInputStream(it))))
+                }
+            }
         }
 
         holder.icon.setOnClickListener {
             if (tweet.retweetedTweet == null) {
-                callback(tweet.user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, position)
+                callback(tweet.user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, parentPosition, position)
             }
             else {
-                callback(tweet.retweetedTweet.user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, position)
+                callback(tweet.retweetedTweet.user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, parentPosition, position)
             }
         }
 
@@ -348,7 +356,7 @@ internal class TweetRecycleView(private val callback: (Long, TweetWrapRecycleVie
             holder.favoriteBtn.setImageResource(R.drawable.tweet_favorited)
         }
         holder.favoriteBtn.setOnClickListener {
-            callback(tweet.id, TweetWrapRecycleView.Companion.ButtonType.FAVORITE, position)
+            callback(tweet.id, TweetWrapRecycleView.Companion.ButtonType.FAVORITE, parentPosition, position)
         }
         holder.favoriteText.text = ""
         if (tweet.retweetedTweet == null) {
@@ -367,7 +375,7 @@ internal class TweetRecycleView(private val callback: (Long, TweetWrapRecycleVie
             holder.retweetBtn.setImageResource(R.drawable.tweet_retweeted)
         }
         holder.retweetBtn.setOnClickListener {
-            callback(tweet.id, TweetWrapRecycleView.Companion.ButtonType.RETWEET, position)
+            callback(tweet.id, TweetWrapRecycleView.Companion.ButtonType.RETWEET, parentPosition, position)
         }
 
         holder.retweetText.text = ""
@@ -422,10 +430,14 @@ internal class TweetRecycleView(private val callback: (Long, TweetWrapRecycleVie
                         else ->
                             null
                     }
-                val bitmap = BitmapFactory.decodeStream(Utility.loadImageStream(holder.mediaLayout.context, mediaObject.mediaUrl, Utility.Companion.ImagePrefix.PICTURE))
-                item?.layoutParams?.width = (size.widthPixels - holder.icon.layoutParams.width) / tweet.extendedEntities.medias.size
-                item?.layoutParams?.height = item?.layoutParams?.width!! * bitmap.height / bitmap.width
-                item?.setImageBitmap(bitmap)
+                Imager().loadImage(holder.mediaLayout.context, mediaObject.mediaUrl, Imager.Companion.ImagePrefix.PICTURE) {
+                    val bitmap = BitmapFactory.decodeStream(FileInputStream(it))
+                    item?.post {
+                        item.layoutParams?.width = (size.widthPixels - holder.icon.layoutParams.width) / tweet.extendedEntities.medias.size
+                        item.layoutParams?.height = item.layoutParams?.width!! * bitmap.height / bitmap.width
+                        item.setImageBitmap(bitmap)
+                    }
+                }
             }
         }
 
@@ -547,7 +559,7 @@ internal class TweetScrollEvent(private val top: ((()->Unit)->Unit)? = null, pri
         super.onScrolled(recyclerView, dx, dy)
 
         Log.d(TAG, "[START]onScrolled(${recyclerView}, ${dx}, ${dy})")
-        reload(recyclerView)
+//        reload(recyclerView)
         Log.d(TAG, "[END]onScrolled(${recyclerView}, ${dx}, ${dy})")
     }
 
