@@ -67,7 +67,7 @@ class HomeTimeLineActivity : RootActivity()
                     setHasFixedSize(true)
                     val userId = it.getLong(it.getColumnIndex("user_id"))
                     layoutManager = LinearLayoutManager(this@HomeTimeLineActivity, LinearLayoutManager.VERTICAL, false)
-                    adapter = TweetWrapRecycleView{commonId, type, position ->
+                    adapter = TweetWrapRecycleView{commonId, type, parentPosition, childPosition ->
                         when (type) {
                             TweetWrapRecycleView.Companion.ButtonType.FAVORITE -> {
 
