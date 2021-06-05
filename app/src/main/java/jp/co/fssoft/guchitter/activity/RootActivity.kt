@@ -1,6 +1,5 @@
 package jp.co.fssoft.guchitter.activity
 
-import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.util.Log
 import android.webkit.URLUtil
@@ -37,17 +36,16 @@ open class RootActivity : AppCompatActivity()
     /**
      * TODO
      *
-     * @param db
      * @param api
      * @param request
      * @param callback
      * @param userId
      * @param recursive
      */
-    private fun getTweetsCommon(db: SQLiteDatabase, api: TwitterApiCommon, request: Map<String, String>, callback: (()->Unit)?, userId: Long, recursive: ((SQLiteDatabase, Long, Boolean, (()->Unit)?) -> Unit)? = null)
+    private fun getTweetsCommon(api: TwitterApiCommon, request: Map<String, String>, callback: (()->Unit)?, userId: Long, recursive: ((Long, Boolean, (()->Unit)?) -> Unit)? = null)
     {
-        Log.d(TAG, "[START]getTweetsCommon(${db}, ${api}, ${request}, ${callback}, ${userId}, ${recursive})")
-
+        Log.d(TAG, "[START]getTweetsCommon(${api}, ${request}, ${callback}, ${userId}, ${recursive})")
+        val db = database.writableDatabase
         api.start(db, request) {
             if (it != null) {
                 val jsonList = Utility.jsonListDecode(TweetObject.serializer().list, it)
@@ -69,7 +67,7 @@ open class RootActivity : AppCompatActivity()
                 }
                 if (recursive != null) {
                     if (jsonList.isEmpty() != false) {
-                        recursive(db, userId, true, callback)
+                        recursive(userId, true, callback)
                     }
                     else {
                         callback?.let { it() }
@@ -89,12 +87,12 @@ open class RootActivity : AppCompatActivity()
     /**
      * TODO
      *
-     * @param db
      * @param tweetId
      * @param replies
      */
-    private fun getReplyHomeTweets(db: SQLiteDatabase, tweetId: Long, replies: MutableList<TweetObject>)
+    private fun getReplyHomeTweets(tweetId: Long, replies: MutableList<TweetObject>)
     {
+        val db = database.readableDatabase
         val query =
             """
                 SELECT 
@@ -118,7 +116,7 @@ open class RootActivity : AppCompatActivity()
                     tweetObject.user = userObject
                 }
                 replies.add(tweetObject)
-                getReplyHomeTweets(db, it.getLong(it.getColumnIndex("tweet_id")), replies)
+                getReplyHomeTweets(it.getLong(it.getColumnIndex("tweet_id")), replies)
                 movable = it.moveToNext()
             }
         }
@@ -128,14 +126,14 @@ open class RootActivity : AppCompatActivity()
     /**
      * TODO
      *
-     * @param db
      * @param replyTweetId
      * @param replies
      */
-    private fun getReplyUserTweets(db: SQLiteDatabase, replyTweetId: Long, replies: MutableList<TweetObject>)
+    private fun getReplyUserTweets(replyTweetId: Long, replies: MutableList<TweetObject>)
     {
-        Log.d(TAG, "[START]getReplyUserTweets(${db}, ${replyTweetId}, ${replies})")
+        Log.d(TAG, "[START]getReplyUserTweets(${replyTweetId}, ${replies})")
 
+        val db = database.readableDatabase
         val query =
             """
                 SELECT 
@@ -160,26 +158,26 @@ open class RootActivity : AppCompatActivity()
                 }
                 replies.add(0, tweetObject)
                 if (it.isNull(it.getColumnIndex("reply_tweet_id")) == false) {
-                    getReplyUserTweets(db, it.getLong(it.getColumnIndex("reply_tweet_id")), replies)
+                    getReplyUserTweets(it.getLong(it.getColumnIndex("reply_tweet_id")), replies)
                 }
 
                 movable = it.moveToNext()
             }
         }
 
-        Log.d(TAG, "[END]getReplyUserTweets(${db}, ${replyTweetId}, ${replies})")
+        Log.d(TAG, "[END]getReplyUserTweets(${replyTweetId}, ${replies})")
     }
 
     /**
      * TODO
      *
-     * @param db
      * @param userId
      */
-    protected fun getCurrentUserTweet(db: SQLiteDatabase, userId: Long) : List<List<TweetObject>>
+    protected fun getCurrentUserTweet(userId: Long) : List<List<TweetObject>>
     {
-        Log.d(TAG, "[START]getCurrentUserTweet(${db}, ${userId})")
+        Log.d(TAG, "[START]getCurrentUserTweet(${userId})")
 
+        val db = database.readableDatabase
         val tweetObjects = mutableListOf<MutableList<TweetObject>>()
         val query =
             """
@@ -204,7 +202,7 @@ open class RootActivity : AppCompatActivity()
                 }
                 tweetObjects.add(mutableListOf(tweetObject))
                 tweetObject.replyTweetId?.let {
-                    getReplyUserTweets(db, it, tweetObjects.last())
+                    getReplyUserTweets(it, tweetObjects.last())
                 }
                 movable = it.moveToNext()
             }
@@ -238,22 +236,22 @@ open class RootActivity : AppCompatActivity()
             }
         }
 
-        Log.d(TAG, "[END]getCurrentUserTweet(${db}, ${userId})")
+        Log.d(TAG, "[END]getCurrentUserTweet(${userId})")
         return tweetObjects
     }
 
     /**
      * TODO
      *
-     * @param db
      * @param userId
      * @param recursive
      * @param callback
      */
-    protected fun getNextUserTweet(db: SQLiteDatabase, userId: Long, recursive: Boolean = false, callback: (()->Unit)? = null)
+    protected fun getNextUserTweet(userId: Long, recursive: Boolean = false, callback: (()->Unit)? = null)
     {
-        Log.d(TAG, "[START]getNextUserTweet(${db}, ${userId}, ${recursive}, ${callback})")
+        Log.d(TAG, "[START]getNextUserTweet(${userId}, ${recursive}, ${callback})")
 
+        val db = database.writableDatabase
         var tweetMaxId = 0L
         val query =
             """
@@ -288,27 +286,27 @@ open class RootActivity : AppCompatActivity()
         }
 
         if (recursive == true) {
-            getTweetsCommon(db, TwitterApiStatusesUserTimeline(userId), requestMap, callback, userId, ::getNextUserTweet)
+            getTweetsCommon(TwitterApiStatusesUserTimeline(userId), requestMap, callback, userId, ::getNextUserTweet)
         }
         else {
-            getTweetsCommon(db, TwitterApiStatusesUserTimeline(userId), requestMap, callback, userId)
+            getTweetsCommon(TwitterApiStatusesUserTimeline(userId), requestMap, callback, userId)
         }
 
-        Log.d(TAG, "[END]getNextUserTweet(${db}, ${userId}, ${recursive}, ${callback})")
+        Log.d(TAG, "[END]getNextUserTweet(${userId}, ${recursive}, ${callback})")
     }
 
     /**
      * TODO
      *
-     * @param db
      * @param userId
      * @param recursive
      * @param callback
      */
-    protected fun getPrevUserTweet(db: SQLiteDatabase, userId: Long, recursive: Boolean = false, callback: (()->Unit)? = null)
+    protected fun getPrevUserTweet(userId: Long, recursive: Boolean = false, callback: (()->Unit)? = null)
     {
-        Log.d(TAG, "[START]getPrevUserTweet(${db}, ${userId}, ${recursive}, ${callback})")
+        Log.d(TAG, "[START]getPrevUserTweet(${userId}, ${recursive}, ${callback})")
 
+        val db = database.readableDatabase
         var tweetMinId = 0L
         val query =
             """
@@ -343,13 +341,13 @@ open class RootActivity : AppCompatActivity()
         }
 
         if (recursive == true) {
-            getTweetsCommon(db, TwitterApiStatusesUserTimeline(userId), requestMap, callback, userId, ::getPrevUserTweet)
+            getTweetsCommon(TwitterApiStatusesUserTimeline(userId), requestMap, callback, userId, ::getPrevUserTweet)
         }
         else {
-            getTweetsCommon(db, TwitterApiStatusesUserTimeline(userId), requestMap, callback, userId)
+            getTweetsCommon(TwitterApiStatusesUserTimeline(userId), requestMap, callback, userId)
         }
 
-        Log.d(TAG, "[END]getPrevUserTweet(${db}, ${userId}, ${recursive}, ${callback})")
+        Log.d(TAG, "[END]getPrevUserTweet(${userId}, ${recursive}, ${callback})")
     }
 
 
@@ -357,12 +355,12 @@ open class RootActivity : AppCompatActivity()
     /**
      * TODO
      *
-     * @param db
      * @param userId
      */
-    protected fun getCurrentHomeTweet(db: SQLiteDatabase, userId: Long) : List<List<TweetObject>>
+    protected fun getCurrentHomeTweet(userId: Long) : List<List<TweetObject>>
     {
-        Log.d(TAG, "[START]getCurrentHomeTweet(${db}, ${userId})")
+        Log.d(TAG, "[START]getCurrentHomeTweet(${userId})")
+        val db = database.readableDatabase
         val tweetObjects = mutableListOf<MutableList<TweetObject>>()
         val query =
             """
@@ -391,12 +389,12 @@ open class RootActivity : AppCompatActivity()
                     tweetObject.user = userObject
                 }
                 tweetObjects.add(mutableListOf(tweetObject))
-                getReplyHomeTweets(db, tweetObject.id, tweetObjects.last())
+                getReplyHomeTweets(tweetObject.id, tweetObjects.last())
 
                 movable = it.moveToNext()
             }
         }
-        Log.d(TAG, "[END]getCurrentHomeTweet(${db}, ${userId})")
+        Log.d(TAG, "[END]getCurrentHomeTweet(${userId})")
 
         return tweetObjects
     }
@@ -404,13 +402,13 @@ open class RootActivity : AppCompatActivity()
     /**
      * TODO
      *
-     * @param db
      * @param userId
      * @param recursive
      */
-    protected fun getNextHomeTweet(db: SQLiteDatabase, userId: Long, recursive: Boolean = false, callback: (()->Unit)? = null)
+    protected fun getNextHomeTweet(userId: Long, recursive: Boolean = false, callback: (()->Unit)? = null)
     {
-        Log.d(TAG, "[START]getNextHomeTweet(${db}, ${userId}, ${recursive}, ${callback})")
+        Log.d(TAG, "[START]getNextHomeTweet(${userId}, ${recursive}, ${callback})")
+        val db = database.writableDatabase
         var tweetMaxId = 0L
         val query =
             """
@@ -445,24 +443,24 @@ open class RootActivity : AppCompatActivity()
             requestMap["since_id"] = tweetMaxId.toString()
         }
         if (recursive == true) {
-            getTweetsCommon(db, TwitterApiStatusesHomeTimeline(userId), requestMap, callback, userId, ::getNextHomeTweet)
+            getTweetsCommon(TwitterApiStatusesHomeTimeline(userId), requestMap, callback, userId, ::getNextHomeTweet)
         }
         else {
-            getTweetsCommon(db, TwitterApiStatusesHomeTimeline(userId), requestMap, callback, userId)
+            getTweetsCommon(TwitterApiStatusesHomeTimeline(userId), requestMap, callback, userId)
         }
-        Log.d(TAG, "[END]getNextHomeTweet(${db}, ${userId}, ${recursive}, ${callback})")
+        Log.d(TAG, "[END]getNextHomeTweet(${userId}, ${recursive}, ${callback})")
     }
 
     /**
      * TODO
      *
-     * @param db
      * @param userId
      * @param recursive
      */
-    protected fun getPrevHomeTweet(db: SQLiteDatabase, userId: Long, recursive: Boolean = false, callback: (()->Unit)? = null)
+    protected fun getPrevHomeTweet(userId: Long, recursive: Boolean = false, callback: (()->Unit)? = null)
     {
-        Log.d(TAG, "[START]getPrevHomeTweet(${db}, ${userId}, ${recursive})")
+        Log.d(TAG, "[START]getPrevHomeTweet(${userId}, ${recursive})")
+        val db = database.writableDatabase
         var tweetMinId = 0L
         val query =
             """
@@ -497,12 +495,12 @@ open class RootActivity : AppCompatActivity()
             requestMap["max_id"] = tweetMinId.toString()
         }
         if (recursive == true) {
-            getTweetsCommon(db, TwitterApiStatusesHomeTimeline(userId), requestMap, callback, userId, ::getPrevHomeTweet)
+            getTweetsCommon(TwitterApiStatusesHomeTimeline(userId), requestMap, callback, userId, ::getPrevHomeTweet)
         }
         else {
-            getTweetsCommon(db, TwitterApiStatusesHomeTimeline(userId), requestMap, callback, userId)
+            getTweetsCommon(TwitterApiStatusesHomeTimeline(userId), requestMap, callback, userId)
         }
-        Log.d(TAG, "[END]getPrevHomeTweet(${db}, ${userId}, ${recursive})")
+        Log.d(TAG, "[END]getPrevHomeTweet(${userId}, ${recursive})")
     }
 
     /**
@@ -514,7 +512,8 @@ open class RootActivity : AppCompatActivity()
     protected fun getUser(userId: Long) : UserObject
     {
         var data: UserObject? = null
-        database.readableDatabase.rawQuery("""SELECT data FROM t_users WHERE user_id = ${userId}""", null).use {
+        val db = database.readableDatabase
+        db.rawQuery("""SELECT data FROM t_users WHERE user_id = ${userId}""", null).use {
             it.moveToFirst()
             data = Utility.jsonDecode(UserObject.serializer(), it.getString(it.getColumnIndex("data")))
         }

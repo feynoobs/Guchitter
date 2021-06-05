@@ -102,12 +102,12 @@ class UserTimeLineActivity : RootActivity()
                 }
             }
             runOnUiThread {
-                (adapter as TweetWrapRecycleView).tweetObjects = getCurrentUserTweet(database.readableDatabase, userId)
+                (adapter as TweetWrapRecycleView).tweetObjects = getCurrentUserTweet(userId)
                 adapter?.notifyDataSetChanged()
                 if ((adapter as TweetWrapRecycleView).tweetObjects.isEmpty() == true) {
-                    getNextHomeTweet(database.writableDatabase, userId, false) {
+                    getNextHomeTweet(userId, false) {
                         runOnUiThread {
-                            (adapter as TweetWrapRecycleView).tweetObjects = getCurrentUserTweet(database.readableDatabase, userId)
+                            (adapter as TweetWrapRecycleView).tweetObjects = getCurrentUserTweet(userId)
                             adapter?.notifyDataSetChanged()
                         }
                     }
@@ -116,10 +116,10 @@ class UserTimeLineActivity : RootActivity()
             addItemDecoration(DividerItemDecoration(this@UserTimeLineActivity, DividerItemDecoration.VERTICAL))
             addOnScrollListener(TweetScrollEvent(
                 {
-                    callback -> getNextUserTweet(database.writableDatabase, userId, false) {
+                    callback -> getNextUserTweet(userId, false) {
                         runOnUiThread {
                             val beforeCount = (adapter as TweetWrapRecycleView).tweetObjects.size
-                            (adapter as TweetWrapRecycleView).tweetObjects = getCurrentUserTweet(database.readableDatabase, userId)
+                            (adapter as TweetWrapRecycleView).tweetObjects = getCurrentUserTweet(userId)
                             val afterCount = (adapter as TweetWrapRecycleView).tweetObjects.size
                             adapter?.notifyDataSetChanged()
                             callback()
@@ -128,10 +128,10 @@ class UserTimeLineActivity : RootActivity()
                     }
                 },
                 {
-                    callback -> getPrevUserTweet(database.writableDatabase, userId, false) {
+                    callback -> getPrevUserTweet(userId, false) {
                         runOnUiThread {
                             val beforeCount = (adapter as TweetWrapRecycleView).tweetObjects.size
-                            (adapter as TweetWrapRecycleView).tweetObjects = getCurrentUserTweet(database.readableDatabase, userId)
+                            (adapter as TweetWrapRecycleView).tweetObjects = getCurrentUserTweet(userId)
                             adapter?.notifyDataSetChanged()
                             callback()
                             layoutManager!!.scrollToPosition(beforeCount)

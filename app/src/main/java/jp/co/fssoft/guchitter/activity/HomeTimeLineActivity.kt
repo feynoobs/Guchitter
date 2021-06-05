@@ -83,22 +83,22 @@ class HomeTimeLineActivity : RootActivity()
                             }
                         }
                     }
-                    (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(db, userId)
+                    (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
                     addItemDecoration(DividerItemDecoration(this@HomeTimeLineActivity, DividerItemDecoration.VERTICAL))
                     addOnScrollListener(TweetScrollEvent(
                         {
-                            callback -> getNextHomeTweet(database.writableDatabase, userId, false) {
+                            callback -> getNextHomeTweet(userId, false) {
                                 runOnUiThread {
-                                    (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(db, userId)
+                                    (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
                                     adapter?.notifyDataSetChanged()
                                     callback()
                                 }
                             }
                         },
                         {
-                            callback -> getPrevHomeTweet(database.writableDatabase, userId, false) {
+                            callback -> getPrevHomeTweet(userId, false) {
                                 runOnUiThread {
-                                    (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(db, userId)
+                                    (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
                                     adapter?.notifyDataSetChanged()
                                     callback()
                                 }
@@ -106,12 +106,12 @@ class HomeTimeLineActivity : RootActivity()
                         }
                     ))
                     runOnUiThread {
-                        (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(db, userId)
+                        (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
                         adapter?.notifyDataSetChanged()
                         if ((adapter as TweetWrapRecycleView).tweetObjects.isEmpty() == true) {
-                            getNextHomeTweet(database.writableDatabase, userId, false) {
+                            getNextHomeTweet(userId, false) {
                                 runOnUiThread {
-                                    (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(db, userId)
+                                    (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
                                     adapter?.notifyDataSetChanged()
                                 }
                             }
