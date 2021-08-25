@@ -511,12 +511,14 @@ open class RootActivity : AppCompatActivity()
      */
     protected fun getUser(userId: Long) : UserObject
     {
+        Log.d(TAG, "[START]getUser(${userId})")
         var data: UserObject? = null
         val db = database.readableDatabase
         db.rawQuery("""SELECT data FROM t_users WHERE user_id = ${userId}""", null).use {
             it.moveToFirst()
             data = Utility.jsonDecode(UserObject.serializer(), it.getString(it.getColumnIndex("data")))
         }
+        Log.d(TAG, "[END]getUser(${userId})")
 
         return data!!
     }

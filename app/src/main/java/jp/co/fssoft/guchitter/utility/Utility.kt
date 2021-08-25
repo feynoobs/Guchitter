@@ -137,6 +137,8 @@ class Utility
          */
         public fun circleTransform(source: Bitmap) : Bitmap
         {
+            Log.d(TAG, "[START]circleTransform(${source})")
+
             val size = Math.min(source.width, source.height)
             val x = (source.width - size) / 2
             val y = (source.height - size) / 2
@@ -153,6 +155,7 @@ class Utility
                 source.recycle()
             }
             squaredBitmap.recycle()
+            Log.d(TAG, "[END]circleTransform(${source})")
 
             return bitmap
         }
