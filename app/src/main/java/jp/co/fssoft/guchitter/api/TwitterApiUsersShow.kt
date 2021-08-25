@@ -107,10 +107,13 @@ class TwitterApiUsersShow : TwitterApiCommon("https://api.twitter.com/1.1/users/
                         db.insert("t_users", null, values)
                     }
                     else {
-                        db.update("t_users", values, "user_id = ${json.id}", null)
+                        db.update("t_time_lines", values, "user_id = ${json.id}", null)
                     }
                 }
                 db.setTransactionSuccessful()
+            }
+            catch (e: Exception) {
+                Log.e(TAG, e.toString())
             }
             finally {
                 db.endTransaction()

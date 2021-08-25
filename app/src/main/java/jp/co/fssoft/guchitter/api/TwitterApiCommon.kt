@@ -142,7 +142,8 @@ abstract class TwitterApiCommon(private val entryPoint: String, private val meth
                 if (method == "POST") {
                     var body = ""
                     requestParams?.let {
-                        requestParams.forEach({(k, v) -> body += "${k}=${v}"})
+                        requestParams.forEach({(k, v) -> body += "${k}=${v}&"})
+                        body = body.removeSuffix("&")
                     }
                     val os = con.outputStream
                     OutputStreamWriter(os, "UTF-8").use {
