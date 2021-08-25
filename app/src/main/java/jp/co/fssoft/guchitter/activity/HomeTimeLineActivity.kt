@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import jp.co.fssoft.guchitter.R
+import jp.co.fssoft.guchitter.api.TwitterApiFavoritesCreate
 import jp.co.fssoft.guchitter.widget.TweetScrollEvent
 import jp.co.fssoft.guchitter.widget.TweetWrapRecycleView
 
@@ -70,7 +71,9 @@ class HomeTimeLineActivity : RootActivity()
                     adapter = TweetWrapRecycleView{commonId, type, parentPosition, childPosition ->
                         when (type) {
                             TweetWrapRecycleView.Companion.ButtonType.FAVORITE -> {
-
+                                TwitterApiFavoritesCreate().start(database.writableDatabase, mapOf("id" to commonId.toString()), {
+                                    Log.d(TAG, it!!)
+                                })
                             }
                             TweetWrapRecycleView.Companion.ButtonType.RETWEET -> {
 

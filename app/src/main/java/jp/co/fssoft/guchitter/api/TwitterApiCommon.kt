@@ -4,6 +4,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
 import android.util.Log
 import java.io.BufferedReader
+import java.io.OutputStreamWriter
 import java.lang.Exception
 import java.net.URL
 import java.net.URLEncoder
@@ -113,11 +114,16 @@ abstract class TwitterApiCommon(private val entryPoint: String, private val meth
                     URL(entryPoint)
                 }
                 else {
-                    val builder = Uri.Builder()
-                    requestParams.forEach{ (k, v) ->
-                        builder.appendQueryParameter(k, v)
+                    if (method == "GET") {
+                        val builder = Uri.Builder()
+                        requestParams.forEach { (k, v) ->
+                            builder.appendQueryParameter(k, v)
+                        }
+                        URL(entryPoint + builder.toString())
                     }
-                    URL(entryPoint + builder.toString())
+                    else {
+                        URL(entryPoint)
+                    }
                 }
 
             val con = url.openConnection() as HttpsURLConnection
@@ -133,6 +139,22 @@ abstract class TwitterApiCommon(private val entryPoint: String, private val meth
                 con.addRequestProperty("Authorization", "OAuth ${header}")
                 con.addRequestProperty("Accept-Encoding", "gzip")
                 con.connect()
+                if (method == "POST") {
+                    var body = ""
+                    requestParams?.let {
+                        requestParams.forEach({(k, v) -> body += "${k}=${v}"})
+                    }
+                    val os = con.outputStream
+                    OutputStreamWriter(os, "UTF-8").use {
+                        it.write(body)
+                        it.flush()
+                    }
+                    os.close()
+                    Log.d(TAG, header)
+                    Log.d(TAG, url.toString())
+                    Log.d(TAG, body)
+                }
+
                 Log.d(TAG, con.responseCode.toString())
                 if (con.responseCode == 200) {
                     val encoding = con.getHeaderField("Content-Encoding")
