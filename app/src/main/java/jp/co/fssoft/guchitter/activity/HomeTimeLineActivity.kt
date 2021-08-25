@@ -71,12 +71,12 @@ class HomeTimeLineActivity : RootActivity()
                     adapter = TweetWrapRecycleView{commonId, type, parentPosition, childPosition ->
                         when (type) {
                             TweetWrapRecycleView.Companion.ButtonType.FAVORITE -> {
-                                TwitterApiFavoritesCreate().start(database.writableDatabase, mapOf("id" to commonId.toString()), {
+                                TwitterApiFavoritesCreate().start(database.writableDatabase, mapOf("id" to commonId.toString())) {
                                     runOnUiThread {
                                         (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
-                                        adapter?.notifyDataSetChanged()
+                                        adapter?.notifyItemRangeChanged(parentPosition, 1)
                                     }
-                                })
+                                }
                             }
                             TweetWrapRecycleView.Companion.ButtonType.RETWEET -> {
 
