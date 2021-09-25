@@ -10,11 +10,11 @@ import java.lang.Exception
  * TODO
  *
  */
-class TwitterApiFavoritesCreate : TwitterApiCommon("https://api.twitter.com/1.1/favorites/create.json", "POST")
+class TwitterApiStatusUnretweet(private val id: Long) : TwitterApiCommon("https://api.twitter.com/1.1/statuses/unretweet/${id}.json", "POST")
 {
     companion object
     {
-        private val TAG = TwitterApiFavoritesCreate::class.qualifiedName
+        private val TAG = TwitterApiStatusUnretweet::class.qualifiedName
     }
 
     /**
@@ -30,7 +30,7 @@ class TwitterApiFavoritesCreate : TwitterApiCommon("https://api.twitter.com/1.1/
         this.db = db
         this.callback = callback
         val copyHeaderParams = additionalHeaderParams?.toMutableMap()
-        copyHeaderParams?.put("include_entities", true.toString())
+        copyHeaderParams?.put("trim_user", false.toString())
         copyHeaderParams?.put("tweet_mode", "extended")
         startMain(db, copyHeaderParams)
         Log.d(TAG, "[END]start(${db}, ${additionalHeaderParams}, ${callback})")
@@ -47,10 +47,9 @@ class TwitterApiFavoritesCreate : TwitterApiCommon("https://api.twitter.com/1.1/
         if (result != null) {
             db.beginTransaction()
             try {
-                val json = Utility.jsonDecode(TweetObject.serializer(), result)
                 val values = ContentValues()
                 values.put("data", result)
-                db.update("t_time_lines", values, "tweet_id = ${json.id}", null)
+                db.update("t_time_lines", values, "tweet_id = ${id}", null)
                 db.setTransactionSuccessful()
             }
             catch (e: Exception) {

@@ -61,9 +61,11 @@ class TweetWrapRecycleView(private val callback: (Long, ButtonType, Int, Int)->U
         enum class ButtonType(private val effect: Int)
         {
             FAVORITE(1),
-            RETWEET(2),
-            SHARE(3),
-            USER(4)
+            REMOVE_FAVORITE(2),
+            RETWEET(3),
+            REMOVE_RETWEET(4),
+            SHARE(5),
+            USER(6)
         }
     }
 
@@ -356,7 +358,12 @@ internal class TweetRecycleView(private val parentPosition: Int, private val cal
             holder.favoriteBtn.setImageResource(R.drawable.tweet_favorited)
         }
         holder.favoriteBtn.setOnClickListener {
-            callback(tweet.id, TweetWrapRecycleView.Companion.ButtonType.FAVORITE, parentPosition, position)
+            if (tweet.isFavorited == true) {
+                callback(tweet.id, TweetWrapRecycleView.Companion.ButtonType.REMOVE_FAVORITE, parentPosition, position)
+            }
+            else {
+                callback(tweet.id, TweetWrapRecycleView.Companion.ButtonType.FAVORITE, parentPosition, position)
+            }
         }
         holder.favoriteText.text = ""
         if (tweet.retweetedTweet == null) {
@@ -375,7 +382,12 @@ internal class TweetRecycleView(private val parentPosition: Int, private val cal
             holder.retweetBtn.setImageResource(R.drawable.tweet_retweeted)
         }
         holder.retweetBtn.setOnClickListener {
-            callback(tweet.id, TweetWrapRecycleView.Companion.ButtonType.RETWEET, parentPosition, position)
+            if (tweet.retweeted == true) {
+                callback(tweet.id, TweetWrapRecycleView.Companion.ButtonType.REMOVE_RETWEET, parentPosition, position)
+            }
+            else {
+                callback(tweet.id, TweetWrapRecycleView.Companion.ButtonType.RETWEET, parentPosition, position)
+            }
         }
 
         holder.retweetText.text = ""
@@ -484,20 +496,6 @@ internal class TweetScrollEvent(private val top: ((()->Unit)->Unit)? = null, pri
     }
 
     /**
-     *
-     */
-    /*
-    init {
-        top?.let {
-            if (topLock == false) {
-                topLock = true
-                it(::topUnlock)
-            }
-        }
-    }
-    */
-
-    /**
      * TODO
      *
      */
@@ -545,22 +543,6 @@ internal class TweetScrollEvent(private val top: ((()->Unit)->Unit)? = null, pri
             }
         }
         Log.d(TAG, "[END]reload(${recyclerView})")
-    }
-
-    /**
-     * TODO
-     *
-     * @param recyclerView
-     * @param dx
-     * @param dy
-     */
-    override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int)
-    {
-        super.onScrolled(recyclerView, dx, dy)
-
-        Log.d(TAG, "[START]onScrolled(${recyclerView}, ${dx}, ${dy})")
-//        reload(recyclerView)
-        Log.d(TAG, "[END]onScrolled(${recyclerView}, ${dx}, ${dy})")
     }
 
     /**

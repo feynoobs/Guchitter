@@ -9,6 +9,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import jp.co.fssoft.guchitter.R
 import jp.co.fssoft.guchitter.api.TwitterApiFavoritesCreate
+import jp.co.fssoft.guchitter.api.TwitterApiFavoritesDestroy
+import jp.co.fssoft.guchitter.api.TwitterApiStatusRetweet
+import jp.co.fssoft.guchitter.api.TwitterApiStatusUnretweet
 import jp.co.fssoft.guchitter.widget.TweetScrollEvent
 import jp.co.fssoft.guchitter.widget.TweetWrapRecycleView
 
@@ -72,14 +75,35 @@ class HomeTimeLineActivity : RootActivity()
                         when (type) {
                             TweetWrapRecycleView.Companion.ButtonType.FAVORITE -> {
                                 TwitterApiFavoritesCreate().start(database.writableDatabase, mapOf("id" to commonId.toString())) {
+                                    (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
                                     runOnUiThread {
-                                        (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
+                                        adapter?.notifyItemRangeChanged(parentPosition, 1)
+                                    }
+                                }
+                            }
+                            TweetWrapRecycleView.Companion.ButtonType.REMOVE_FAVORITE -> {
+                                TwitterApiFavoritesDestroy().start(database.writableDatabase, mapOf("id" to commonId.toString())) {
+                                    (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
+                                    runOnUiThread {
                                         adapter?.notifyItemRangeChanged(parentPosition, 1)
                                     }
                                 }
                             }
                             TweetWrapRecycleView.Companion.ButtonType.RETWEET -> {
-
+                                TwitterApiStatusRetweet(commonId).start(database.writableDatabase, mapOf("id" to commonId.toString())) {
+                                    (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
+                                    runOnUiThread {
+                                        adapter?.notifyItemRangeChanged(parentPosition, 1)
+                                    }
+                                }
+                            }
+                            TweetWrapRecycleView.Companion.ButtonType.REMOVE_RETWEET -> {
+                                TwitterApiStatusUnretweet(commonId).start(database.writableDatabase, mapOf("id" to commonId.toString())) {
+                                    (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
+                                    runOnUiThread {
+                                        adapter?.notifyItemRangeChanged(parentPosition, 1)
+                                    }
+                                }
                             }
                             TweetWrapRecycleView.Companion.ButtonType.USER -> {
                                 val intent = Intent(applicationContext, UserTimeLineActivity::class.java).apply {

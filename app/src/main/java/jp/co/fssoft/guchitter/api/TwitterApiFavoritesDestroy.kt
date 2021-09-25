@@ -10,11 +10,11 @@ import java.lang.Exception
  * TODO
  *
  */
-class TwitterApiFavoritesCreate : TwitterApiCommon("https://api.twitter.com/1.1/favorites/create.json", "POST")
+class TwitterApiFavoritesDestroy : TwitterApiCommon("https://api.twitter.com/1.1/favorites/destroy.json", "POST")
 {
     companion object
     {
-        private val TAG = TwitterApiFavoritesCreate::class.qualifiedName
+        private val TAG = TwitterApiFavoritesDestroy::class.qualifiedName
     }
 
     /**
