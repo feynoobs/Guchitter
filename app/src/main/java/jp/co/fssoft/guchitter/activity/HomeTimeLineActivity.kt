@@ -8,10 +8,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import jp.co.fssoft.guchitter.R
-import jp.co.fssoft.guchitter.api.TwitterApiFavoritesCreate
-import jp.co.fssoft.guchitter.api.TwitterApiFavoritesDestroy
-import jp.co.fssoft.guchitter.api.TwitterApiStatusRetweet
-import jp.co.fssoft.guchitter.api.TwitterApiStatusUnretweet
+import jp.co.fssoft.guchitter.api.*
 import jp.co.fssoft.guchitter.widget.TweetScrollEvent
 import jp.co.fssoft.guchitter.widget.TweetWrapRecycleView
 
@@ -90,7 +87,7 @@ class HomeTimeLineActivity : RootActivity()
                                 }
                             }
                             TweetWrapRecycleView.Companion.ButtonType.RETWEET -> {
-                                TwitterApiStatusRetweet(commonId).start(database.writableDatabase, mapOf("id" to commonId.toString())) {
+                                TwitterApiStatusesRetweet(commonId).start(database.writableDatabase, mapOf("id" to commonId.toString())) {
                                     (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
                                     runOnUiThread {
                                         adapter?.notifyItemRangeChanged(parentPosition, 1)
@@ -98,10 +95,12 @@ class HomeTimeLineActivity : RootActivity()
                                 }
                             }
                             TweetWrapRecycleView.Companion.ButtonType.REMOVE_RETWEET -> {
-                                TwitterApiStatusUnretweet(commonId).start(database.writableDatabase, mapOf("id" to commonId.toString())) {
-                                    (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
-                                    runOnUiThread {
-                                        adapter?.notifyItemRangeChanged(parentPosition, 1)
+                                TwitterApiStatusesUnretweet(commonId).start(database.writableDatabase, mapOf("id" to commonId.toString())) {
+                                    TwitterApiStatusesShow().start(database.writableDatabase, mapOf("id" to commonId.toString())) {
+                                        (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
+                                        runOnUiThread {
+                                            adapter?.notifyItemRangeChanged(parentPosition, 1)
+                                        }
                                     }
                                 }
                             }

@@ -125,7 +125,6 @@ abstract class TwitterApiCommon(private val entryPoint: String, private val meth
                         URL(entryPoint)
                     }
                 }
-
             val con = url.openConnection() as HttpsURLConnection
             var result: String? = null
             /***********************************************

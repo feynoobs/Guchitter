@@ -3,18 +3,17 @@ package jp.co.fssoft.guchitter.api
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
-import jp.co.fssoft.guchitter.utility.Utility
 import java.lang.Exception
 
 /**
  * TODO
  *
  */
-class TwitterApiStatusRetweet(private val id: Long) : TwitterApiCommon("https://api.twitter.com/1.1/statuses/retweet/${id}.json", "POST")
+class TwitterApiStatusesUnretweet(private val id: Long) : TwitterApiCommon("https://api.twitter.com/1.1/statuses/unretweet/${id}.json", "POST")
 {
     companion object
     {
-        private val TAG = TwitterApiStatusRetweet::class.qualifiedName
+        private val TAG = TwitterApiStatusesUnretweet::class.qualifiedName
     }
 
     /**
