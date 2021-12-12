@@ -383,7 +383,7 @@ internal class TweetRecycleView(private val parentPosition: Int, private val cal
         }
         holder.retweetBtn.setOnClickListener {
             if (tweet.retweeted == true) {
-                callback(tweet.id, TweetWrapRecycleView.Companion.ButtonType.REMOVE_RETWEET, parentPosition, position)
+                callback(tweet.retweetedTweet!!.id, TweetWrapRecycleView.Companion.ButtonType.REMOVE_RETWEET, parentPosition, position)
             }
             else {
                 callback(tweet.id, TweetWrapRecycleView.Companion.ButtonType.RETWEET, parentPosition, position)

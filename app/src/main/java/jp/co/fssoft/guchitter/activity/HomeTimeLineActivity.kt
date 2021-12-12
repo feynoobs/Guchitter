@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import jp.co.fssoft.guchitter.R
 import jp.co.fssoft.guchitter.api.*
+import jp.co.fssoft.guchitter.utility.Utility
 import jp.co.fssoft.guchitter.widget.TweetScrollEvent
 import jp.co.fssoft.guchitter.widget.TweetWrapRecycleView
 
@@ -95,7 +96,25 @@ class HomeTimeLineActivity : RootActivity()
                                 }
                             }
                             TweetWrapRecycleView.Companion.ButtonType.REMOVE_RETWEET -> {
-                                TwitterApiStatusesUnretweet(commonId).start(database.writableDatabase, mapOf("id" to commonId.toString())) {
+
+                                var retweetId = 0L
+                                Log.e(TAG, commonId.toString())
+                                database.readableDatabase.rawQuery("SELECT tweet_id FROM t_time_lines ORDER BY tweet_id DESC", null).use {
+                                    var movable = it.moveToFirst()
+                                    while (movable) {
+                                        val tweet_id = it.getLong(it.getColumnIndex("tweet_id"))
+                                        Log.e(TAG, tweet_id.toString())
+                                        movable = it.moveToNext()
+                                    }
+                                }
+                                database.readableDatabase.rawQuery("SELECT data FROM t_time_lines WHERE tweet_id = ${commonId}", null).use {
+                                    it.moveToFirst()
+                                    val data = it.getString(it.getColumnIndex("data"))
+                                    val json = Utility.jsonDecode(TweetObject.serializer(), data)
+                                    retweetId = json.retweetedTweet!!.id
+                                }
+
+                                TwitterApiStatusesUnretweet(retweetId).start(database.writableDatabase, mapOf("id" to retweetId.toString())) {
                                     TwitterApiStatusesShow().start(database.writableDatabase, mapOf("id" to commonId.toString())) {
                                         (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
                                         runOnUiThread {
