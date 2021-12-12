@@ -149,6 +149,12 @@ internal class TweetViewHolder(private val view: View) : RecyclerView.ViewHolder
     /**
      *
      */
+    val atNameText: TextView = view.findViewById(R.id.tweet_recycle_view_at_user_name)
+
+
+    /**
+     *
+     */
     val mainText: TextView = view.findViewById(R.id.tweet_recycle_view_main)
 
     /**
@@ -313,6 +319,13 @@ internal class TweetRecycleView(private val parentPosition: Int, private val cal
             }
             else {
                 tweet.retweetedTweet.user?.name
+            }
+        holder.atNameText.text = "@" +
+            if (tweet.retweetedTweet == null) {
+                tweet.user?.screen_name
+            }
+            else {
+                tweet.retweetedTweet.user?.screen_name
             }
         holder.nameText.setOnClickListener {
             if (tweet.retweetedTweet == null) {
