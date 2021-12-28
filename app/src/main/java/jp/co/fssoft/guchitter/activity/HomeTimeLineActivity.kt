@@ -13,6 +13,10 @@ import jp.co.fssoft.guchitter.utility.Utility
 import jp.co.fssoft.guchitter.widget.TweetScrollEvent
 import jp.co.fssoft.guchitter.widget.TweetWrapRecycleView
 
+/**
+ * TODO
+ *
+ */
 class HomeTimeLineActivity : RootActivity()
 {
     companion object

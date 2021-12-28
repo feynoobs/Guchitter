@@ -7,6 +7,9 @@ import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 /**
@@ -111,6 +114,41 @@ class Utility
                     useArrayPolymorphism = true
                 )
             ).parse(serializer, json)
+        }
+
+        public fun createFuzzyDateTime(dateTime: String) : String
+        {
+            val dt = LocalDateTime.parse(dateTime, DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss Z yyyy"))
+            val unixPost = dt.atZone(ZoneOffset.ofHours(+0)).toEpochSecond()
+            val unixNow = System.currentTimeMillis() / 1000
+            val unixDiff = unixNow - unixPost
+
+            val fuzzyDateTime =
+                when {
+                    unixDiff < 60 -> {
+                        "${unixDiff}秒"
+                    }
+                    unixDiff < 3600 -> {
+                        val minute = unixDiff / 60
+                        "${minute}分"
+                    }
+                    unixDiff < 86400 -> {
+                        val hour = unixDiff / (60 * 60)
+                        "${hour}時間"
+                    }
+                    unixDiff < 604800 -> {
+                        val day = unixDiff / (60 * 60 * 24)
+                        "${day}日"
+                    }
+                    unixDiff < 31536000 -> {
+                        dt.format(DateTimeFormatter.ofPattern("MM月dd日"))
+                    }
+                    else -> {
+                        dt.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日"))
+                    }
+                }
+
+            return fuzzyDateTime
         }
 
 

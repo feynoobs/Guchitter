@@ -42,6 +42,7 @@ class TweetWrapViewHolder(view: View) : RecyclerView.ViewHolder(view)
 /**
  * TODO
  *
+ * @property userId
  * @property callback
  */
 class TweetWrapRecycleView(private val userId: Long, private val callback: (Long, ButtonType, Int, Int)->Unit) : RecyclerView.Adapter<TweetWrapViewHolder>()
@@ -331,6 +332,7 @@ internal class TweetRecycleView(private val parentPosition: Int, private val cal
             else {
                 tweet.retweetedTweet.user?.screen_name
             }
+        holder.timeText.text = Utility.createFuzzyDateTime(tweet.createdAt)
         holder.nameText.setOnClickListener {
             if (tweet.retweetedTweet == null) {
                 callback(tweet.user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, parentPosition, position)
