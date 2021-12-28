@@ -1,8 +1,10 @@
 package jp.co.fssoft.guchitter.activity
 
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -10,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import jp.co.fssoft.guchitter.R
 import jp.co.fssoft.guchitter.api.*
 import jp.co.fssoft.guchitter.utility.Json
+import jp.co.fssoft.guchitter.utility.Utility
 import jp.co.fssoft.guchitter.widget.TweetScrollEvent
 import jp.co.fssoft.guchitter.widget.TweetWrapRecycleView
 
@@ -41,6 +44,8 @@ class HomeTimeLineActivity : RootActivity()
         val contents: LinearLayout = findViewById(R.id.contents)
         contents.removeAllViews()
         layoutInflater.inflate(R.layout.home_time_line_activity, contents)
+        val tweetBtn: ImageButton = findViewById(R.id.tweet_write_btn)
+        tweetBtn.setImageBitmap(Utility.circleTransform(BitmapFactory.decodeResource(resources, R.drawable.tweet_pen)))
 
         /***********************************************
          * ユーザーデータがあるか確認する
