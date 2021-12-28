@@ -24,9 +24,9 @@ abstract class TwitterApiCommon(private val entryPoint: String, private val meth
     companion object
     {
         private val TAG = TwitterApiCommon::class.qualifiedName
-        const val API_KEY = "2hSoAk98Pw9Vk6LNmXOO6hip6"
-        const val API_SECRET = "t7jHT6dysIJvPVzWORgex8FuHW2orZUEul1JzUazgFoaJqnaGx"
-        const val CALLBACK_URL = "twinida://"
+        protected const val API_KEY = "2hSoAk98Pw9Vk6LNmXOO6hip6"
+        protected const val API_SECRET = "t7jHT6dysIJvPVzWORgex8FuHW2orZUEul1JzUazgFoaJqnaGx"
+        public const val CALLBACK_URL = "twinida://"
     }
     /**
      *
