@@ -8,7 +8,7 @@ import jp.co.fssoft.guchitter.R
 import jp.co.fssoft.guchitter.api.*
 import jp.co.fssoft.guchitter.database.DatabaseHelper
 import jp.co.fssoft.guchitter.utility.Imager
-import jp.co.fssoft.guchitter.utility.Utility
+import jp.co.fssoft.guchitter.utility.Json
 import kotlinx.serialization.builtins.list
 
 /**
@@ -48,7 +48,7 @@ open class RootActivity : AppCompatActivity()
         val db = database.writableDatabase
         api.start(db, request) {
             if (it != null) {
-                val jsonList = Utility.jsonListDecode(TweetObject.serializer().list, it)
+                val jsonList = Json.jsonListDecode(TweetObject.serializer().list, it)
                 jsonList.forEach {
                     var tweetObject = it
                     if (it.retweetedTweet != null) {
@@ -109,10 +109,10 @@ open class RootActivity : AppCompatActivity()
             var movable = it.moveToFirst()
             while (movable) {
                 val userId = it.getLong(it.getColumnIndex("user_id"))
-                val tweetObject = Utility.jsonDecode(TweetObject.serializer(), it.getString(it.getColumnIndex("data")))
+                val tweetObject = Json.jsonDecode(TweetObject.serializer(), it.getString(it.getColumnIndex("data")))
                 db.rawQuery("SELECT data FROM t_users WHERE user_id = ${userId}", null).use {
                     it.moveToFirst()
-                    val userObject = Utility.jsonDecode(UserObject.serializer(), it.getString(it.getColumnIndex("data")))
+                    val userObject = Json.jsonDecode(UserObject.serializer(), it.getString(it.getColumnIndex("data")))
                     tweetObject.user = userObject
                 }
                 replies.add(tweetObject)
@@ -150,10 +150,10 @@ open class RootActivity : AppCompatActivity()
             var movable = it.moveToFirst()
             while (movable) {
                 val userId = it.getLong(it.getColumnIndex("user_id"))
-                val tweetObject = Utility.jsonDecode(TweetObject.serializer(), it.getString(it.getColumnIndex("data")))
+                val tweetObject = Json.jsonDecode(TweetObject.serializer(), it.getString(it.getColumnIndex("data")))
                 db.rawQuery("SELECT data FROM t_users WHERE user_id = ${userId}", null).use {
                     it.moveToFirst()
-                    val userObject = Utility.jsonDecode(UserObject.serializer(), it.getString(it.getColumnIndex("data")))
+                    val userObject = Json.jsonDecode(UserObject.serializer(), it.getString(it.getColumnIndex("data")))
                     tweetObject.user = userObject
                 }
                 replies.add(0, tweetObject)
@@ -194,10 +194,10 @@ open class RootActivity : AppCompatActivity()
         db.rawQuery(query, null).use {
             var movable = it.moveToFirst()
             while (movable) {
-                val tweetObject = Utility.jsonDecode(TweetObject.serializer(), it.getString(it.getColumnIndex("data")))
+                val tweetObject = Json.jsonDecode(TweetObject.serializer(), it.getString(it.getColumnIndex("data")))
                 db.rawQuery("SELECT data FROM t_users WHERE user_id = ${userId}", null).use {
                     it.moveToFirst()
-                    val userObject = Utility.jsonDecode(UserObject.serializer(), it.getString(it.getColumnIndex("data")))
+                    val userObject = Json.jsonDecode(UserObject.serializer(), it.getString(it.getColumnIndex("data")))
                     tweetObject.user = userObject
                 }
                 tweetObjects.add(mutableListOf(tweetObject))
@@ -382,10 +382,10 @@ open class RootActivity : AppCompatActivity()
             var movable = it.moveToFirst()
             while (movable) {
                 val userId = it.getLong(it.getColumnIndex("user_id"))
-                val tweetObject = Utility.jsonDecode(TweetObject.serializer(), it.getString(it.getColumnIndex("data")))
+                val tweetObject = Json.jsonDecode(TweetObject.serializer(), it.getString(it.getColumnIndex("data")))
                 db.rawQuery("SELECT data FROM t_users WHERE user_id = ${userId}", null).use {
                     it.moveToFirst()
-                    val userObject = Utility.jsonDecode(UserObject.serializer(), it.getString(it.getColumnIndex("data")))
+                    val userObject = Json.jsonDecode(UserObject.serializer(), it.getString(it.getColumnIndex("data")))
                     tweetObject.user = userObject
                 }
                 tweetObjects.add(mutableListOf(tweetObject))
@@ -516,7 +516,7 @@ open class RootActivity : AppCompatActivity()
         val db = database.readableDatabase
         db.rawQuery("""SELECT data FROM t_users WHERE user_id = ${userId}""", null).use {
             it.moveToFirst()
-            data = Utility.jsonDecode(UserObject.serializer(), it.getString(it.getColumnIndex("data")))
+            data = Json.jsonDecode(UserObject.serializer(), it.getString(it.getColumnIndex("data")))
         }
         Log.d(TAG, "[END]getUser(${userId})")
 

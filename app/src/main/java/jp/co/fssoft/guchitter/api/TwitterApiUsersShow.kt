@@ -3,6 +3,7 @@ package jp.co.fssoft.guchitter.api
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
+import jp.co.fssoft.guchitter.utility.Json
 import jp.co.fssoft.guchitter.utility.Utility
 
 /**
@@ -62,7 +63,7 @@ class TwitterApiUsersShow : TwitterApiCommon("https://api.twitter.com/1.1/users/
         result?.let {
             db.beginTransaction()
             try {
-                val json = Utility.jsonDecode(UserObject.serializer(), result)
+                val json = Json.jsonDecode(UserObject.serializer(), result)
 
                 var insert = true
                 db.rawQuery("SELECT * FROM t_users WHERE user_id = ${json.id}", null).use {

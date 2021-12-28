@@ -3,6 +3,7 @@ package jp.co.fssoft.guchitter.api
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
+import jp.co.fssoft.guchitter.utility.Json
 import jp.co.fssoft.guchitter.utility.Utility
 import kotlinx.serialization.builtins.list
 
@@ -46,7 +47,7 @@ class TwitterApiStatusesHomeTimeline(private val userId: Long) : TwitterApiCommo
         Log.d(TAG, "[START]finish(${result})")
 
         result?.let {
-            val jsonList = Utility.jsonListDecode(TweetObject.serializer().list, result)
+            val jsonList = Json.jsonListDecode(TweetObject.serializer().list, result)
             db.beginTransaction()
             try {
                 jsonList.forEach {
@@ -68,7 +69,7 @@ class TwitterApiStatusesHomeTimeline(private val userId: Long) : TwitterApiCommo
                         }
 
                     values.put("user_id", userIdFromTweet)
-                    values.put("data", Utility.jsonEncode(UserObject.serializer(), userDataFromTweet!!))
+                    values.put("data", Json.jsonEncode(UserObject.serializer(), userDataFromTweet!!))
                     values.put("updated_at", Utility.now())
                     db.rawQuery("SELECT id FROM t_users WHERE user_id = ${userIdFromTweet}", null).use {
                         if (it.count == 1) {
@@ -88,7 +89,7 @@ class TwitterApiStatusesHomeTimeline(private val userId: Long) : TwitterApiCommo
                     values.put("tweet_id", it.id)
                     values.put("reply_tweet_id", it.replyTweetId)
                     values.put("user_id", it.user?.id)
-                    values.put("data", Utility.jsonEncode(TweetObject.serializer(), it))
+                    values.put("data", Json.jsonEncode(TweetObject.serializer(), it))
                     values.put("created_at", Utility.now())
                     values.put("updated_at", Utility.now())
                     db.rawQuery("""SELECT id FROM t_time_lines WHERE tweet_id = ${it.id}""", null).use {

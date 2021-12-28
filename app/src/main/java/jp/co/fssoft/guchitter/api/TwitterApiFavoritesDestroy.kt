@@ -3,6 +3,7 @@ package jp.co.fssoft.guchitter.api
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
+import jp.co.fssoft.guchitter.utility.Json
 import jp.co.fssoft.guchitter.utility.Utility
 import java.lang.Exception
 
@@ -47,7 +48,7 @@ class TwitterApiFavoritesDestroy : TwitterApiCommon("https://api.twitter.com/1.1
         if (result != null) {
             db.beginTransaction()
             try {
-                val json = Utility.jsonDecode(TweetObject.serializer(), result)
+                val json = Json.jsonDecode(TweetObject.serializer(), result)
                 val values = ContentValues()
                 values.put("data", result)
                 db.update("t_time_lines", values, "tweet_id = ${json.id}", null)

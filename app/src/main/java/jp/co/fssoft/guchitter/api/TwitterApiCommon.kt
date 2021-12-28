@@ -13,13 +13,19 @@ import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import javax.net.ssl.HttpsURLConnection
 
+/**
+ * TODO
+ *
+ * @property entryPoint
+ * @property method
+ */
 abstract class TwitterApiCommon(private val entryPoint: String, private val method: String)
 {
     companion object
     {
         private val TAG = TwitterApiCommon::class.qualifiedName
-        const val API_KEY = "Zh5yLVETVZbJECibsok2cxbRD"
-        const val API_SECRET = "fTA1UkmfLgACkp7xK2FxQMSs1OYjM3RsxDTZKaRC6EUyVAvtW0"
+        const val API_KEY = "2hSoAk98Pw9Vk6LNmXOO6hip6"
+        const val API_SECRET = "t7jHT6dysIJvPVzWORgex8FuHW2orZUEul1JzUazgFoaJqnaGx"
         const val CALLBACK_URL = "twinida://"
     }
     /**

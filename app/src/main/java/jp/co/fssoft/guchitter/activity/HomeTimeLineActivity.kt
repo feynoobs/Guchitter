@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import jp.co.fssoft.guchitter.R
 import jp.co.fssoft.guchitter.api.*
-import jp.co.fssoft.guchitter.utility.Utility
+import jp.co.fssoft.guchitter.utility.Json
 import jp.co.fssoft.guchitter.widget.TweetScrollEvent
 import jp.co.fssoft.guchitter.widget.TweetWrapRecycleView
 
@@ -114,7 +114,7 @@ class HomeTimeLineActivity : RootActivity()
                                 database.readableDatabase.rawQuery("SELECT data FROM t_time_lines WHERE tweet_id = ${commonId}", null).use {
                                     it.moveToFirst()
                                     val data = it.getString(it.getColumnIndex("data"))
-                                    val json = Utility.jsonDecode(TweetObject.serializer(), data)
+                                    val json = Json.jsonDecode(TweetObject.serializer(), data)
                                     retweetId = json.retweetedTweet!!.id
                                 }
 
