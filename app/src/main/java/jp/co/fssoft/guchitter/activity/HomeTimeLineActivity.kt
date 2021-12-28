@@ -69,7 +69,7 @@ class HomeTimeLineActivity : RootActivity()
                     setHasFixedSize(true)
                     val userId = it.getLong(it.getColumnIndex("user_id"))
                     layoutManager = LinearLayoutManager(this@HomeTimeLineActivity, LinearLayoutManager.VERTICAL, false)
-                    adapter = TweetWrapRecycleView{commonId, type, parentPosition, childPosition ->
+                    adapter = TweetWrapRecycleView(userId) {commonId, type, parentPosition, childPosition ->
                         when (type) {
                             TweetWrapRecycleView.Companion.ButtonType.FAVORITE -> {
                                 TwitterApiFavoritesCreate().start(database.writableDatabase, mapOf("id" to commonId.toString())) {

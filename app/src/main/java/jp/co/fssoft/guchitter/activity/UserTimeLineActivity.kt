@@ -86,7 +86,7 @@ class UserTimeLineActivity : RootActivity()
         findViewById<RecyclerView>(R.id.tweet_wrap_recycle_view).apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(this@UserTimeLineActivity, LinearLayoutManager.VERTICAL, false)
-            adapter = TweetWrapRecycleView { commonId, type, parentPosition, childPosition ->
+            adapter = TweetWrapRecycleView(userId) { commonId, type, parentPosition, childPosition ->
                 when (type) {
                     TweetWrapRecycleView.Companion.ButtonType.USER -> {
                         if (userId == commonId) {

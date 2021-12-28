@@ -44,7 +44,7 @@ class TweetWrapViewHolder(view: View) : RecyclerView.ViewHolder(view)
  *
  * @property callback
  */
-class TweetWrapRecycleView(private val callback: (Long, ButtonType, Int, Int)->Unit) : RecyclerView.Adapter<TweetWrapViewHolder>()
+class TweetWrapRecycleView(private val userId: Long, private val callback: (Long, ButtonType, Int, Int)->Unit) : RecyclerView.Adapter<TweetWrapViewHolder>()
 {
     companion object
     {
@@ -197,6 +197,10 @@ internal class TweetViewHolder(private val view: View) : RecyclerView.ViewHolder
      */
     val transferBtn: ImageButton = view.findViewById(R.id.tweet_recycle_view_transfer_button)
 
+    /**
+     *
+     */
+    val otherBtn: ImageButton = view.findViewById(R.id.tweet_recycle_view_other_button)
 
     /**
      *
@@ -413,6 +417,10 @@ internal class TweetRecycleView(private val parentPosition: Int, private val cal
             if (tweet.retweetedTweet.retweets != 0) {
                 holder.retweetText.text = String.format("%,d", tweet.retweetedTweet?.retweets)
             }
+        }
+
+        holder.otherBtn.setOnClickListener {
+
         }
 
         if (position == 0) {

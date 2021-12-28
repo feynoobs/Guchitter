@@ -55,6 +55,14 @@
                 android:id="@+id/tweet_recycle_view_post_time"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"/>
+            <ImageButton
+                android:id="@+id/tweet_recycle_view_other_button"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:scaleType="centerInside"
+                android:adjustViewBounds="true"
+                android:background="@null"
+                android:src="@drawable/other"/>
         </LinearLayout>
         <TextView
             android:id="@+id/tweet_recycle_view_main"
