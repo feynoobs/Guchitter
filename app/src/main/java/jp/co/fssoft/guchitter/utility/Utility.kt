@@ -41,6 +41,12 @@ class Utility
             return resultMap
         }
 
+        /**
+         * TODO
+         *
+         * @param dateTime
+         * @return
+         */
         public fun createFuzzyDateTime(dateTime: String) : String
         {
             val dt = LocalDateTime.parse(dateTime, DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss Z yyyy"))
@@ -90,6 +96,27 @@ class Utility
             Log.d(TAG, "[END]now()")
 
             return format.format(date)
+        }
+
+        /**
+         * TODO
+         *
+         * @param source
+         * @param length
+         * @return
+         */
+        public fun resizeBitmap(source: Bitmap, length: Int) : Bitmap
+        {
+            Log.d(TAG, "[START]resizeBitmap(${source})")
+            val size = Math.max(source.width, source.height)
+            val aspect = length.toDouble() / size.toDouble()
+            val bmp = Bitmap.createScaledBitmap(source, (source.width * aspect).toInt(), (source.height * aspect).toInt(), true)
+            if (source !== bmp) {
+                source.recycle()
+            }
+            Log.d(TAG, "[END]resizeBitmap(${source})")
+
+            return bmp
         }
 
         /**

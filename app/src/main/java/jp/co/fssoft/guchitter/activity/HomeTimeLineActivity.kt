@@ -31,6 +31,16 @@ class HomeTimeLineActivity : RootActivity()
     }
 
     /**
+     *
+     */
+    private var scroll = 0
+
+    /**
+     *
+     */
+    private var offset = 0
+
+    /**
      * TODO
      *
      * @param savedInstanceState
@@ -44,8 +54,16 @@ class HomeTimeLineActivity : RootActivity()
         val contents: LinearLayout = findViewById(R.id.contents)
         contents.removeAllViews()
         layoutInflater.inflate(R.layout.home_time_line_activity, contents)
-        val tweetBtn: ImageButton = findViewById(R.id.tweet_write_btn)
-        tweetBtn.setImageBitmap(Utility.circleTransform(BitmapFactory.decodeResource(resources, R.drawable.tweet_pen)))
+        findViewById<ImageButton>(R.id.tweet_write_btn).apply {
+            val btnImage = Utility.resizeBitmap(
+                BitmapFactory.decodeResource(resources, R.drawable.tweet_pen),
+                196
+            )
+            setImageBitmap(Utility.circleTransform(btnImage))
+            setOnClickListener {
+                startActivity(Intent(application, PostTweetActivity::class.java))
+            }
+        }
 
         /***********************************************
          * ユーザーデータがあるか確認する
@@ -64,11 +82,11 @@ class HomeTimeLineActivity : RootActivity()
      * TODO
      *
      */
-    override fun onStart()
+    override fun onResume()
     {
-        super.onStart()
+        super.onResume()
 
-        Log.d(TAG, "[START]onStart()")
+        Log.d(TAG, "[START]onResume()")
 
         val db = database.readableDatabase
         db.rawQuery("SELECT user_id FROM t_users WHERE current = 1", null).use {
@@ -78,6 +96,7 @@ class HomeTimeLineActivity : RootActivity()
                     setHasFixedSize(true)
                     val userId = it.getLong(it.getColumnIndex("user_id"))
                     layoutManager = LinearLayoutManager(this@HomeTimeLineActivity, LinearLayoutManager.VERTICAL, false)
+                    (layoutManager as LinearLayoutManager).scrollToPositionWithOffset(scroll, offset)
                     adapter = TweetWrapRecycleView(userId) {commonId, type, parentPosition, childPosition ->
                         when (type) {
                             TweetWrapRecycleView.Companion.ButtonType.FAVORITE -> {
@@ -140,26 +159,27 @@ class HomeTimeLineActivity : RootActivity()
                             }
                         }
                     }
+
                     (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
                     addItemDecoration(DividerItemDecoration(this@HomeTimeLineActivity, DividerItemDecoration.VERTICAL))
                     addOnScrollListener(TweetScrollEvent(
                         {
-                            callback -> getNextHomeTweet(userId, false) {
-                                runOnUiThread {
-                                    (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
-                                    adapter?.notifyDataSetChanged()
-                                    callback()
-                                }
+                                callback -> getNextHomeTweet(userId, false) {
+                            runOnUiThread {
+                                (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
+                                adapter?.notifyDataSetChanged()
+                                callback()
                             }
+                        }
                         },
                         {
-                            callback -> getPrevHomeTweet(userId, false) {
-                                runOnUiThread {
-                                    (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
-                                    adapter?.notifyDataSetChanged()
-                                    callback()
-                                }
+                                callback -> getPrevHomeTweet(userId, false) {
+                            runOnUiThread {
+                                (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
+                                adapter?.notifyDataSetChanged()
+                                callback()
                             }
+                        }
                         }
                     ))
                     runOnUiThread {
@@ -177,6 +197,29 @@ class HomeTimeLineActivity : RootActivity()
                 }
             }
         }
-        Log.d(TAG, "[END]onStart()")
+        Log.d(TAG, "[END]onResume()")
+    }
+
+    /**
+     * TODO
+     *
+     */
+    override fun onPause()
+    {
+        super.onPause()
+
+        Log.d(TAG, "[START]onPause()")
+        findViewById<RecyclerView>(R.id.tweet_wrap_recycle_view).apply {
+            scroll = (layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+            val v = getChildAt(0)
+            offset =
+                if (v == null) {
+                    0
+                }
+                else {
+                    v.top - v.paddingTop
+                }
+        }
+        Log.d(TAG, "[END]onPause()")
     }
 }

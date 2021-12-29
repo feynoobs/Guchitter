@@ -4,6 +4,7 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.1953125" />
+        <entry key="app/src/main/res/layout/post_tweet_activity.xml" value="0.128125" />
         <entry key="app/src/main/res/layout/tweet_recycle_view_item.xml" value="0.1" />
       </map>
     </option>

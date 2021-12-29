@@ -279,6 +279,8 @@ internal class TweetViewHolder(private val view: View) : RecyclerView.ViewHolder
 /**
  * TODO
  *
+ * @property parentPosition
+ * @property callback
  */
 internal class TweetRecycleView(private val parentPosition: Int, private val callback: (Long, TweetWrapRecycleView.Companion.ButtonType, Int, Int)->Unit) : RecyclerView.Adapter<TweetViewHolder>()
 {
