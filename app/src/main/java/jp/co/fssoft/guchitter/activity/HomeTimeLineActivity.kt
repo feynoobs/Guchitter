@@ -222,4 +222,34 @@ class HomeTimeLineActivity : RootActivity()
         }
         Log.d(TAG, "[END]onPause()")
     }
+
+    /**
+     * TODO
+     *
+     * @param outState
+     */
+    override fun onSaveInstanceState(outState: Bundle)
+    {
+        super.onSaveInstanceState(outState)
+
+        Log.d(TAG, "[START]onSaveInstanceState(${outState})")
+        outState.putInt("offset", offset)
+        outState.putInt("scroll", scroll)
+        Log.d(TAG, "[END]onSaveInstanceState(${outState})")
+    }
+
+    /**
+     * TODO
+     *
+     * @param savedInstanceState
+     */
+    override fun onRestoreInstanceState(savedInstanceState: Bundle)
+    {
+        super.onRestoreInstanceState(savedInstanceState)
+
+        Log.d(TAG, "[START]onRestoreInstanceState(${savedInstanceState})")
+        offset = savedInstanceState.getInt("offset")
+        scroll = savedInstanceState.getInt("scroll")
+        Log.d(TAG, "[END]onRestoreInstanceState(${savedInstanceState})")
+    }
 }

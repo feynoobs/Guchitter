@@ -3,5 +3,19 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    </LinearLayout>
 
+    <EditText
+        android:id="@+id/tweet_body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/aqua"
+        android:gravity="top|left"
+        android:hint="いまどうしてる？">
+
+        <requestFocus />
+    </EditText>
 </LinearLayout>
