@@ -75,7 +75,7 @@ class TwitterApiUsersShow : TwitterApiCommon("https://api.twitter.com/1.1/users/
                 if (additionalParams != null) {
                     db.rawQuery("SELECT MAX(my) max FROM t_users", null).use {
                         it.moveToFirst()
-                        val my = it.getLong(it.getColumnIndex("max")) + 1
+                        val my = it.getLong(it.getColumnIndexOrThrow("max")) + 1
 
                         var values = ContentValues()
                         values.put("current", 0)

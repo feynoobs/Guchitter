@@ -17,12 +17,12 @@
                 android:id="@+id/tweet_recycle_view_upper_line"
                 android:layout_width="2dp"
                 android:layout_height="16dp"
-                android:background="@color/dark_gray"/>
+                android:background="@color/design_default_color_error"/>
             <View
                 android:id="@+id/tweet_recycle_view_lower_line"
                 android:layout_width="2dp"
                 android:layout_height="wrap_content"
-                android:background="@color/dark_gray"/>
+                android:background="@color/design_default_color_error"/>
         </LinearLayout>
         <ImageButton
             android:id="@+id/tweet_recycle_view_user_icon"

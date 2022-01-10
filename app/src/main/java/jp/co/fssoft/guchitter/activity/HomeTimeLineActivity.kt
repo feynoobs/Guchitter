@@ -94,7 +94,7 @@ class HomeTimeLineActivity : RootActivity()
                 it.moveToFirst()
                 findViewById<RecyclerView>(R.id.tweet_wrap_recycle_view).apply {
                     setHasFixedSize(true)
-                    val userId = it.getLong(it.getColumnIndex("user_id"))
+                    val userId = it.getLong(it.getColumnIndexOrThrow("user_id"))
                     layoutManager = LinearLayoutManager(this@HomeTimeLineActivity, LinearLayoutManager.VERTICAL, false)
                     (layoutManager as LinearLayoutManager).scrollToPositionWithOffset(scroll, offset)
                     adapter = TweetWrapRecycleView(userId) {commonId, type, parentPosition, childPosition ->
@@ -130,14 +130,14 @@ class HomeTimeLineActivity : RootActivity()
                                 database.readableDatabase.rawQuery("SELECT tweet_id FROM t_time_lines ORDER BY tweet_id DESC", null).use {
                                     var movable = it.moveToFirst()
                                     while (movable) {
-                                        val tweet_id = it.getLong(it.getColumnIndex("tweet_id"))
+                                        val tweet_id = it.getLong(it.getColumnIndexOrThrow("tweet_id"))
                                         Log.e(TAG, tweet_id.toString())
                                         movable = it.moveToNext()
                                     }
                                 }
                                 database.readableDatabase.rawQuery("SELECT data FROM t_time_lines WHERE tweet_id = ${commonId}", null).use {
                                     it.moveToFirst()
-                                    val data = it.getString(it.getColumnIndex("data"))
+                                    val data = it.getString(it.getColumnIndexOrThrow("data"))
                                     val json = Json.jsonDecode(TweetObject.serializer(), data)
                                     retweetId = json.retweetedTweet!!.id
                                 }
@@ -210,15 +210,16 @@ class HomeTimeLineActivity : RootActivity()
 
         Log.d(TAG, "[START]onPause()")
         findViewById<RecyclerView>(R.id.tweet_wrap_recycle_view).apply {
-            scroll = (layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-            val v = getChildAt(0)
-            offset =
-                if (v == null) {
-                    0
-                }
-                else {
-                    v.top - v.paddingTop
-                }
+            if (layoutManager != null) {
+                scroll = (layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                val v = getChildAt(0)
+                offset =
+                    if (v == null) {
+                        0
+                    } else {
+                        v.top - v.paddingTop
+                    }
+            }
         }
         Log.d(TAG, "[END]onPause()")
     }

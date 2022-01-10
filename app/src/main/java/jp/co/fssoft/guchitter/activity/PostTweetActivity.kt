@@ -5,9 +5,12 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.Window
+import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import jp.co.fssoft.guchitter.R
+import jp.co.fssoft.guchitter.api.TwitterApiUpdate
+import jp.co.fssoft.guchitter.database.DatabaseHelper
 
 /**
  * TODO
@@ -38,7 +41,14 @@ class PostTweetActivity : AppCompatActivity()
             val r = Rect()
             window.decorView.getWindowVisibleDisplayFrame(r)
             findViewById<EditText>(R.id.tweet_body).height = r.bottom - r.top
-            Log.e(TAG, r.toString())
+        }
+
+        findViewById<Button>(R.id.tweet_send_btn).setOnClickListener {
+            val params = mapOf(
+                "status" to findViewById<EditText>(R.id.tweet_body).text.toString(),
+                "display_coordinates" to false.toString()
+            )
+            TwitterApiUpdate().start(DatabaseHelper(applicationContext).readableDatabase, params)
         }
         Log.d(TAG, "[END]onCreate(${savedInstanceState})")
     }

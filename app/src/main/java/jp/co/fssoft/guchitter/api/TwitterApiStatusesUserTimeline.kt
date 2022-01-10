@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import jp.co.fssoft.guchitter.utility.Json
 import jp.co.fssoft.guchitter.utility.Utility
-import kotlinx.serialization.builtins.list
+import kotlinx.serialization.builtins.ListSerializer
 
 /**
  * TODO
@@ -46,7 +46,7 @@ class TwitterApiStatusesUserTimeline(private val userId: Long) : TwitterApiCommo
     {
         Log.d(TAG, "[START]finish(${result})")
         result?.let {
-            val jsonList = Json.jsonListDecode(TweetObject.serializer().list, result)
+            val jsonList = Json.jsonListDecode(ListSerializer(TweetObject.serializer()), result)
             db.beginTransaction()
             try {
                 jsonList.forEach {

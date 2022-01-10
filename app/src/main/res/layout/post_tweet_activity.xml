@@ -6,14 +6,23 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/close"/>
+        <Button
+            android:id="@+id/tweet_send_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ツィートする"/>
     </LinearLayout>
 
     <EditText
         android:id="@+id/tweet_body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/aqua"
-        android:gravity="top|left"
+        android:background="@color/cardview_shadow_end_color"
+        android:gravity="top|start"
         android:hint="いまどうしてる？">
 
         <requestFocus />
