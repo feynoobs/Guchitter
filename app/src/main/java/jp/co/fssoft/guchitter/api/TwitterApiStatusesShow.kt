@@ -7,10 +7,12 @@ import jp.co.fssoft.guchitter.utility.Json
 import java.lang.Exception
 
 /**
- * TODO
+ * Twitter api statuses show
  *
+ * @property db
+ * @constructor Create empty Twitter api statuses show
  */
-class TwitterApiStatusesShow : TwitterApiCommon("https://api.twitter.com/1.1/statuses/show.json", "GET")
+class TwitterApiStatusesShow(private val db: SQLiteDatabase) : TwitterApiCommon("https://api.twitter.com/1.1/statuses/show.json", "GET", db)
 {
     companion object
     {
@@ -18,22 +20,21 @@ class TwitterApiStatusesShow : TwitterApiCommon("https://api.twitter.com/1.1/sta
     }
 
     /**
-     * TODO
+     * Start
      *
-     * @param db
      * @param additionalHeaderParams
-     * @param callback
+     * @return
      */
-    override fun start(db: SQLiteDatabase, additionalHeaderParams: Map<String, String>?, callback: ((String?) -> Unit)?)
+    override fun start(additionalHeaderParams: Map<String, String>?) : TwitterApiCommon
     {
-        Log.d(TAG, "[START]start(${db}, ${additionalHeaderParams}, ${callback})")
-        this.db = db
-        this.callback = callback
+        Log.v(TAG, "[START]start(${db}, ${additionalHeaderParams}, ${callback})")
         val copyHeaderParams = additionalHeaderParams?.toMutableMap()
         copyHeaderParams?.put("include_entities", true.toString())
         copyHeaderParams?.put("tweet_mode", "extended")
-        startMain(db, copyHeaderParams)
-        Log.d(TAG, "[END]start(${db}, ${additionalHeaderParams}, ${callback})")
+        startMain(copyHeaderParams)
+        Log.v(TAG, "[END]start(${db}, ${additionalHeaderParams}, ${callback})")
+
+        return this
     }
 
     /**
@@ -43,14 +44,14 @@ class TwitterApiStatusesShow : TwitterApiCommon("https://api.twitter.com/1.1/sta
      */
     override fun finish(result: String?)
     {
-        Log.d(TAG, "[START]finish(${result})")
-        if (result != null) {
+        Log.v(TAG, "[START]finish(${result})")
+        result?.let {
             db.beginTransaction()
             try {
-                val json = Json.jsonDecode(TweetObject.serializer(), result)
+                val json = Json.jsonDecode(TweetObject.serializer(), it)
                 val values = ContentValues()
-                values.put("data", result)
-                db.update("t_time_lines", values, "tweet_id = ${json.id}", null)
+                values.put("data", it)
+                db.update("t_time_lines", values, "tweet_id = ?", arrayOf(json.id.toString()))
                 db.setTransactionSuccessful()
             }
             catch (e: Exception) {
@@ -61,6 +62,6 @@ class TwitterApiStatusesShow : TwitterApiCommon("https://api.twitter.com/1.1/sta
             }
         }
         callback?.let { it(result) }
-        Log.d(TAG, "[END]finish(${result})")
+        Log.v(TAG, "[END]finish(${result})")
     }
 }

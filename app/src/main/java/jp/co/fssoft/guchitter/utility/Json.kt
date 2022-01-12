@@ -30,7 +30,7 @@ class Json
          */
         public fun <T> jsonEncode(serializer: SerializationStrategy<T>, values: T): String
         {
-            Log.d(TAG, "[START]jsonEncode(${serializer}, ${values})")
+            Log.v(TAG, "[START]jsonEncode(${serializer}, ${values})")
             return Json { encodeDefaults = true }.encodeToString(serializer, values)
         }
 
@@ -44,7 +44,7 @@ class Json
          */
         public fun <T> jsonListEncode(serializer: KSerializer<List<T>>, values: List<T>): String
         {
-            Log.d(TAG, "[START]jsonListEncode(${serializer}, ${values})")
+            Log.v(TAG, "[START]jsonListEncode(${serializer}, ${values})")
             return Json { encodeDefaults = true }.encodeToString(serializer, values)
         }
 
@@ -59,8 +59,7 @@ class Json
          */
         public fun <T> jsonDecode(deserializer: KSerializer<T>, json: String): T
         {
-            Log.d(TAG, "[START]jsonDecode(${deserializer}, ${json})")
-
+            Log.v(TAG, "[START]jsonDecode(${deserializer}, ${json})")
             return Json {ignoreUnknownKeys = true; isLenient = true; useArrayPolymorphism = true}.decodeFromString(deserializer, json)
         }
 
@@ -74,8 +73,7 @@ class Json
          */
         public fun <T> jsonListDecode(deserializer: KSerializer<List<T>>, json: String): List<T>
         {
-            Log.d(TAG, "[START]jsonDecode(${deserializer}, ${json})")
-
+            Log.v(TAG, "[START]jsonDecode(${deserializer}, ${json})")
             return Json {ignoreUnknownKeys = true; isLenient = true; useArrayPolymorphism = true}.decodeFromString(deserializer, json)
         }
     }

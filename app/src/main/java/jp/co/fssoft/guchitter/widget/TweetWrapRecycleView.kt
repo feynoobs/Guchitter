@@ -98,7 +98,7 @@ class TweetWrapRecycleView(private val userId: Long, private val callback: (Long
         Log.d(TAG, "[START]onBindViewHolder(${holder}, ${position})")
         holder.tweetsView.findViewById<RecyclerView>(R.id.tweet_recycle_view).apply {
             setHasFixedSize(true)
-            adapter = TweetRecycleView(position, callback)
+            adapter = TweetRecycleView(position, context, callback)
             (adapter as TweetRecycleView).tweetObjects = tweetObjects[position]
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         }
@@ -282,7 +282,7 @@ internal class TweetViewHolder(private val view: View) : RecyclerView.ViewHolder
  * @property parentPosition
  * @property callback
  */
-internal class TweetRecycleView(private val parentPosition: Int, private val callback: (Long, TweetWrapRecycleView.Companion.ButtonType, Int, Int)->Unit) : RecyclerView.Adapter<TweetViewHolder>()
+internal class TweetRecycleView(private val parentPosition: Int, private val context: Context, private val callback: (Long, TweetWrapRecycleView.Companion.ButtonType, Int, Int)->Unit) : RecyclerView.Adapter<TweetViewHolder>()
 {
     companion object
     {
@@ -327,7 +327,7 @@ internal class TweetRecycleView(private val parentPosition: Int, private val cal
             else {
                 tweet.retweetedTweet.user?.name
             }
-        holder.atNameText.text = "@" +
+        holder.atNameText.text = context.getString(R.string.at) +
             if (tweet.retweetedTweet == null) {
                 tweet.user?.screen_name
             }

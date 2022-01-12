@@ -6,33 +6,38 @@ import android.util.Log
 import java.lang.Exception
 
 /**
- * TODO
+ * Twitter api statuses retweet
  *
+ * @property id
+ * @property db
+ * @constructor Create empty Twitter api statuses retweet
  */
-class TwitterApiStatusesRetweet(private val id: Long) : TwitterApiCommon("https://api.twitter.com/1.1/statuses/retweet/${id}.json", "POST")
+class TwitterApiStatusesRetweet(private val id: Long, private val db: SQLiteDatabase) : TwitterApiCommon("https://api.twitter.com/1.1/statuses/retweet/${id}.json", "POST", db)
 {
     companion object
     {
+        /**
+         * T a g
+         */
         private val TAG = TwitterApiStatusesRetweet::class.qualifiedName
     }
 
     /**
-     * TODO
+     * Start
      *
-     * @param db
      * @param additionalHeaderParams
-     * @param callback
+     * @return
      */
-    override fun start(db: SQLiteDatabase, additionalHeaderParams: Map<String, String>?, callback: ((String?) -> Unit)?)
+    override fun start(additionalHeaderParams: Map<String, String>?) : TwitterApiCommon
     {
-        Log.d(TAG, "[START]start(${db}, ${additionalHeaderParams}, ${callback})")
-        this.db = db
-        this.callback = callback
+        Log.v(TAG, "[START]start(${db}, ${additionalHeaderParams}, ${callback})")
         val copyHeaderParams = additionalHeaderParams?.toMutableMap()
         copyHeaderParams?.put("trim_user", false.toString())
         copyHeaderParams?.put("tweet_mode", "extended")
-        startMain(db, copyHeaderParams)
-        Log.d(TAG, "[END]start(${db}, ${additionalHeaderParams}, ${callback})")
+        startMain(copyHeaderParams)
+        Log.v(TAG, "[END]start(${db}, ${additionalHeaderParams}, ${callback})")
+
+        return this
     }
 
     /**
@@ -42,13 +47,13 @@ class TwitterApiStatusesRetweet(private val id: Long) : TwitterApiCommon("https:
      */
     override fun finish(result: String?)
     {
-        Log.d(TAG, "[START]finish(${result})")
-        if (result != null) {
+        Log.v(TAG, "[START]finish(${result})")
+        result?.let {
             db.beginTransaction()
             try {
                 val values = ContentValues()
-                values.put("data", result)
-                db.update("t_time_lines", values, "tweet_id = ${id}", null)
+                values.put("data", it)
+                db.update("t_time_lines", values, "tweet_id = ?", arrayOf(id.toString()))
                 db.setTransactionSuccessful()
             }
             catch (e: Exception) {
@@ -59,6 +64,6 @@ class TwitterApiStatusesRetweet(private val id: Long) : TwitterApiCommon("https:
             }
         }
         callback?.let { it(result) }
-        Log.d(TAG, "[END]finish(${result})")
+        Log.v(TAG, "[END]finish(${result})")
     }
 }

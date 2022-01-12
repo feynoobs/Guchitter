@@ -29,7 +29,7 @@ class Utility
          */
         public fun splitQuery(query: String): Map<String, String>
         {
-            Log.d(TAG, "[START]splitQuery(${query})")
+            Log.v(TAG, "[START]splitQuery(${query})")
             val results = query.split("&")
             val resultMap = mutableMapOf<String, String>()
             results.forEach {
@@ -37,7 +37,7 @@ class Utility
                 resultMap[splitResult[0]] = splitResult[1]
             }
 
-            Log.d(TAG, "[END]splitQuery(${query})")
+            Log.v(TAG, "[END]splitQuery(${query})")
             return resultMap
         }
 
@@ -49,6 +49,8 @@ class Utility
          */
         public fun createFuzzyDateTime(dateTime: String) : String
         {
+            Log.v(TAG, "[START]createFuzzyDateTime(${String})")
+
             val dt = LocalDateTime.parse(dateTime, DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss Z yyyy"))
             val unixPost = dt.atZone(ZoneOffset.ofHours(+0)).toEpochSecond()
             val unixNow = System.currentTimeMillis() / 1000
@@ -78,6 +80,7 @@ class Utility
                         dt.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日"))
                     }
                 }
+            Log.v(TAG, "[END]createFuzzyDateTime(${String})")
 
             return fuzzyDateTime
         }
@@ -90,10 +93,10 @@ class Utility
          */
         public fun now(): String
         {
-            Log.d(TAG, "[START]now()")
+            Log.v(TAG, "[START]now()")
             val date = Date()
             val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-            Log.d(TAG, "[END]now()")
+            Log.v(TAG, "[END]now()")
 
             return format.format(date)
         }
@@ -107,14 +110,14 @@ class Utility
          */
         public fun resizeBitmap(source: Bitmap, length: Int) : Bitmap
         {
-            Log.d(TAG, "[START]resizeBitmap(${source})")
+            Log.v(TAG, "[START]resizeBitmap(${source})")
             val size = Math.max(source.width, source.height)
             val aspect = length.toDouble() / size.toDouble()
             val bmp = Bitmap.createScaledBitmap(source, (source.width * aspect).toInt(), (source.height * aspect).toInt(), true)
             if (source !== bmp) {
                 source.recycle()
             }
-            Log.d(TAG, "[END]resizeBitmap(${source})")
+            Log.v(TAG, "[END]resizeBitmap(${source})")
 
             return bmp
         }
@@ -127,8 +130,7 @@ class Utility
          */
         public fun circleTransform(source: Bitmap) : Bitmap
         {
-            Log.d(TAG, "[START]circleTransform(${source})")
-
+            Log.v(TAG, "[START]circleTransform(${source})")
             val size = Math.min(source.width, source.height)
             val x = (source.width - size) / 2
             val y = (source.height - size) / 2
@@ -145,7 +147,7 @@ class Utility
                 source.recycle()
             }
             squaredBitmap.recycle()
-            Log.d(TAG, "[END]circleTransform(${source})")
+            Log.v(TAG, "[END]circleTransform(${source})")
 
             return bitmap
         }

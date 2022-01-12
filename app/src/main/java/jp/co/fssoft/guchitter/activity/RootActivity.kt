@@ -46,13 +46,13 @@ open class RootActivity : AppCompatActivity()
     {
         Log.d(TAG, "[START]getTweetsCommon(${api}, ${request}, ${callback}, ${userId}, ${recursive})")
         val db = database.writableDatabase
-        api.start(db, request) {
+        api.start(request).callback = {
             if (it != null) {
                 val jsonList = Json.jsonListDecode(ListSerializer(TweetObject.serializer()), it)
                 jsonList.forEach {
                     var tweetObject = it
-                    if (it.retweetedTweet != null) {
-                        tweetObject = it.retweetedTweet
+                    it.retweetedTweet?.let {
+                        tweetObject = it
                     }
                     Imager().saveImage(applicationContext, Imager.Companion.ImagePrefix.USER, tweetObject.user!!.profileImageUrl)
                     tweetObject.user!!.profileBannerUrl?.let {
@@ -81,6 +81,7 @@ open class RootActivity : AppCompatActivity()
                 callback?.let { it() }
             }
         }
+
         Log.d(TAG, "[END]getTweetsCommon(${db}, ${api}, ${request}, ${callback}, ${userId}, ${recursive})")
     }
 
@@ -100,23 +101,23 @@ open class RootActivity : AppCompatActivity()
                 FROM 
                     t_time_lines
                 WHERE
-                    reply_tweet_id = ${tweetId}
+                    reply_tweet_id = ?
                 ORDER BY
                     tweet_id
                 DESC
             """
-        db.rawQuery(query, null).use {
+        db.rawQuery(query, arrayOf(tweetId.toString())).use {
             var movable = it.moveToFirst()
             while (movable) {
-                val userId = it.getLong(it.getColumnIndex("user_id"))
-                val tweetObject = Json.jsonDecode(TweetObject.serializer(), it.getString(it.getColumnIndex("data")))
-                db.rawQuery("SELECT data FROM t_users WHERE user_id = ${userId}", null).use {
+                val userId = it.getLong(it.getColumnIndexOrThrow("user_id"))
+                val tweetObject = Json.jsonDecode(TweetObject.serializer(), it.getString(it.getColumnIndexOrThrow("data")))
+                db.rawQuery("SELECT data FROM t_users WHERE user_id = ?", arrayOf(userId.toString())).use {
                     it.moveToFirst()
-                    val userObject = Json.jsonDecode(UserObject.serializer(), it.getString(it.getColumnIndex("data")))
+                    val userObject = Json.jsonDecode(UserObject.serializer(), it.getString(it.getColumnIndexOrThrow("data")))
                     tweetObject.user = userObject
                 }
                 replies.add(tweetObject)
-                getReplyHomeTweets(it.getLong(it.getColumnIndex("tweet_id")), replies)
+                getReplyHomeTweets(it.getLong(it.getColumnIndexOrThrow("tweet_id")), replies)
                 movable = it.moveToNext()
             }
         }
@@ -141,17 +142,17 @@ open class RootActivity : AppCompatActivity()
                 FROM 
                     t_time_lines
                 WHERE
-                    tweet_id = ${replyTweetId}
+                    tweet_id = ?
                 ORDER BY
                     tweet_id
                 DESC
             """
-        db.rawQuery(query, null).use {
+        db.rawQuery(query, arrayOf(replyTweetId.toString())).use {
             var movable = it.moveToFirst()
             while (movable) {
                 val userId = it.getLong(it.getColumnIndexOrThrow("user_id"))
                 val tweetObject = Json.jsonDecode(TweetObject.serializer(), it.getString(it.getColumnIndexOrThrow("data")))
-                db.rawQuery("SELECT data FROM t_users WHERE user_id = ${userId}", null).use {
+                db.rawQuery("SELECT data FROM t_users WHERE user_id = ?", arrayOf(userId.toString())).use {
                     it.moveToFirst()
                     val userObject = Json.jsonDecode(UserObject.serializer(), it.getString(it.getColumnIndexOrThrow("data")))
                     tweetObject.user = userObject
@@ -186,16 +187,16 @@ open class RootActivity : AppCompatActivity()
                 FROM 
                     t_time_lines
                 WHERE
-                    user_id = ${userId} 
+                    user_id = ?
                 ORDER BY
                     tweet_id
                 DESC
             """
-        db.rawQuery(query, null).use {
+        db.rawQuery(query, arrayOf(userId.toString())).use {
             var movable = it.moveToFirst()
             while (movable) {
                 val tweetObject = Json.jsonDecode(TweetObject.serializer(), it.getString(it.getColumnIndexOrThrow("data")))
-                db.rawQuery("SELECT data FROM t_users WHERE user_id = ${userId}", null).use {
+                db.rawQuery("SELECT data FROM t_users WHERE user_id = ?", arrayOf(userId.toString())).use {
                     it.moveToFirst()
                     val userObject = Json.jsonDecode(UserObject.serializer(), it.getString(it.getColumnIndexOrThrow("data")))
                     tweetObject.user = userObject
@@ -260,14 +261,14 @@ open class RootActivity : AppCompatActivity()
                 FROM 
                     t_time_lines
                 WHERE
-                    user_id = ${userId} 
+                    user_id = ?
                 ORDER BY
                     tweet_id
                 DESC
                 LIMIT
                     1
             """
-        db.rawQuery(query, null).use {
+        db.rawQuery(query, arrayOf(userId.toString())).use {
             if (it.count == 1) {
                 it.moveToFirst()
                 tweetMaxId = it.getLong(it.getColumnIndexOrThrow("tweet_id"))
@@ -286,10 +287,10 @@ open class RootActivity : AppCompatActivity()
         }
 
         if (recursive == true) {
-            getTweetsCommon(TwitterApiStatusesUserTimeline(userId), requestMap, callback, userId, ::getNextUserTweet)
+            getTweetsCommon(TwitterApiStatusesUserTimeline(db), requestMap, callback, userId, ::getNextUserTweet)
         }
         else {
-            getTweetsCommon(TwitterApiStatusesUserTimeline(userId), requestMap, callback, userId)
+            getTweetsCommon(TwitterApiStatusesUserTimeline(db), requestMap, callback, userId)
         }
 
         Log.d(TAG, "[END]getNextUserTweet(${userId}, ${recursive}, ${callback})")
@@ -315,14 +316,14 @@ open class RootActivity : AppCompatActivity()
                 FROM 
                     t_time_lines
                 WHERE
-                    user_id = ${userId} 
+                    user_id = ?
                 ORDER BY
                     tweet_id
                 ASC
                 LIMIT
                     1
             """
-        db.rawQuery(query, null).use {
+        db.rawQuery(query, arrayOf(userId.toString())).use {
             if (it.count == 1) {
                 it.moveToFirst()
                 tweetMinId = it.getLong(it.getColumnIndexOrThrow("tweet_id")) - 1
@@ -341,10 +342,10 @@ open class RootActivity : AppCompatActivity()
         }
 
         if (recursive == true) {
-            getTweetsCommon(TwitterApiStatusesUserTimeline(userId), requestMap, callback, userId, ::getPrevUserTweet)
+            getTweetsCommon(TwitterApiStatusesUserTimeline(db), requestMap, callback, userId, ::getPrevUserTweet)
         }
         else {
-            getTweetsCommon(TwitterApiStatusesUserTimeline(userId), requestMap, callback, userId)
+            getTweetsCommon(TwitterApiStatusesUserTimeline(db), requestMap, callback, userId)
         }
 
         Log.d(TAG, "[END]getPrevUserTweet(${userId}, ${recursive}, ${callback})")
@@ -371,19 +372,19 @@ open class RootActivity : AppCompatActivity()
                 INNER JOIN
                     r_home_tweets
                 ON
-                    r_home_tweets.user_id = ${userId} AND t_time_lines.tweet_id = r_home_tweets.tweet_id
+                    r_home_tweets.user_id = ? AND t_time_lines.tweet_id = r_home_tweets.tweet_id
                 WHERE
                     t_time_lines.reply_tweet_id IS NULL
                 ORDER BY
                     t_time_lines.tweet_id
                 DESC
             """
-        db.rawQuery(query, null).use {
+        db.rawQuery(query, arrayOf(userId.toString())).use {
             var movable = it.moveToFirst()
             while (movable) {
                 val userId = it.getLong(it.getColumnIndexOrThrow("user_id"))
                 val tweetObject = Json.jsonDecode(TweetObject.serializer(), it.getString(it.getColumnIndexOrThrow("data")))
-                db.rawQuery("SELECT data FROM t_users WHERE user_id = ${userId}", null).use {
+                db.rawQuery("SELECT data FROM t_users WHERE user_id = ?", arrayOf(userId.toString())).use {
                     it.moveToFirst()
                     val userObject = Json.jsonDecode(UserObject.serializer(), it.getString(it.getColumnIndexOrThrow("data")))
                     tweetObject.user = userObject
@@ -419,14 +420,14 @@ open class RootActivity : AppCompatActivity()
                 INNER JOIN
                     r_home_tweets
                 ON
-                    r_home_tweets.user_id = ${userId} AND t_time_lines.tweet_id = r_home_tweets.tweet_id
+                    r_home_tweets.user_id = ? AND t_time_lines.tweet_id = r_home_tweets.tweet_id
                 ORDER BY
                     t_time_lines.tweet_id
                 DESC
                 LIMIT
                     1
             """
-        db.rawQuery(query, null).use {
+        db.rawQuery(query, arrayOf(userId.toString())).use {
             if (it.count == 1) {
                 it.moveToFirst()
                 tweetMaxId = it.getLong(it.getColumnIndexOrThrow("tweet_id"))
@@ -443,10 +444,10 @@ open class RootActivity : AppCompatActivity()
             requestMap["since_id"] = tweetMaxId.toString()
         }
         if (recursive == true) {
-            getTweetsCommon(TwitterApiStatusesHomeTimeline(userId), requestMap, callback, userId, ::getNextHomeTweet)
+            getTweetsCommon(TwitterApiStatusesHomeTimeline(userId, db), requestMap, callback, userId, ::getNextHomeTweet)
         }
         else {
-            getTweetsCommon(TwitterApiStatusesHomeTimeline(userId), requestMap, callback, userId)
+            getTweetsCommon(TwitterApiStatusesHomeTimeline(userId, db), requestMap, callback, userId)
         }
         Log.d(TAG, "[END]getNextHomeTweet(${userId}, ${recursive}, ${callback})")
     }
@@ -471,14 +472,14 @@ open class RootActivity : AppCompatActivity()
                 INNER JOIN
                     r_home_tweets
                 ON
-                    r_home_tweets.user_id = ${userId} AND t_time_lines.tweet_id = r_home_tweets.tweet_id
+                    r_home_tweets.user_id = ? AND t_time_lines.tweet_id = r_home_tweets.tweet_id
                 ORDER BY
                     t_time_lines.tweet_id
                 ASC
                 LIMIT
                     1
             """
-        db.rawQuery(query, null).use {
+        db.rawQuery(query, arrayOf(userId.toString())).use {
             if (it.count == 1) {
                 it.moveToFirst()
                 tweetMinId = it.getLong(it.getColumnIndexOrThrow("tweet_id")) - 1
@@ -495,10 +496,10 @@ open class RootActivity : AppCompatActivity()
             requestMap["max_id"] = tweetMinId.toString()
         }
         if (recursive == true) {
-            getTweetsCommon(TwitterApiStatusesHomeTimeline(userId), requestMap, callback, userId, ::getPrevHomeTweet)
+            getTweetsCommon(TwitterApiStatusesHomeTimeline(userId, db), requestMap, callback, userId, ::getPrevHomeTweet)
         }
         else {
-            getTweetsCommon(TwitterApiStatusesHomeTimeline(userId), requestMap, callback, userId)
+            getTweetsCommon(TwitterApiStatusesHomeTimeline(userId, db), requestMap, callback, userId)
         }
         Log.d(TAG, "[END]getPrevHomeTweet(${userId}, ${recursive})")
     }
@@ -514,7 +515,7 @@ open class RootActivity : AppCompatActivity()
         Log.d(TAG, "[START]getUser(${userId})")
         var data: UserObject? = null
         val db = database.readableDatabase
-        db.rawQuery("""SELECT data FROM t_users WHERE user_id = ${userId}""", null).use {
+        db.rawQuery("SELECT data FROM t_users WHERE user_id = ?", arrayOf(userId.toString())).use {
             it.moveToFirst()
             data = Json.jsonDecode(UserObject.serializer(), it.getString(it.getColumnIndexOrThrow("data")))
         }

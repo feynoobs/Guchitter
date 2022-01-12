@@ -48,10 +48,10 @@ class AuthenticationActivity : AppCompatActivity()
         val query = url.replace("${TwitterApiCommon.CALLBACK_URL}?", "")
         val resultMap = Utility.splitQuery(query).toMutableMap()
         resultMap["oauth_token_secret"] = token["oauth_token_secret"] as String
-        TwitterApiAccessToken().start(database.readableDatabase, resultMap) {
+        TwitterApiAccessToken(database.readableDatabase).start(resultMap).callback = {
             val resultMap = Utility.splitQuery(it!!).toMutableMap()
             resultMap.remove("screen_name")
-            TwitterApiUsersShow().start(database.writableDatabase, resultMap) {
+            TwitterApiUsersShow(database.writableDatabase).start(resultMap).callback = {
                 finish()
             }
         }
@@ -70,7 +70,7 @@ class AuthenticationActivity : AppCompatActivity()
         Log.d(TAG, "[START]onCreate(${savedInstanceState})")
         setContentView(R.layout.authentication_activity)
         val webView: WebView = findViewById(R.id.authentication_view)
-        TwitterApiRequestToken().start(database.readableDatabase, null) {
+        TwitterApiRequestToken(database.readableDatabase).start().callback = {
             val token = Utility.splitQuery(it!!)
 
             runOnUiThread {

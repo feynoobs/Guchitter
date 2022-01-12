@@ -7,10 +7,12 @@ import jp.co.fssoft.guchitter.utility.Json
 import jp.co.fssoft.guchitter.utility.Utility
 
 /**
- * TODO
+ * Twitter api users show
  *
+ * @property db
+ * @constructor Create empty Twitter api users show
  */
-class TwitterApiUsersShow : TwitterApiCommon("https://api.twitter.com/1.1/users/show.json", "GET")
+class TwitterApiUsersShow(private val db: SQLiteDatabase) : TwitterApiCommon("https://api.twitter.com/1.1/users/show.json", "GET", db)
 {
     companion object
     {
@@ -19,22 +21,21 @@ class TwitterApiUsersShow : TwitterApiCommon("https://api.twitter.com/1.1/users/
          */
         private val TAG = TwitterApiStatusesUserTimeline::class.qualifiedName
 
+        /**
+         * Additional params
+         */
         private var additionalParams: Map<String, String>? = null
-
     }
 
     /**
-     * TODO
+     * Start
      *
-     * @param db
      * @param additionalHeaderParams
-     * @param callback
+     * @return
      */
-    override fun start(db: SQLiteDatabase, additionalHeaderParams: Map<String, String>?, callback: ((String?) -> Unit)?)
+    override fun start(additionalHeaderParams: Map<String, String>?) : TwitterApiCommon
     {
-        Log.d(TAG, "[START]start(${db}, ${additionalHeaderParams}, ${callback})")
-        this.db = db
-        this.callback = callback
+        Log.v(TAG, "[START]start(${db}, ${additionalHeaderParams}, ${callback})")
 
         val requestParams = mapOf("user_id" to additionalHeaderParams!!["user_id"]!!)
         /***********************************************
@@ -48,8 +49,10 @@ class TwitterApiUsersShow : TwitterApiCommon("https://api.twitter.com/1.1/users/
                 )
             }
         }
-        startMain(db, requestParams, additionalParams)
-        Log.d(TAG, "[END]start(${db}, ${additionalHeaderParams}, ${callback})")
+        startMain(requestParams, additionalParams)
+        Log.v(TAG, "[END]start(${db}, ${additionalHeaderParams}, ${callback})")
+
+        return this
     }
 
     /**
@@ -59,14 +62,14 @@ class TwitterApiUsersShow : TwitterApiCommon("https://api.twitter.com/1.1/users/
      */
     override fun finish(result: String?)
     {
-        Log.d(TAG, "[START]finish(${result})")
+        Log.v(TAG, "[START]finish(${result})")
         result?.let {
             db.beginTransaction()
             try {
                 val json = Json.jsonDecode(UserObject.serializer(), result)
 
                 var insert = true
-                db.rawQuery("SELECT * FROM t_users WHERE user_id = ${json.id}", null).use {
+                db.rawQuery("SELECT * FROM t_users WHERE user_id = ?", arrayOf(json.id.toString())).use {
                     if (it.count == 1) {
                         insert = false
                     }
@@ -79,7 +82,7 @@ class TwitterApiUsersShow : TwitterApiCommon("https://api.twitter.com/1.1/users/
 
                         var values = ContentValues()
                         values.put("current", 0)
-                        db.update("t_users", values, "current = 1", null)
+                        db.update("t_users", values, "current = ?", arrayOf("1"))
 
                         values = ContentValues()
                         values.put("user_id", json.id)
@@ -94,7 +97,7 @@ class TwitterApiUsersShow : TwitterApiCommon("https://api.twitter.com/1.1/users/
                             db.insert("t_users", null, values)
                         }
                         else {
-                            db.update("t_users", values, "user_id = ${json.id}", null)
+                            db.update("t_users", values, "user_id = ?", arrayOf(json.id.toString()))
                         }
                     }
                 }
@@ -108,7 +111,7 @@ class TwitterApiUsersShow : TwitterApiCommon("https://api.twitter.com/1.1/users/
                         db.insert("t_users", null, values)
                     }
                     else {
-                        db.update("t_time_lines", values, "user_id = ${json.id}", null)
+                        db.update("t_time_lines", values, "user_id = ?", arrayOf(json.id.toString()))
                     }
                 }
                 db.setTransactionSuccessful()
@@ -122,6 +125,6 @@ class TwitterApiUsersShow : TwitterApiCommon("https://api.twitter.com/1.1/users/
         }
 
         callback?.let { it(result) }
-        Log.d(TAG, "[END]finish(${result})")
+        Log.v(TAG, "[END]finish(${result})")
     }
 }

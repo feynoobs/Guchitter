@@ -8,10 +8,12 @@ import jp.co.fssoft.guchitter.utility.Utility
 import kotlinx.serialization.builtins.ListSerializer
 
 /**
- * TODO
+ * Twitter api statuses user timeline
  *
+ * @property db
+ * @constructor Create empty Twitter api statuses user timeline
  */
-class TwitterApiStatusesUserTimeline(private val userId: Long) : TwitterApiCommon("https://api.twitter.com/1.1/statuses/user_timeline.json", "GET")
+class TwitterApiStatusesUserTimeline(private val db: SQLiteDatabase) : TwitterApiCommon("https://api.twitter.com/1.1/statuses/user_timeline.json", "GET", db)
 {
     companion object
     {
@@ -22,19 +24,18 @@ class TwitterApiStatusesUserTimeline(private val userId: Long) : TwitterApiCommo
     }
 
     /**
-     * TODO
+     * Start
      *
-     * @param db
      * @param additionalHeaderParams
-     * @param callback
+     * @return
      */
-    override fun start(db: SQLiteDatabase, additionalHeaderParams: Map<String, String>?, callback: ((String?) -> Unit)?)
+    override fun start(additionalHeaderParams: Map<String, String>?) : TwitterApiCommon
     {
-        Log.d(TAG, "[START]start(${db}, ${additionalHeaderParams}, ${callback})")
-        this.db = db
-        this.callback = callback
-        startMain(db, additionalHeaderParams)
-        Log.d(TAG, "[END]start(${db}, ${additionalHeaderParams}, ${callback})")
+        Log.v(TAG, "[START]start(${db}, ${additionalHeaderParams}, ${callback})")
+        startMain(additionalHeaderParams)
+        Log.v(TAG, "[END]start(${db}, ${additionalHeaderParams}, ${callback})")
+
+        return this
     }
 
     /**
@@ -44,9 +45,9 @@ class TwitterApiStatusesUserTimeline(private val userId: Long) : TwitterApiCommo
      */
     override fun finish(result: String?)
     {
-        Log.d(TAG, "[START]finish(${result})")
+        Log.v(TAG, "[START]finish(${result})")
         result?.let {
-            val jsonList = Json.jsonListDecode(ListSerializer(TweetObject.serializer()), result)
+            val jsonList = Json.jsonListDecode(ListSerializer(TweetObject.serializer()), it)
             db.beginTransaction()
             try {
                 jsonList.forEach {
@@ -70,7 +71,7 @@ class TwitterApiStatusesUserTimeline(private val userId: Long) : TwitterApiCommo
                     values.put("user_id", userId)
                     values.put("data", Json.jsonEncode(UserObject.serializer(), userData!!))
                     values.put("updated_at", Utility.now())
-                    db.rawQuery("""SELECT id FROM t_users WHERE user_id = ${userId}""", null).use {
+                    db.rawQuery("SELECT id FROM t_users WHERE user_id = ?", arrayOf(userId.toString())).use {
                         if (it.count == 1) {
                             insert = false
                         }
@@ -80,7 +81,7 @@ class TwitterApiStatusesUserTimeline(private val userId: Long) : TwitterApiCommo
                         db.insert("t_users", null, values)
                     }
                     else {
-                        db.update("t_users", values, "user_id = ${userId}", null)
+                        db.update("t_users", values, "user_id = ?", arrayOf(userId.toString()))
                     }
 
                     insert = true
@@ -90,7 +91,7 @@ class TwitterApiStatusesUserTimeline(private val userId: Long) : TwitterApiCommo
                     values.put("user_id", it.user?.id)
                     values.put("data", Json.jsonEncode(TweetObject.serializer(), it))
                     values.put("updated_at", Utility.now())
-                    db.rawQuery("""SELECT id FROM t_time_lines WHERE tweet_id = ${it.id}""", null).use {
+                    db.rawQuery("SELECT id FROM t_time_lines WHERE tweet_id = ?", arrayOf(it.id.toString())).use {
                         if (it.count == 1) {
                             insert = false
                         }
@@ -100,7 +101,7 @@ class TwitterApiStatusesUserTimeline(private val userId: Long) : TwitterApiCommo
                         db.insert("t_time_lines", null, values)
                     }
                     else {
-                        db.update("t_time_lines", values, "tweet_id = ${it.id}", null)
+                        db.update("t_time_lines", values, "tweet_id = ?", arrayOf(it.id.toString()))
                     }
                 }
                 db.setTransactionSuccessful()
@@ -111,6 +112,6 @@ class TwitterApiStatusesUserTimeline(private val userId: Long) : TwitterApiCommo
         }
         callback?.let { it(result) }
 
-        Log.d(TAG, "[END]finish(${result})")
+        Log.v(TAG, "[END]finish(${result})")
     }
 }

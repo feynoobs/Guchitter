@@ -4,12 +4,13 @@ import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 
 /**
- * TODO
+ * Twitter api access token
  *
+ * @property db
+ * @constructor Create empty Twitter api access token
  */
-class TwitterApiAccessToken : TwitterApiCommon("https://api.twitter.com/oauth/access_token", "POST")
+class TwitterApiAccessToken(private val db: SQLiteDatabase) : TwitterApiCommon("https://api.twitter.com/oauth/access_token", "POST", db)
 {
-
     companion object
     {
         /**
@@ -19,18 +20,18 @@ class TwitterApiAccessToken : TwitterApiCommon("https://api.twitter.com/oauth/ac
     }
 
     /**
-     * TODO
+     * Start
      *
-     * @param db
      * @param additionalHeaderParams
-     * @param callback
+     * @return
      */
-    override fun start(db: SQLiteDatabase, additionalHeaderParams: Map<String, String>?, callback: ((String?)->Unit)?)
+    override fun start(additionalHeaderParams: Map<String, String>?) : TwitterApiCommon
     {
-        Log.d(TAG, "[START]start(${db}, ${additionalHeaderParams}, ${callback})")
-        this.callback = callback
-        startMain(db, null, additionalHeaderParams)
-        Log.d(TAG, "[END]start(${db}, ${additionalHeaderParams}, ${callback})")
+        Log.v(TAG, "[START]start(${db}, ${additionalHeaderParams}, ${callback})")
+        startMain(null, additionalHeaderParams)
+        Log.v(TAG, "[END]start(${db}, ${additionalHeaderParams}, ${callback})")
+
+        return this
     }
 
     /**
@@ -40,10 +41,8 @@ class TwitterApiAccessToken : TwitterApiCommon("https://api.twitter.com/oauth/ac
      */
     override fun finish(result: String?)
     {
-        Log.d(TAG, "[START]finish(${result})")
-
+        Log.v(TAG, "[START]finish(${result})")
         callback?.let { it(result) }
-
-        Log.d(TAG, "[END]finish(${result})")
+        Log.v(TAG, "[END]finish(${result})")
     }
 }

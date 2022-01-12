@@ -70,7 +70,7 @@ class HomeTimeLineActivity : RootActivity()
          * なければ認証
          */
         val db = database.readableDatabase
-        db.rawQuery("SELECT * FROM t_users WHERE current = 1", null).use {
+        db.rawQuery("SELECT * FROM t_users WHERE current = ?", arrayOf("1")).use {
             if (it.count == 0) {
                 startActivity(Intent(application, AuthenticationActivity::class.java))
             }
@@ -89,7 +89,7 @@ class HomeTimeLineActivity : RootActivity()
         Log.d(TAG, "[START]onResume()")
 
         val db = database.readableDatabase
-        db.rawQuery("SELECT user_id FROM t_users WHERE current = 1", null).use {
+        db.rawQuery("SELECT user_id FROM t_users WHERE current = ?", arrayOf("1")).use {
             if (it.count == 1) {
                 it.moveToFirst()
                 findViewById<RecyclerView>(R.id.tweet_wrap_recycle_view).apply {
@@ -100,7 +100,7 @@ class HomeTimeLineActivity : RootActivity()
                     adapter = TweetWrapRecycleView(userId) {commonId, type, parentPosition, childPosition ->
                         when (type) {
                             TweetWrapRecycleView.Companion.ButtonType.FAVORITE -> {
-                                TwitterApiFavoritesCreate().start(database.writableDatabase, mapOf("id" to commonId.toString())) {
+                                TwitterApiFavoritesCreate(database.writableDatabase).start(mapOf("id" to commonId.toString())).callback = {
                                     (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
                                     runOnUiThread {
                                         adapter?.notifyItemRangeChanged(parentPosition, 1)
@@ -108,7 +108,7 @@ class HomeTimeLineActivity : RootActivity()
                                 }
                             }
                             TweetWrapRecycleView.Companion.ButtonType.REMOVE_FAVORITE -> {
-                                TwitterApiFavoritesDestroy().start(database.writableDatabase, mapOf("id" to commonId.toString())) {
+                                TwitterApiFavoritesDestroy(database.writableDatabase).start(mapOf("id" to commonId.toString())).callback =  {
                                     (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
                                     runOnUiThread {
                                         adapter?.notifyItemRangeChanged(parentPosition, 1)
@@ -116,7 +116,7 @@ class HomeTimeLineActivity : RootActivity()
                                 }
                             }
                             TweetWrapRecycleView.Companion.ButtonType.RETWEET -> {
-                                TwitterApiStatusesRetweet(commonId).start(database.writableDatabase, mapOf("id" to commonId.toString())) {
+                                TwitterApiStatusesRetweet(commonId, database.writableDatabase).start(mapOf("id" to commonId.toString())).callback = {
                                     (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
                                     runOnUiThread {
                                         adapter?.notifyItemRangeChanged(parentPosition, 1)
@@ -124,7 +124,6 @@ class HomeTimeLineActivity : RootActivity()
                                 }
                             }
                             TweetWrapRecycleView.Companion.ButtonType.REMOVE_RETWEET -> {
-
                                 var retweetId = 0L
                                 Log.e(TAG, commonId.toString())
                                 database.readableDatabase.rawQuery("SELECT tweet_id FROM t_time_lines ORDER BY tweet_id DESC", null).use {
@@ -135,15 +134,15 @@ class HomeTimeLineActivity : RootActivity()
                                         movable = it.moveToNext()
                                     }
                                 }
-                                database.readableDatabase.rawQuery("SELECT data FROM t_time_lines WHERE tweet_id = ${commonId}", null).use {
+                                database.readableDatabase.rawQuery("SELECT data FROM t_time_lines WHERE tweet_id = ?", arrayOf(commonId.toString())).use {
                                     it.moveToFirst()
                                     val data = it.getString(it.getColumnIndexOrThrow("data"))
                                     val json = Json.jsonDecode(TweetObject.serializer(), data)
                                     retweetId = json.retweetedTweet!!.id
                                 }
 
-                                TwitterApiStatusesUnretweet(retweetId).start(database.writableDatabase, mapOf("id" to retweetId.toString())) {
-                                    TwitterApiStatusesShow().start(database.writableDatabase, mapOf("id" to commonId.toString())) {
+                                TwitterApiStatusesUnretweet(retweetId, database.writableDatabase).start(mapOf("id" to retweetId.toString())).callback = {
+                                    TwitterApiStatusesShow(database.writableDatabase).start(mapOf("id" to commonId.toString())).callback = {
                                         (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
                                         runOnUiThread {
                                             adapter?.notifyItemRangeChanged(parentPosition, 1)
@@ -164,22 +163,22 @@ class HomeTimeLineActivity : RootActivity()
                     addItemDecoration(DividerItemDecoration(this@HomeTimeLineActivity, DividerItemDecoration.VERTICAL))
                     addOnScrollListener(TweetScrollEvent(
                         {
-                                callback -> getNextHomeTweet(userId, false) {
-                            runOnUiThread {
-                                (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
-                                adapter?.notifyDataSetChanged()
-                                callback()
+                            callback -> getNextHomeTweet(userId, false) {
+                                runOnUiThread {
+                                    (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
+                                    adapter?.notifyDataSetChanged()
+                                    callback()
+                                }
                             }
-                        }
                         },
                         {
-                                callback -> getPrevHomeTweet(userId, false) {
-                            runOnUiThread {
-                                (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
-                                adapter?.notifyDataSetChanged()
-                                callback()
+                            callback -> getPrevHomeTweet(userId, false) {
+                                runOnUiThread {
+                                    (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
+                                    adapter?.notifyDataSetChanged()
+                                    callback()
+                                }
                             }
-                        }
                         }
                     ))
                     runOnUiThread {
@@ -198,30 +197,6 @@ class HomeTimeLineActivity : RootActivity()
             }
         }
         Log.d(TAG, "[END]onResume()")
-    }
-
-    /**
-     * TODO
-     *
-     */
-    override fun onPause()
-    {
-        super.onPause()
-
-        Log.d(TAG, "[START]onPause()")
-        findViewById<RecyclerView>(R.id.tweet_wrap_recycle_view).apply {
-            if (layoutManager != null) {
-                scroll = (layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-                val v = getChildAt(0)
-                offset =
-                    if (v == null) {
-                        0
-                    } else {
-                        v.top - v.paddingTop
-                    }
-            }
-        }
-        Log.d(TAG, "[END]onPause()")
     }
 
     /**

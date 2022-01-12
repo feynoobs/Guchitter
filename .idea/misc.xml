@@ -3,6 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/layout/post_tweet_activity.xml" value="0.12228260869565218" />
+        <entry key="app/src/main/res/layout/root_activity.xml" value="0.12462006079027356" />
+        <entry key="app/src/main/res/layout/tweet_recycle_view.xml" value="0.12462006079027356" />
+        <entry key="app/src/main/res/layout/tweet_recycle_view_item.xml" value="0.11043566362715299" />
         <entry key="app/src/main/res/layout/user_time_line_activity.xml" value="0.2" />
       </map>
     </option>

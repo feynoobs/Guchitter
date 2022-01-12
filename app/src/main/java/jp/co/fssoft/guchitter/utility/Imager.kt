@@ -66,7 +66,7 @@ class Imager
      */
     public fun saveImage(context: Context, prefix: ImagePrefix, url: String, saveAs: String? = null)
     {
-        Log.d(TAG, "[START]saveImage(${context}, ${prefix}, ${url})")
+        Log.v(TAG, "[START]saveImage(${context}, ${prefix}, ${url})")
         val file =
             if (saveAs == null) {
                 "${prefix}_${URLUtil.guessFileName(url, null, null)}"
@@ -81,7 +81,7 @@ class Imager
                 if (httpsRequest.find { it == file} == null) {
                     httpsRequest.add(file)
                     runnable = Runnable {
-                        Log.d(TAG, "[START][THREAD]saveImage(${context}, ${prefix}, ${url})")
+                        Log.v(TAG, "[START][THREAD]saveImage(${context}, ${prefix}, ${url})")
                         val con = URL(url).openConnection() as HttpsURLConnection
                         con.addRequestProperty("Accept-Encoding", "gzip")
                         con.connect()
@@ -128,7 +128,7 @@ class Imager
                             httpsRequest.remove(file)
                         }
                     }
-                    Log.d(TAG, "[END][THREAD]saveImage(${context}, ${prefix}, ${url})")
+                    Log.v(TAG, "[END][THREAD]saveImage(${context}, ${prefix}, ${url})")
                 }
             }
         }
@@ -141,7 +141,7 @@ class Imager
                 keepRequest.add(thread)
             }
         }
-        Log.d(TAG, "[END]saveImage(${context}, ${prefix}, ${url})")
+        Log.v(TAG, "[END]saveImage(${context}, ${prefix}, ${url})")
     }
 
     /**
@@ -154,7 +154,7 @@ class Imager
      */
     public fun loadImage(context: Context, path: String, prefix: ImagePrefix, callback: (File)->Unit)
     {
-        Log.d(TAG, "[START]loadImage(${context}, ${path}, ${prefix}, ${callback})")
+        Log.v(TAG, "[START]loadImage(${context}, ${path}, ${prefix}, ${callback})")
 
         val file = "${context.cacheDir}/${prefix}_${URLUtil.guessFileName(path, null, null)}"
         val fileObject = File("${context.cacheDir}/${prefix}_${URLUtil.guessFileName(path, null, null)}")
@@ -170,6 +170,6 @@ class Imager
             Thread(runnable).start()
         }
 
-        Log.d(TAG, "[END]loadImage(${context}, ${path}, ${prefix}, ${callback})")
+        Log.v(TAG, "[END]loadImage(${context}, ${path}, ${prefix}, ${callback})")
     }
 }

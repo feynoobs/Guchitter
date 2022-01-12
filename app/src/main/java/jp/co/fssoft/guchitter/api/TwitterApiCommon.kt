@@ -14,38 +14,45 @@ import javax.crypto.spec.SecretKeySpec
 import javax.net.ssl.HttpsURLConnection
 
 /**
- * TODO
+ * Twitter api common
  *
  * @property entryPoint
  * @property method
+ * @property db
+ * @constructor Create empty Twitter api common
  */
-abstract class TwitterApiCommon(private val entryPoint: String, private val method: String)
+abstract class TwitterApiCommon(private val entryPoint: String, private val method: String, private val db: SQLiteDatabase)
 {
     companion object
     {
+        /**
+         * T a g
+         */
         private val TAG = TwitterApiCommon::class.qualifiedName
+
+        /**
+         * A p i_k e y
+         */
         protected const val API_KEY = "2hSoAk98Pw9Vk6LNmXOO6hip6"
+
+        /**
+         * A p i_s e c r e t
+         */
         protected const val API_SECRET = "t7jHT6dysIJvPVzWORgex8FuHW2orZUEul1JzUazgFoaJqnaGx"
+
+        /**
+         * C a l l b a c k_u r l
+         */
         public const val CALLBACK_URL = "twinida://"
     }
-    /**
-     *
-     */
-    protected var callback: ((String?)->Unit)? = null
-
-    /**
-     *
-     */
-    protected lateinit var db: SQLiteDatabase
 
     /**
      * TODO
      *
-     * @param db
      * @param additionalHeaderParams
      * @param callback
      */
-    abstract fun start(db: SQLiteDatabase, additionalHeaderParams: Map<String, String>? = null, callback: ((String?)->Unit)? = null)
+    abstract fun start(additionalHeaderParams: Map<String, String>? = null): TwitterApiCommon
 
     /**
      * TODO
@@ -55,17 +62,21 @@ abstract class TwitterApiCommon(private val entryPoint: String, private val meth
     abstract fun finish(result: String?)
 
     /**
-     * TODO
+     * Callback
+     */
+    public var callback: ((String?) -> Unit)? = null
+
+    /**
+     * Start main
      *
-     * @param db
      * @param requestParams
      * @param additionalParams
      */
-    protected fun startMain(db: SQLiteDatabase, requestParams: Map<String, String>? = null, additionalParams: Map<String, String>? = null)
+    protected fun startMain(requestParams: Map<String, String>? = null, additionalParams: Map<String, String>? = null)
     {
-        Log.d(TAG, "[START]startMain(${db}, ${requestParams}, ${additionalParams})")
+        Log.v(TAG, "[START]startMain(${db}, ${requestParams}, ${additionalParams})")
         val runnable = Runnable {
-            Log.d(TAG, "[START]startMain(${db}, ${requestParams}, ${additionalParams})[THREAD]")
+            Log.v(TAG, "[START]startMain(${db}, ${requestParams}, ${additionalParams})[THREAD]")
 
             val headerParams = mutableMapOf(
                 "oauth_consumer_key"     to API_KEY,
@@ -87,8 +98,8 @@ abstract class TwitterApiCommon(private val entryPoint: String, private val meth
             db.rawQuery("SELECT * FROM t_users WHERE current = 1", null).use {
                 if (it.count == 1) {
                     it.moveToFirst()
-                    headerParams["oauth_token"] = it.getString(it.getColumnIndex("oauth_token"))
-                    signatureKey += URLEncoder.encode(it.getString(it.getColumnIndex("oauth_token_secret")), "UTF-8")
+                    headerParams["oauth_token"] = it.getString(it.getColumnIndexOrThrow("oauth_token"))
+                    signatureKey += URLEncoder.encode(it.getString(it.getColumnIndexOrThrow("oauth_token_secret")), "UTF-8")
                 }
             }
 
@@ -167,7 +178,8 @@ abstract class TwitterApiCommon(private val entryPoint: String, private val meth
                     result =
                        if (encoding != null) {
                             GZIPInputStream(con.inputStream).bufferedReader().use(BufferedReader::readText)
-                        } else {
+                        }
+                       else {
                             con.inputStream.bufferedReader().use(BufferedReader::readText)
                         }
                 }
@@ -180,10 +192,10 @@ abstract class TwitterApiCommon(private val entryPoint: String, private val meth
                 con.disconnect()
             }
 
-            Log.d(TAG, "[END]startMain(${db}, ${requestParams}, ${additionalParams})[THREAD]")
+            Log.v(TAG, "[END]startMain(${db}, ${requestParams}, ${additionalParams})[THREAD]")
         }
         Thread(runnable).start()
 
-        Log.d(TAG, "[END]startMain(${db}, ${requestParams}, ${additionalParams})")
+        Log.v(TAG, "[END]startMain(${db}, ${requestParams}, ${additionalParams})")
     }
 }
