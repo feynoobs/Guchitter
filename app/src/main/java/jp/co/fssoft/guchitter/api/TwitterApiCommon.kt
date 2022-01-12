@@ -74,9 +74,9 @@ abstract class TwitterApiCommon(private val entryPoint: String, private val meth
      */
     protected fun startMain(requestParams: Map<String, String>? = null, additionalParams: Map<String, String>? = null)
     {
-        Log.v(TAG, "[START]startMain(${db}, ${requestParams}, ${additionalParams})")
+        Log.v(TAG, "[START]startMain(${requestParams}, ${additionalParams})")
         val runnable = Runnable {
-            Log.v(TAG, "[START]startMain(${db}, ${requestParams}, ${additionalParams})[THREAD]")
+            Log.v(TAG, "[START]startMain(${requestParams}, ${additionalParams})[THREAD]")
 
             val headerParams = mutableMapOf(
                 "oauth_consumer_key"     to API_KEY,
@@ -95,7 +95,7 @@ abstract class TwitterApiCommon(private val entryPoint: String, private val meth
                 }
             }
             requestParams?.let { headerParams.putAll(it) }
-            db.rawQuery("SELECT * FROM t_users WHERE current = 1", null).use {
+            db.rawQuery("SELECT * FROM t_users WHERE current = ?", arrayOf("1")).use {
                 if (it.count == 1) {
                     it.moveToFirst()
                     headerParams["oauth_token"] = it.getString(it.getColumnIndexOrThrow("oauth_token"))
@@ -192,10 +192,10 @@ abstract class TwitterApiCommon(private val entryPoint: String, private val meth
                 con.disconnect()
             }
 
-            Log.v(TAG, "[END]startMain(${db}, ${requestParams}, ${additionalParams})[THREAD]")
+            Log.v(TAG, "[END]startMain(${requestParams}, ${additionalParams})[THREAD]")
         }
         Thread(runnable).start()
 
-        Log.v(TAG, "[END]startMain(${db}, ${requestParams}, ${additionalParams})")
+        Log.v(TAG, "[END]startMain(${requestParams}, ${additionalParams})")
     }
 }

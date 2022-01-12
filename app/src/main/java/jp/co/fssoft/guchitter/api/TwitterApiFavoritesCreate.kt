@@ -27,12 +27,12 @@ class TwitterApiFavoritesCreate(private val db: SQLiteDatabase) : TwitterApiComm
      */
     override fun start(additionalHeaderParams: Map<String, String>?) : TwitterApiCommon
     {
-        Log.v(TAG, "[START]start(${db}, ${additionalHeaderParams}, ${callback})")
+        Log.v(TAG, "[START]start(${additionalHeaderParams})")
         val copyHeaderParams = additionalHeaderParams?.toMutableMap()
         copyHeaderParams?.put("include_entities", true.toString())
         copyHeaderParams?.put("tweet_mode", "extended")
         startMain(copyHeaderParams)
-        Log.v(TAG, "[END]start(${db}, ${additionalHeaderParams}, ${callback})")
+        Log.v(TAG, "[END]start(${additionalHeaderParams})")
 
         return this
     }
