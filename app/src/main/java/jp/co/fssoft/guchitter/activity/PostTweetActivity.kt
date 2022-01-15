@@ -1,14 +1,17 @@
 package jp.co.fssoft.guchitter.activity
 
+import android.content.Intent
 import android.graphics.Rect
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import jp.co.fssoft.guchitter.R
-import jp.co.fssoft.guchitter.api.TwitterApiUpdate
-import jp.co.fssoft.guchitter.database.DatabaseHelper
+import jp.co.fssoft.guchitter.service.PostTweetService
 
 /**
  * TODO
@@ -25,10 +28,26 @@ class PostTweetActivity : AppCompatActivity()
     }
 
     /**
+     * Images
+     */
+    private var keepImages: ArrayList<String> = arrayListOf()
+
+    /**
+     * Launcher
+     */
+    private val launcher = registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) {
+        Log.e(TAG, it.toString())
+        it.forEach {
+            keepImages.add(it.toString())
+        }
+    }
+
+    /**
      * TODO
      *
      * @param savedInstanceState
      */
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
@@ -46,24 +65,17 @@ class PostTweetActivity : AppCompatActivity()
                 }
             }
         }
+        findViewById<Button>(R.id.tweet_image_btn).setOnClickListener {
+            launcher.launch(arrayOf("image/*"))
+        }
 
         findViewById<Button>(R.id.tweet_send_btn).setOnClickListener {
-            val params = mapOf(
-                "status" to bodyTextView.text.toString(),
-                "display_coordinates" to false.toString()
-            )
-            val progress = findViewById<ProgressBar>(R.id.tweet_progress)
-            progress.visibility = View.VISIBLE
-            TwitterApiUpdate(DatabaseHelper(applicationContext).readableDatabase).start(params).callback =  {
-                runOnUiThread {
-                    progress.visibility = View.INVISIBLE
-                    Log.e(TAG, "${it}")
-                    it ?: run {
-                        Toast.makeText(applicationContext, getString(R.string.post_tweet_fail), Toast.LENGTH_LONG).show()
-                    }
-                    finish()
-                }
+            val serviceIntent = Intent(applicationContext, PostTweetService::class.java).apply {
+                putExtra("status", bodyTextView.text.toString())
+                putStringArrayListExtra("images", keepImages)
             }
+            startService(serviceIntent)
+            finish()
         }
         Log.d(TAG, "[END]onCreate(${savedInstanceState})")
     }

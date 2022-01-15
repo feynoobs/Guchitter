@@ -3,45 +3,38 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <FrameLayout
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:id="@+id/tweet_send_bar1"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        >
+        android:orientation="vertical">
         <LinearLayout
-            android:id="@+id/tweet_send_bar1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <ImageButton
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/close"/>
-                <Button
-                    android:id="@+id/tweet_send_btn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/post_tweet"/>
-            </LinearLayout>
-
-            <EditText
-                android:id="@+id/tweet_body"
-                android:layout_width="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageButton
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@color/cardview_shadow_end_color"
-                android:gravity="top|start"
-                android:hint="@string/doing">
-                <requestFocus />
-            </EditText>
+                android:background="@drawable/close"/>
+            <Button
+                android:id="@+id/tweet_send_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/post_tweet"/>
+            <Button
+                android:id="@+id/tweet_image_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="カメラロール"/>
         </LinearLayout>
-        <ProgressBar
-            android:id="@+id/tweet_progress"
-            style="?android:attr/progressBarStyle"
-            android:layout_width="wrap_content"
+
+        <EditText
+            android:id="@+id/tweet_body"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:visibility="invisible" />
-    </FrameLayout>
+            android:background="@color/cardview_shadow_end_color"
+            android:gravity="top|start"
+            android:hint="@string/doing">
+            <requestFocus />
+        </EditText>
+    </LinearLayout>
 </LinearLayout>
