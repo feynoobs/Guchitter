@@ -66,8 +66,7 @@ class PostTweetActivity : AppCompatActivity()
         findViewById<Button>(R.id.tweet_image_btn).setOnClickListener {
             launcher.launch(arrayOf("image/jpeg", "image/png", "image/webp"))
         }
-        val replyId = intent.getLongExtra("in_reply_to_status_id", -1L)
-        Log.e(TAG, intent.extras.toString())
+
         findViewById<Button>(R.id.tweet_send_btn).setOnClickListener {
             val serviceIntent = Intent(applicationContext, PostTweetService::class.java).apply {
                 putExtra("status", bodyTextView.text.toString())

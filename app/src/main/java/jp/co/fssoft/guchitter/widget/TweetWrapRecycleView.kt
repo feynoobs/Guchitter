@@ -153,7 +153,6 @@ internal class TweetViewHolder(private val view: View) : RecyclerView.ViewHolder
      */
     val atNameText: TextView = view.findViewById(R.id.tweet_recycle_view_at_user_name)
 
-
     /**
      *
      */
@@ -273,6 +272,13 @@ internal class TweetViewHolder(private val view: View) : RecyclerView.ViewHolder
         shareBtn.layoutParams.height = shareBtn.layoutParams.width
         shareBtn.setImageResource(R.drawable.tweet_share)
 
+        otherBtn.layoutParams.width = (size.widthPixels * 0.84 * 0.2 * 0.25).toInt()
+        otherBtn.layoutParams.height = (size.widthPixels * 0.84 * 0.2 * 0.25).toInt()
+
+        nameText.layoutParams.width = (size.widthPixels * 0.84 * 0.36).toInt()
+
+        atNameText.layoutParams.width = (size.widthPixels * 0.84 * 0.36).toInt()
+
         Log.d(TAG, "[END]init")
     }
 }
@@ -328,7 +334,7 @@ internal class TweetRecycleView(private val parentPosition: Int, private val con
             else {
                 tweet.retweetedTweet.user?.name
             }
-        holder.atNameText.text = context.getString(R.string.at) +
+        holder.atNameText.text =
             if (tweet.retweetedTweet == null) {
                 tweet.user?.screen_name
             }
