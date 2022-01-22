@@ -16,6 +16,9 @@ class TwitterApiFavoritesDestroy(private val db: SQLiteDatabase) : TwitterApiCom
 {
     companion object
     {
+        /**
+         * T a g
+         */
         private val TAG = TwitterApiFavoritesDestroy::class.qualifiedName
     }
 

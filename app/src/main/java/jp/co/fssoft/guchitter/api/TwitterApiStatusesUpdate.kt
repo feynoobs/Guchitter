@@ -9,7 +9,7 @@ import android.util.Log
  * @property db
  * @constructor Create empty Twitter api update
  */
-class TwitterApiUpdate(private val db: SQLiteDatabase) : TwitterApiCommon("https://api.twitter.com/1.1/statuses/update.json", "POST", db)
+class TwitterApiStatusesUpdate(private val db: SQLiteDatabase) : TwitterApiCommon("https://api.twitter.com/1.1/statuses/update.json", "POST", db)
 {
     /**
      * Companion
@@ -18,7 +18,7 @@ class TwitterApiUpdate(private val db: SQLiteDatabase) : TwitterApiCommon("https
      */
     companion object
     {
-        private val TAG = TwitterApiUpdate::class.qualifiedName
+        private val TAG = TwitterApiStatusesUpdate::class.qualifiedName
     }
 
     /**

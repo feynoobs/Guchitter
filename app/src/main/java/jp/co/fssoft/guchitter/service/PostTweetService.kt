@@ -2,6 +2,7 @@ package jp.co.fssoft.guchitter.service
 
 import android.app.Service
 import android.content.Intent
+import android.net.Uri
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
@@ -9,8 +10,12 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import jp.co.fssoft.guchitter.R
-import jp.co.fssoft.guchitter.api.TwitterApiUpdate
+import jp.co.fssoft.guchitter.api.ImageObject
+import jp.co.fssoft.guchitter.api.TwitterApiMediaUpload
+import jp.co.fssoft.guchitter.api.TwitterApiStatusesUpdate
 import jp.co.fssoft.guchitter.database.DatabaseHelper
+import jp.co.fssoft.guchitter.utility.Json
+import java.io.ByteArrayOutputStream
 
 /**
  * Post tweet service
@@ -56,11 +61,63 @@ class PostTweetService : Service()
             setSmallIcon(R.drawable.tweet_pen)
         }.build()
 
-        val params = mapOf(
+        val bodyParams = mutableMapOf(
             "status" to intent?.getStringExtra("status")!!,
             "display_coordinates" to false.toString()
         )
-        TwitterApiUpdate(DatabaseHelper(applicationContext).readableDatabase).start(params).callback =  {
+
+
+        val images = intent.getStringArrayListExtra("images")
+        if (images?.size != 0) {
+            val medias = mutableListOf<Long>()
+            images?.forEach {
+                val stream = contentResolver.openInputStream(Uri.parse(it))!!
+                val data = ByteArrayOutputStream()
+                val buffer = ByteArray(1024)
+                while (true) {
+                    val read = stream.read(buffer)
+                    if (read < 0) {
+                        break
+                    }
+                    data.write(buffer, 0, read)
+                }
+                val params = mapOf(
+                    "media_data" to android.util.Base64.encodeToString(data.toByteArray(), android.util.Base64.NO_WRAP)
+                )
+                TwitterApiMediaUpload(DatabaseHelper(applicationContext).readableDatabase).start(params).callback = {
+                    Log.e(TAG, it!!)
+                    val postData = Json.jsonDecode(ImageObject.serializer(), it)
+                    medias.add(postData.id)
+                    if (medias.size == images.size) {
+                        var mediaIds = ""
+                        medias.forEach {
+                            mediaIds += "${it.toString()},"
+                        }
+                        mediaIds.removeSuffix(",")
+                        bodyParams["media_ids"] = mediaIds
+                        postTweet(bodyParams)
+                    }
+                }
+            }
+        }
+        else {
+            postTweet(bodyParams)
+        }
+
+        startForeground(1, notification)
+        Log.d(TAG, "[END]onStartCommand(${intent}, ${flags}, ${startId})")
+
+        return START_STICKY
+    }
+
+    /**
+     * Post tweet
+     *
+     * @param param
+     */
+    private fun postTweet(param: Map<String, String>)
+    {
+        TwitterApiStatusesUpdate(DatabaseHelper(applicationContext).readableDatabase).start(param).callback =  {
             Handler(Looper.getMainLooper()).post {
                 if (it == null) {
                     Toast.makeText(applicationContext, getString(R.string.post_tweet_fail), Toast.LENGTH_LONG).show()
@@ -71,10 +128,5 @@ class PostTweetService : Service()
             }
             stopForeground(true)
         }
-
-        startForeground(1, notification)
-
-        Log.d(TAG, "[END]onStartCommand(${intent}, ${flags}, ${startId})")
-        return START_STICKY
     }
 }

@@ -136,3 +136,18 @@ data class UserObject(
     @SerialName("default_profile") val defaultProfile: Boolean,
     @SerialName("default_profile_image") val defaultProfileImage: Boolean
 )
+
+@Serializable
+data class ImageObject(
+    @SerialName("media_id") val id: Long,
+    val size: Long,
+    @SerialName("expires_after_secs") val expiresSec: Long,
+    val image: ImageSizeObject
+)
+
+@Serializable
+data class ImageSizeObject(
+    @SerialName("image_type") val mimeType: String,
+    @SerialName("w") val width: Long,
+    @SerialName("h") val height: Long,
+)

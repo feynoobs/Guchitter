@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter
 import java.lang.Exception
 import java.net.URL
 import java.net.URLEncoder
+import java.security.MessageDigest
 import java.util.zip.GZIPInputStream
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
@@ -71,8 +72,9 @@ abstract class TwitterApiCommon(private val entryPoint: String, private val meth
      *
      * @param requestParams
      * @param additionalParams
+     * @param rawData
      */
-    protected fun startMain(requestParams: Map<String, String>? = null, additionalParams: Map<String, String>? = null)
+    protected fun startMain(requestParams: Map<String, String>? = null, additionalParams: Map<String, String>? = null, rawData: Map<String, String>? = null)
     {
         Log.v(TAG, "[START]startMain(${requestParams}, ${additionalParams})")
         val runnable = Runnable {
@@ -154,19 +156,47 @@ abstract class TwitterApiCommon(private val entryPoint: String, private val meth
                 }
                 con.addRequestProperty("Authorization", "OAuth ${header}")
                 con.addRequestProperty("Accept-Encoding", "gzip")
+                val hash = MessageDigest
+                    .getInstance("SHA-256")
+                    .digest(System.currentTimeMillis().toString().toByteArray())
+                    .joinToString(separator = "") {
+                        "%02x".format(it)
+                    }
+                val boundary = "g-u-c-h-i-t-t-e-r-------------${hash}"
+                rawData?.let {
+                    con.addRequestProperty("Content-Type", "multipart/form-data; boundary=${boundary}")
+                }
+
                 con.connect()
                 if (method == "POST") {
                     var body = ""
-                    requestParams?.let {
-                        requestParams.forEach({(k, v) -> body += "${k}=${v}&"})
-                        body = body.removeSuffix("&")
+                    requestParams?.forEach { (k, v) ->
+                        body += "${k}=${v}&"
                     }
+                    body = body.removeSuffix("&")
+
+                    rawData?.let {
+                        it.forEach { (k, v) ->
+                            body  = "--${boundary}\r\n"
+                            body += "Content-Disposition: form-data; name=\"${k}\"; \r\n"
+                            body += "\r\n"
+                            body += "${v}\r\n"
+                            body += "--${boundary}--\r\n"
+                            body += "\r\n"
+                        }
+                    }
+                    /*
+                    rawData?.forEach {
+                            (k, v) -> body += "{\"${k}\": \"${v}\"}"
+                    }
+                    */
+
                     val os = con.outputStream
-                    OutputStreamWriter(os, "UTF-8").use {
-                        it.write(body)
-                        it.flush()
+                    OutputStreamWriter(os, "UTF-8").apply {
+                        write(body)
+                        flush()
+                        close()
                     }
-                    os.close()
                     Log.d(TAG, header)
                     Log.d(TAG, url.toString())
                     Log.d(TAG, body)
