@@ -66,7 +66,8 @@ class TweetWrapRecycleView(private val userId: Long, private val callback: (Long
             RETWEET(3),
             REMOVE_RETWEET(4),
             SHARE(5),
-            USER(6)
+            USER(6),
+            REPLY(7)
         }
     }
 
@@ -363,6 +364,10 @@ internal class TweetRecycleView(private val parentPosition: Int, private val con
                     holder.icon.setImageBitmap(Utility.circleTransform(BitmapFactory.decodeStream(FileInputStream(it))))
                 }
             }
+        }
+
+        holder.replyBtn.setOnClickListener {
+            callback(tweet.id, TweetWrapRecycleView.Companion.ButtonType.REPLY, parentPosition, position)
         }
 
         holder.icon.setOnClickListener {

@@ -65,7 +65,10 @@ class PostTweetService : Service()
             "status" to intent?.getStringExtra("status")!!,
             "display_coordinates" to false.toString()
         )
-
+        val replyId = intent.getLongExtra("in_reply_to_status_id", -1L)
+        if (replyId != -1L) {
+            bodyParams["in_reply_to_status_id"] = replyId.toString()
+        }
 
         val images = intent.getStringArrayListExtra("images")
         if (images?.size != 0) {

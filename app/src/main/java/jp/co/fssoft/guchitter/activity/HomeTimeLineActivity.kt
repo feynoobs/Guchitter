@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import jp.co.fssoft.guchitter.R
 import jp.co.fssoft.guchitter.api.*
+import jp.co.fssoft.guchitter.service.PostTweetService
 import jp.co.fssoft.guchitter.utility.Json
 import jp.co.fssoft.guchitter.utility.Utility
 import jp.co.fssoft.guchitter.widget.TweetScrollEvent
@@ -99,6 +100,12 @@ class HomeTimeLineActivity : RootActivity()
                     (layoutManager as LinearLayoutManager).scrollToPositionWithOffset(scroll, offset)
                     adapter = TweetWrapRecycleView(userId) {commonId, type, parentPosition, childPosition ->
                         when (type) {
+                            TweetWrapRecycleView.Companion.ButtonType.REPLY -> {
+                                val intent = Intent(applicationContext, PostTweetActivity::class.java).apply {
+                                    putExtra("in_reply_to_status_id", commonId)
+                                }
+                                startActivity(intent)
+                            }
                             TweetWrapRecycleView.Companion.ButtonType.FAVORITE -> {
                                 TwitterApiFavoritesCreate(database.writableDatabase).start(mapOf("id" to commonId.toString())).callback = {
                                     (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
