@@ -1,17 +1,25 @@
 package jp.co.fssoft.guchitter.activity
 
+import android.animation.ObjectAnimator
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.view.ViewGroup
+import android.view.animation.Animation
+import android.view.animation.Animation.AnimationListener
+import android.view.animation.AnimationUtils
 import android.widget.ImageButton
 import android.widget.LinearLayout
+import android.widget.RelativeLayout
+import android.widget.Toast
+import androidx.core.view.marginBottom
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import jp.co.fssoft.guchitter.R
 import jp.co.fssoft.guchitter.api.*
-import jp.co.fssoft.guchitter.service.PostTweetService
 import jp.co.fssoft.guchitter.utility.Json
 import jp.co.fssoft.guchitter.utility.Utility
 import jp.co.fssoft.guchitter.widget.TweetScrollEvent
@@ -163,26 +171,100 @@ class HomeTimeLineActivity : RootActivity()
                                 }
                                 startActivity(intent)
                             }
+                            TweetWrapRecycleView.Companion.ButtonType.OTHER_MY -> {
+                                val test = this@HomeTimeLineActivity.findViewById<LinearLayout>(R.id.message_layout)
+                                ObjectAnimator.ofFloat(test, "translationY", test.height * -1.0f).apply {
+                                    duration = resources.getInteger(android.R.integer.config_shortAnimTime).toLong()
+                                    start()
+                                }
+                                Log.e(TAG, test.height.toString())
+                                /*
+                                val animation = AnimationUtils.loadAnimation(applicationContext, R.anim.show)
+
+                                animation.setAnimationListener(object : AnimationListener {
+                                    override fun onAnimationStart(p0: Animation?)
+                                    {
+                                    }
+
+                                    override fun onAnimationEnd(p0: Animation?)
+                                    {
+                                        Log.e(TAG, "aaaaaaaaa")
+                                        test.visibility = View.INVISIBLE
+                                    }
+
+                                    override fun onAnimationRepeat(p0: Animation?)
+                                    {
+                                    }
+
+                                })
+                                test.startAnimation(animation)
+
+                                */
+                            }
                         }
                     }
 
-                    (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
                     addItemDecoration(DividerItemDecoration(this@HomeTimeLineActivity, DividerItemDecoration.VERTICAL))
                     addOnScrollListener(TweetScrollEvent(
-                        {
-                            callback -> getNextHomeTweet(userId, false) {
+                        { callback ->
+                            val prevData = getCurrentHomeTweet(userId)
+                            getNextHomeTweet(userId, false) {
                                 runOnUiThread {
                                     (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
-                                    adapter?.notifyDataSetChanged()
+                                    var insets = 0
+                                    for (i in 0 until (adapter as TweetWrapRecycleView).tweetObjects.size) {
+                                        if ((adapter as TweetWrapRecycleView).tweetObjects[i][0].id > prevData[0][0].id) {
+                                            ++insets
+                                        }
+                                        else {
+                                            break
+                                        }
+                                    }
+                                    if (insets > 0) {
+                                        adapter?.notifyItemRangeInserted(0, insets)
+                                        Toast.makeText(applicationContext, getString(R.string.next_tweet), Toast.LENGTH_LONG).show()
+                                    }
+
+                                    for (i in 0 until (adapter as TweetWrapRecycleView).tweetObjects.size) {
+                                        for (j in 0 until prevData.size) {
+                                            if ((adapter as TweetWrapRecycleView).tweetObjects[i][0].id == prevData[j][0].id) {
+                                                if ((adapter as TweetWrapRecycleView).tweetObjects[i].size != prevData[j].size) {
+                                                    adapter?.notifyItemChanged(i)
+                                                }
+                                            }
+                                        }
+                                    }
                                     callback()
                                 }
                             }
                         },
-                        {
-                            callback -> getPrevHomeTweet(userId, false) {
+                        { callback ->
+                            val prevData = getCurrentHomeTweet(userId)
+                            getPrevHomeTweet(userId, false) {
                                 runOnUiThread {
                                     (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
-                                    adapter?.notifyDataSetChanged()
+                                    var insets = 0
+                                    for (i in 0 until (adapter as TweetWrapRecycleView).tweetObjects.size) {
+                                        if ((adapter as TweetWrapRecycleView).tweetObjects[i][0].id < prevData[prevData.size - 1][0].id) {
+                                            ++insets
+                                        }
+                                        else {
+                                            break
+                                        }
+                                    }
+                                    if (insets > 0) {
+                                        adapter?.notifyItemRangeInserted(prevData.size - 1, insets)
+                                        Toast.makeText(applicationContext, getString(R.string.next_tweet), Toast.LENGTH_LONG).show()
+                                    }
+                                    for (i in 0 until (adapter as TweetWrapRecycleView).tweetObjects.size) {
+                                        for (j in 0 until prevData.size) {
+                                            if ((adapter as TweetWrapRecycleView).tweetObjects[i][0].id == prevData[j][0].id) {
+                                                if ((adapter as TweetWrapRecycleView).tweetObjects[i].size != prevData[j].size) {
+                                                    adapter?.notifyItemChanged(i)
+                                                }
+                                            }
+                                        }
+                                    }
                                     callback()
                                 }
                             }

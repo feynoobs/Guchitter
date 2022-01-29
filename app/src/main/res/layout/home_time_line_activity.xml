@@ -16,8 +16,7 @@
             android:scrollbars="vertical" />
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="16dp">
+            android:layout_height="wrap_content">
             <ImageButton
                 android:id="@+id/tweet_write_btn"
                 android:layout_width="wrap_content"
@@ -25,6 +24,7 @@
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentEnd="true"
                 android:background="@null"
+                android:layout_margin="16dp"
                 />
         </RelativeLayout>
     </FrameLayout>

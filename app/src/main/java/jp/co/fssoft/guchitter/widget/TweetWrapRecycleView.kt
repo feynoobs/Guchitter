@@ -67,7 +67,9 @@ class TweetWrapRecycleView(private val userId: Long, private val callback: (Long
             REMOVE_RETWEET(4),
             SHARE(5),
             USER(6),
-            REPLY(7)
+            REPLY(7),
+            OTHER_MY(8),
+            OTHER_OTHER(9)
         }
     }
 
@@ -99,7 +101,7 @@ class TweetWrapRecycleView(private val userId: Long, private val callback: (Long
         Log.d(TAG, "[START]onBindViewHolder(${holder}, ${position})")
         holder.tweetsView.findViewById<RecyclerView>(R.id.tweet_recycle_view).apply {
             setHasFixedSize(true)
-            adapter = TweetRecycleView(position, context, callback)
+            adapter = TweetRecycleView(position, context, callback, userId)
             (adapter as TweetRecycleView).tweetObjects = tweetObjects[position]
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         }
@@ -289,7 +291,7 @@ internal class TweetViewHolder(private val view: View) : RecyclerView.ViewHolder
  * @property parentPosition
  * @property callback
  */
-internal class TweetRecycleView(private val parentPosition: Int, private val context: Context, private val callback: (Long, TweetWrapRecycleView.Companion.ButtonType, Int, Int)->Unit) : RecyclerView.Adapter<TweetViewHolder>()
+internal class TweetRecycleView(private val parentPosition: Int, private val context: Context, private val callback: (Long, TweetWrapRecycleView.Companion.ButtonType, Int, Int)->Unit, private val userId: Long ) : RecyclerView.Adapter<TweetViewHolder>()
 {
     companion object
     {
@@ -421,6 +423,18 @@ internal class TweetRecycleView(private val parentPosition: Int, private val con
                 callback(tweet.id, TweetWrapRecycleView.Companion.ButtonType.RETWEET, parentPosition, position)
             }
         }
+        holder.otherBtn.setOnClickListener {
+            if (tweet.retweeted == true) {
+            }
+            else {
+                if (tweet.user?.id == userId) {
+                    callback(tweet.id, TweetWrapRecycleView.Companion.ButtonType.OTHER_MY, parentPosition, position)
+                }
+                else {
+                    callback(tweet.id, TweetWrapRecycleView.Companion.ButtonType.OTHER_OTHER, parentPosition, position)
+                }
+            }
+        }
 
         holder.retweetText.text = ""
         if (tweet.retweetedTweet == null) {
@@ -432,10 +446,6 @@ internal class TweetRecycleView(private val parentPosition: Int, private val con
             if (tweet.retweetedTweet.retweets != 0) {
                 holder.retweetText.text = String.format("%,d", tweet.retweetedTweet?.retweets)
             }
-        }
-
-        holder.otherBtn.setOnClickListener {
-
         }
 
         if (position == 0) {

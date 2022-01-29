@@ -3,6 +3,8 @@ package jp.co.fssoft.guchitter.activity
 import android.os.Bundle
 import android.util.Log
 import android.webkit.URLUtil
+import android.widget.LinearLayout
+import android.widget.RelativeLayout
 import androidx.appcompat.app.AppCompatActivity
 import jp.co.fssoft.guchitter.R
 import jp.co.fssoft.guchitter.api.*
@@ -534,6 +536,16 @@ open class RootActivity : AppCompatActivity()
         super.onCreate(savedInstanceState)
         Log.d(TAG, "[START]onCreate(${savedInstanceState})")
         setContentView(R.layout.root_activity)
+
+        val messageLayout = findViewById<LinearLayout>(R.id.message_layout)
+        messageLayout.post {
+            val params = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT).apply {
+                setMargins(0, 0, 0, -messageLayout.height)
+                addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE)
+            }
+            messageLayout.layoutParams = params
+        }
+
         Log.d(TAG, "[END]onCreate(${savedInstanceState})")
     }
 }
