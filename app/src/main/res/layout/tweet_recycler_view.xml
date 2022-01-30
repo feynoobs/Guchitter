@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal">
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/tweet_recycle_view"
+        android:id="@+id/tweet_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

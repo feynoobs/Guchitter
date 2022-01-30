@@ -16,7 +16,7 @@ import jp.co.fssoft.guchitter.R
 import jp.co.fssoft.guchitter.utility.Imager
 import jp.co.fssoft.guchitter.utility.Utility
 import jp.co.fssoft.guchitter.widget.TweetScrollEvent
-import jp.co.fssoft.guchitter.widget.TweetWrapRecycleView
+import jp.co.fssoft.guchitter.widget.TweetWrapRecyclerView
 import java.io.FileInputStream
 
 /**
@@ -83,14 +83,14 @@ class UserTimeLineActivity : RootActivity()
         findViewById<TextView>(R.id.user_timeline_header_tweets).apply {
             text = String.format("%,d", userObject.tweets)
         }
-        findViewById<RecyclerView>(R.id.tweet_wrap_recycle_view).apply {
+        findViewById<RecyclerView>(R.id.tweet_wrap_recycler_view).apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(this@UserTimeLineActivity, LinearLayoutManager.VERTICAL, false)
-            adapter = TweetWrapRecycleView(userId) { commonId, type, parentPosition, childPosition ->
+            adapter = TweetWrapRecyclerView(userId) { commonId, type, parentPosition, childPosition ->
                 when (type) {
-                    TweetWrapRecycleView.Companion.ButtonType.USER -> {
+                    TweetWrapRecyclerView.Companion.ButtonType.USER -> {
                         if (userId == commonId) {
-                            val target = layoutManager?.findViewByPosition(parentPosition)?.findViewById<RecyclerView>(R.id.tweet_recycle_view)?.layoutManager?.findViewByPosition(childPosition)
+                            val target = layoutManager?.findViewByPosition(parentPosition)?.findViewById<RecyclerView>(R.id.tweet_recycler_view)?.layoutManager?.findViewByPosition(childPosition)
                             target?.startAnimation(AnimationUtils.loadAnimation(applicationContext, R.anim.shake))
                         }
                         else {
@@ -102,12 +102,12 @@ class UserTimeLineActivity : RootActivity()
                 }
             }
             runOnUiThread {
-                (adapter as TweetWrapRecycleView).tweetObjects = getCurrentUserTweet(userId)
+                (adapter as TweetWrapRecyclerView).tweetObjects = getCurrentUserTweet(userId)
                 adapter?.notifyDataSetChanged()
-                if ((adapter as TweetWrapRecycleView).tweetObjects.isEmpty() == true) {
+                if ((adapter as TweetWrapRecyclerView).tweetObjects.isEmpty() == true) {
                     getNextHomeTweet(userId, false) {
                         runOnUiThread {
-                            (adapter as TweetWrapRecycleView).tweetObjects = getCurrentUserTweet(userId)
+                            (adapter as TweetWrapRecyclerView).tweetObjects = getCurrentUserTweet(userId)
                             adapter?.notifyDataSetChanged()
                         }
                     }
@@ -118,9 +118,9 @@ class UserTimeLineActivity : RootActivity()
                 {
                     callback -> getNextUserTweet(userId, false) {
                         runOnUiThread {
-                            val beforeCount = (adapter as TweetWrapRecycleView).tweetObjects.size
-                            (adapter as TweetWrapRecycleView).tweetObjects = getCurrentUserTweet(userId)
-                            val afterCount = (adapter as TweetWrapRecycleView).tweetObjects.size
+                            val beforeCount = (adapter as TweetWrapRecyclerView).tweetObjects.size
+                            (adapter as TweetWrapRecyclerView).tweetObjects = getCurrentUserTweet(userId)
+                            val afterCount = (adapter as TweetWrapRecyclerView).tweetObjects.size
                             adapter?.notifyDataSetChanged()
                             callback()
                             layoutManager!!.scrollToPosition(afterCount - beforeCount + 1)
@@ -130,8 +130,8 @@ class UserTimeLineActivity : RootActivity()
                 {
                     callback -> getPrevUserTweet(userId, false) {
                         runOnUiThread {
-                            val beforeCount = (adapter as TweetWrapRecycleView).tweetObjects.size
-                            (adapter as TweetWrapRecycleView).tweetObjects = getCurrentUserTweet(userId)
+                            val beforeCount = (adapter as TweetWrapRecyclerView).tweetObjects.size
+                            (adapter as TweetWrapRecyclerView).tweetObjects = getCurrentUserTweet(userId)
                             adapter?.notifyDataSetChanged()
                             callback()
                             layoutManager!!.scrollToPosition(beforeCount)

@@ -1,10 +1,12 @@
 package jp.co.fssoft.guchitter.activity
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.webkit.URLUtil
-import android.widget.LinearLayout
-import android.widget.RelativeLayout
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import jp.co.fssoft.guchitter.R
 import jp.co.fssoft.guchitter.api.*
@@ -33,6 +35,14 @@ open class RootActivity : AppCompatActivity()
      */
     protected val database by lazy {
         DatabaseHelper(applicationContext)
+    }
+
+    private val launcher by lazy {
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode != RESULT_OK) {
+
+            }
+        }
     }
 
     /**
@@ -537,13 +547,18 @@ open class RootActivity : AppCompatActivity()
         Log.d(TAG, "[START]onCreate(${savedInstanceState})")
         setContentView(R.layout.root_activity)
 
-        val messageLayout = findViewById<LinearLayout>(R.id.message_layout)
-        messageLayout.post {
-            val params = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT).apply {
-                setMargins(0, 0, 0, -messageLayout.height)
-                addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE)
-            }
-            messageLayout.layoutParams = params
+//        val message1Layout = findViewById<LinearLayout>(R.id.message1_layout)
+//        message1Layout.post {
+//            val params = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT).apply {
+//                setMargins(0, 0, 0, -message1Layout.height)
+//                addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE)
+//            }
+//            message1Layout.layoutParams = params
+//        }
+
+        if (Settings.canDrawOverlays(applicationContext) == false) {
+            val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
+            startActivity(intent)
         }
 
         Log.d(TAG, "[END]onCreate(${savedInstanceState})")

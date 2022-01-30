@@ -10,7 +10,7 @@
         >
         <androidx.recyclerview.widget.RecyclerView
             android:clickable="false"
-            android:id="@+id/tweet_wrap_recycle_view"
+            android:id="@+id/tweet_wrap_recycler_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:scrollbars="vertical" />

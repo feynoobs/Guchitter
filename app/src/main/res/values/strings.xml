@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Guchitter</string>
+    <string name="tweet">ツィート</string>
+    <string name="post_tweet">ツィートする</string>
+    <string name="at">\@</string>
+    <string name="post_tweet_success">ツィートしました</string>
+    <string name="post_tweet_fail">ツィートに失敗しました</string>
+    <string name="doing">いまどうしてる？</string>
+    <string name="channel_name">いまどうしてる？</string>
+    <string name="dot">・</string>
+    <string name="next_tweet">新しいツィートがあります</string>
+</resources>

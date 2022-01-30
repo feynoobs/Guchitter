@@ -35,7 +35,7 @@ class TweetWrapViewHolder(view: View) : RecyclerView.ViewHolder(view)
     /**
      *
      */
-    val tweetsView: RecyclerView = view.findViewById(R.id.tweet_recycle_view)
+    val tweetsView: RecyclerView = view.findViewById(R.id.tweet_recycler_view)
 
 }
 
@@ -45,14 +45,14 @@ class TweetWrapViewHolder(view: View) : RecyclerView.ViewHolder(view)
  * @property userId
  * @property callback
  */
-class TweetWrapRecycleView(private val userId: Long, private val callback: (Long, ButtonType, Int, Int)->Unit) : RecyclerView.Adapter<TweetWrapViewHolder>()
+class TweetWrapRecyclerView(private val userId: Long, private val callback: (Long, ButtonType, Int, Int)->Unit) : RecyclerView.Adapter<TweetWrapViewHolder>()
 {
     companion object
     {
         /**
          *
          */
-        private val TAG = TweetWrapRecycleView::class.qualifiedName
+        private val TAG = TweetWrapRecyclerView::class.qualifiedName
 
         /**
          * TODO
@@ -88,7 +88,7 @@ class TweetWrapRecycleView(private val userId: Long, private val callback: (Long
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TweetWrapViewHolder
     {
         Log.d(TAG, "[START]onCreateViewHolder(${parent}, ${viewType})")
-        return TweetWrapViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.tweet_recycle_view, parent, false))
+        return TweetWrapViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.tweet_recycler_view, parent, false))
     }
 
     /**
@@ -99,7 +99,7 @@ class TweetWrapRecycleView(private val userId: Long, private val callback: (Long
      */
     override fun onBindViewHolder(holder: TweetWrapViewHolder, position: Int) {
         Log.d(TAG, "[START]onBindViewHolder(${holder}, ${position})")
-        holder.tweetsView.findViewById<RecyclerView>(R.id.tweet_recycle_view).apply {
+        holder.tweetsView.findViewById<RecyclerView>(R.id.tweet_recycler_view).apply {
             setHasFixedSize(true)
             adapter = TweetRecycleView(position, context, callback, userId)
             (adapter as TweetRecycleView).tweetObjects = tweetObjects[position]
@@ -122,12 +122,10 @@ class TweetWrapRecycleView(private val userId: Long, private val callback: (Long
 
 
 /**
- * TODO
+ * Tweet view holder
  *
- * @constructor
- * TODO
- *
- * @param view
+ * @property view
+ * @constructor Create empty Tweet view holder
  */
 internal class TweetViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
 {
@@ -143,87 +141,87 @@ internal class TweetViewHolder(private val view: View) : RecyclerView.ViewHolder
     /**
      *
      */
-    val icon: ImageButton = view.findViewById(R.id.tweet_recycle_view_user_icon)
+    val icon: ImageButton = view.findViewById(R.id.tweet_recycler_view_user_icon)
 
     /**
      *
      */
-    val nameText: TextView = view.findViewById(R.id.tweet_recycle_view_user_name)
+    val nameText: TextView = view.findViewById(R.id.tweet_recycler_view_user_name)
 
     /**
      *
      */
-    val atNameText: TextView = view.findViewById(R.id.tweet_recycle_view_at_user_name)
+    val atNameText: TextView = view.findViewById(R.id.tweet_recycler_view_at_user_name)
 
     /**
      *
      */
-    val mainText: TextView = view.findViewById(R.id.tweet_recycle_view_main)
+    val mainText: TextView = view.findViewById(R.id.tweet_recycler_view_main)
 
     /**
      *
      */
-    val timeText: TextView = view.findViewById(R.id.tweet_recycle_view_post_time)
+    val timeText: TextView = view.findViewById(R.id.tweet_recycler_view_post_time)
 
     /**
      *
      */
-    val replyBtn: ImageButton = view.findViewById(R.id.tweet_recycle_view_reply_button)
+    val replyBtn: ImageButton = view.findViewById(R.id.tweet_recycler_view_reply_button)
 
     /**
      *
      */
-    val replyText: TextView = view.findViewById(R.id.tweet_recycle_view_reply_count)
+    val replyText: TextView = view.findViewById(R.id.tweet_recycler_view_reply_count)
 
     /**
      *
      */
-    val retweetBtn: ImageButton = view.findViewById(R.id.tweet_recycle_view_retweet_button)
+    val retweetBtn: ImageButton = view.findViewById(R.id.tweet_recycler_view_retweet_button)
 
     /**
      *
      */
-    val retweetText: TextView = view.findViewById(R.id.tweet_recycle_view_retweet_count)
+    val retweetText: TextView = view.findViewById(R.id.tweet_recycler_view_retweet_count)
 
     /**
      *
      */
-    val favoriteBtn: ImageButton = view.findViewById(R.id.tweet_recycle_view_favorite_button)
+    val favoriteBtn: ImageButton = view.findViewById(R.id.tweet_recycler_view_favorite_button)
 
     /**
      *
      */
-    val favoriteText: TextView = view.findViewById(R.id.tweet_recycle_view_favorite_count)
+    val favoriteText: TextView = view.findViewById(R.id.tweet_recycler_view_favorite_count)
 
     /**
      *
      */
-    val transferBtn: ImageButton = view.findViewById(R.id.tweet_recycle_view_transfer_button)
+    val transferBtn: ImageButton = view.findViewById(R.id.tweet_recycler_view_transfer_button)
 
     /**
      *
      */
-    val otherBtn: ImageButton = view.findViewById(R.id.tweet_recycle_view_other_button)
+    val otherBtn: ImageButton = view.findViewById(R.id.tweet_recycler_view_other_button)
 
     /**
      *
      */
-    val shareBtn: ImageButton = view.findViewById(R.id.tweet_recycle_view_share_button)
+    val shareBtn: ImageButton = view.findViewById(R.id.tweet_recycler_view_share_button)
 
     /**
      *
      */
-    val upperLine: View = view.findViewById(R.id.tweet_recycle_view_upper_line)
+    val upperLine: View = view.findViewById(R.id.tweet_recycler_view_upper_line)
 
     /**
      *
      */
-    val lowerLine: View = view.findViewById(R.id.tweet_recycle_view_lower_line)
+    val lowerLine: View = view.findViewById(R.id.tweet_recycler_view_lower_line)
 
     /**
      *
      */
-    private val space: Space = view.findViewById(R.id.tweet_recycle_view_space)
+    private val space: Space = view.findViewById(R.id.tweet_recycler_view_space)
 
     /**
      *
@@ -291,7 +289,7 @@ internal class TweetViewHolder(private val view: View) : RecyclerView.ViewHolder
  * @property parentPosition
  * @property callback
  */
-internal class TweetRecycleView(private val parentPosition: Int, private val context: Context, private val callback: (Long, TweetWrapRecycleView.Companion.ButtonType, Int, Int)->Unit, private val userId: Long ) : RecyclerView.Adapter<TweetViewHolder>()
+internal class TweetRecycleView(private val parentPosition: Int, private val context: Context, private val callback: (Long, TweetWrapRecyclerView.Companion.ButtonType, Int, Int)->Unit, private val userId: Long ) : RecyclerView.Adapter<TweetViewHolder>()
 {
     companion object
     {
@@ -316,7 +314,7 @@ internal class TweetRecycleView(private val parentPosition: Int, private val con
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TweetViewHolder
     {
         Log.d(TAG, "[START]onCreateViewHolder(${parent}, ${viewType})")
-        return TweetViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.tweet_recycle_view_item, parent, false))
+        return TweetViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.tweet_recycler_view_item, parent, false))
     }
 
     /**
@@ -346,10 +344,10 @@ internal class TweetRecycleView(private val parentPosition: Int, private val con
         holder.timeText.text = Utility.createFuzzyDateTime(tweet.createdAt)
         holder.nameText.setOnClickListener {
             if (tweet.retweetedTweet == null) {
-                callback(tweet.user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, parentPosition, position)
+                callback(tweet.user!!.id, TweetWrapRecyclerView.Companion.ButtonType.USER, parentPosition, position)
             }
             else {
-                callback(tweet.retweetedTweet.user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, parentPosition, position)
+                callback(tweet.retweetedTweet.user!!.id, TweetWrapRecyclerView.Companion.ButtonType.USER, parentPosition, position)
             }
         }
         holder.mainText.text =
@@ -375,15 +373,15 @@ internal class TweetRecycleView(private val parentPosition: Int, private val con
         }
 
         holder.replyBtn.setOnClickListener {
-            callback(tweet.id, TweetWrapRecycleView.Companion.ButtonType.REPLY, parentPosition, position)
+            callback(tweet.id, TweetWrapRecyclerView.Companion.ButtonType.REPLY, parentPosition, position)
         }
 
         holder.icon.setOnClickListener {
             if (tweet.retweetedTweet == null) {
-                callback(tweet.user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, parentPosition, position)
+                callback(tweet.user!!.id, TweetWrapRecyclerView.Companion.ButtonType.USER, parentPosition, position)
             }
             else {
-                callback(tweet.retweetedTweet.user!!.id, TweetWrapRecycleView.Companion.ButtonType.USER, parentPosition, position)
+                callback(tweet.retweetedTweet.user!!.id, TweetWrapRecyclerView.Companion.ButtonType.USER, parentPosition, position)
             }
         }
 
@@ -393,10 +391,10 @@ internal class TweetRecycleView(private val parentPosition: Int, private val con
         }
         holder.favoriteBtn.setOnClickListener {
             if (tweet.isFavorited == true) {
-                callback(tweet.id, TweetWrapRecycleView.Companion.ButtonType.REMOVE_FAVORITE, parentPosition, position)
+                callback(tweet.id, TweetWrapRecyclerView.Companion.ButtonType.REMOVE_FAVORITE, parentPosition, position)
             }
             else {
-                callback(tweet.id, TweetWrapRecycleView.Companion.ButtonType.FAVORITE, parentPosition, position)
+                callback(tweet.id, TweetWrapRecyclerView.Companion.ButtonType.FAVORITE, parentPosition, position)
             }
         }
         holder.favoriteText.text = ""
@@ -417,10 +415,10 @@ internal class TweetRecycleView(private val parentPosition: Int, private val con
         }
         holder.retweetBtn.setOnClickListener {
             if (tweet.retweeted == true) {
-                callback(tweet.retweetedTweet!!.id, TweetWrapRecycleView.Companion.ButtonType.REMOVE_RETWEET, parentPosition, position)
+                callback(tweet.retweetedTweet!!.id, TweetWrapRecyclerView.Companion.ButtonType.REMOVE_RETWEET, parentPosition, position)
             }
             else {
-                callback(tweet.id, TweetWrapRecycleView.Companion.ButtonType.RETWEET, parentPosition, position)
+                callback(tweet.id, TweetWrapRecyclerView.Companion.ButtonType.RETWEET, parentPosition, position)
             }
         }
         holder.otherBtn.setOnClickListener {
@@ -428,10 +426,10 @@ internal class TweetRecycleView(private val parentPosition: Int, private val con
             }
             else {
                 if (tweet.user?.id == userId) {
-                    callback(tweet.id, TweetWrapRecycleView.Companion.ButtonType.OTHER_MY, parentPosition, position)
+                    callback(tweet.id, TweetWrapRecyclerView.Companion.ButtonType.OTHER_MY, parentPosition, position)
                 }
                 else {
-                    callback(tweet.id, TweetWrapRecycleView.Companion.ButtonType.OTHER_OTHER, parentPosition, position)
+                    callback(tweet.id, TweetWrapRecyclerView.Companion.ButtonType.OTHER_OTHER, parentPosition, position)
                 }
             }
         }
@@ -461,13 +459,13 @@ internal class TweetRecycleView(private val parentPosition: Int, private val con
             val inflater = LayoutInflater.from(holder.mediaLayout.context)
              when (tweet.extendedEntities.medias.size) {
                 1 ->
-                    inflater.inflate(R.layout.tweet_recycle_view_item_one_photo, holder.mediaLayout)
+                    inflater.inflate(R.layout.tweet_recycler_view_item_one_photo, holder.mediaLayout)
                 2 ->
-                     inflater.inflate(R.layout.tweet_recycle_view_item_two_photo, holder.mediaLayout)
+                     inflater.inflate(R.layout.tweet_recycler_view_item_two_photo, holder.mediaLayout)
                 3 ->
-                    inflater.inflate(R.layout.tweet_recycle_view_item_three_photo, holder.mediaLayout)
+                    inflater.inflate(R.layout.tweet_recycler_view_item_three_photo, holder.mediaLayout)
                 4 ->
-                     inflater.inflate(R.layout.tweet_recycle_view_item_four_photo, holder.mediaLayout)
+                     inflater.inflate(R.layout.tweet_recycler_view_item_four_photo, holder.mediaLayout)
             }
 
             val display = (holder.mediaLayout.context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay
@@ -478,13 +476,13 @@ internal class TweetRecycleView(private val parentPosition: Int, private val con
                 val item: ImageView? =
                     when (index) {
                         0 ->
-                            holder.mediaLayout.findViewById(R.id.tweet_recycle_view_1st_image)
+                            holder.mediaLayout.findViewById(R.id.tweet_recycler_view_1st_image)
                         1 ->
-                            holder.mediaLayout.findViewById(R.id.tweet_recycle_view_2nd_image)
+                            holder.mediaLayout.findViewById(R.id.tweet_recycler_view_2nd_image)
                         2 ->
-                            holder.mediaLayout.findViewById(R.id.tweet_recycle_view_3rd_image)
+                            holder.mediaLayout.findViewById(R.id.tweet_recycler_view_3rd_image)
                         3 ->
-                            holder.mediaLayout.findViewById(R.id.tweet_recycle_view_4th_image)
+                            holder.mediaLayout.findViewById(R.id.tweet_recycler_view_4th_image)
                         else ->
                             null
                     }

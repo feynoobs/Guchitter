@@ -1,20 +1,13 @@
 package jp.co.fssoft.guchitter.activity
 
-import android.animation.ObjectAnimator
 import android.content.Intent
 import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.graphics.PixelFormat
 import android.os.Bundle
 import android.util.Log
-import android.view.View
-import android.view.ViewGroup
-import android.view.animation.Animation
-import android.view.animation.Animation.AnimationListener
-import android.view.animation.AnimationUtils
-import android.widget.ImageButton
-import android.widget.LinearLayout
-import android.widget.RelativeLayout
-import android.widget.Toast
-import androidx.core.view.marginBottom
+import android.view.WindowManager
+import android.widget.*
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,7 +16,7 @@ import jp.co.fssoft.guchitter.api.*
 import jp.co.fssoft.guchitter.utility.Json
 import jp.co.fssoft.guchitter.utility.Utility
 import jp.co.fssoft.guchitter.widget.TweetScrollEvent
-import jp.co.fssoft.guchitter.widget.TweetWrapRecycleView
+import jp.co.fssoft.guchitter.widget.TweetWrapRecyclerView
 
 /**
  * TODO
@@ -101,44 +94,44 @@ class HomeTimeLineActivity : RootActivity()
         db.rawQuery("SELECT user_id FROM t_users WHERE current = ?", arrayOf("1")).use {
             if (it.count == 1) {
                 it.moveToFirst()
-                findViewById<RecyclerView>(R.id.tweet_wrap_recycle_view).apply {
+                findViewById<RecyclerView>(R.id.tweet_wrap_recycler_view).apply {
                     setHasFixedSize(true)
                     val userId = it.getLong(it.getColumnIndexOrThrow("user_id"))
                     layoutManager = LinearLayoutManager(this@HomeTimeLineActivity, LinearLayoutManager.VERTICAL, false)
                     (layoutManager as LinearLayoutManager).scrollToPositionWithOffset(scroll, offset)
-                    adapter = TweetWrapRecycleView(userId) {commonId, type, parentPosition, childPosition ->
+                    adapter = TweetWrapRecyclerView(userId) {commonId, type, parentPosition, childPosition ->
                         when (type) {
-                            TweetWrapRecycleView.Companion.ButtonType.REPLY -> {
+                            TweetWrapRecyclerView.Companion.ButtonType.REPLY -> {
                                 val intent = Intent(applicationContext, PostTweetActivity::class.java).apply {
                                     putExtra("in_reply_to_status_id", commonId)
                                 }
                                 startActivity(intent)
                             }
-                            TweetWrapRecycleView.Companion.ButtonType.FAVORITE -> {
+                            TweetWrapRecyclerView.Companion.ButtonType.FAVORITE -> {
                                 TwitterApiFavoritesCreate(database.writableDatabase).start(mapOf("id" to commonId.toString())).callback = {
-                                    (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
+                                    (adapter as TweetWrapRecyclerView).tweetObjects = getCurrentHomeTweet(userId)
                                     runOnUiThread {
                                         adapter?.notifyItemRangeChanged(parentPosition, 1)
                                     }
                                 }
                             }
-                            TweetWrapRecycleView.Companion.ButtonType.REMOVE_FAVORITE -> {
+                            TweetWrapRecyclerView.Companion.ButtonType.REMOVE_FAVORITE -> {
                                 TwitterApiFavoritesDestroy(database.writableDatabase).start(mapOf("id" to commonId.toString())).callback =  {
-                                    (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
+                                    (adapter as TweetWrapRecyclerView).tweetObjects = getCurrentHomeTweet(userId)
                                     runOnUiThread {
                                         adapter?.notifyItemRangeChanged(parentPosition, 1)
                                     }
                                 }
                             }
-                            TweetWrapRecycleView.Companion.ButtonType.RETWEET -> {
+                            TweetWrapRecyclerView.Companion.ButtonType.RETWEET -> {
                                 TwitterApiStatusesRetweet(commonId, database.writableDatabase).start(mapOf("id" to commonId.toString())).callback = {
-                                    (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
+                                    (adapter as TweetWrapRecyclerView).tweetObjects = getCurrentHomeTweet(userId)
                                     runOnUiThread {
                                         adapter?.notifyItemRangeChanged(parentPosition, 1)
                                     }
                                 }
                             }
-                            TweetWrapRecycleView.Companion.ButtonType.REMOVE_RETWEET -> {
+                            TweetWrapRecyclerView.Companion.ButtonType.REMOVE_RETWEET -> {
                                 var retweetId = 0L
                                 Log.e(TAG, commonId.toString())
                                 database.readableDatabase.rawQuery("SELECT tweet_id FROM t_time_lines ORDER BY tweet_id DESC", null).use {
@@ -158,48 +151,41 @@ class HomeTimeLineActivity : RootActivity()
 
                                 TwitterApiStatusesUnretweet(retweetId, database.writableDatabase).start(mapOf("id" to retweetId.toString())).callback = {
                                     TwitterApiStatusesShow(database.writableDatabase).start(mapOf("id" to commonId.toString())).callback = {
-                                        (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
+                                        (adapter as TweetWrapRecyclerView).tweetObjects = getCurrentHomeTweet(userId)
                                         runOnUiThread {
                                             adapter?.notifyItemRangeChanged(parentPosition, 1)
                                         }
                                     }
                                 }
                             }
-                            TweetWrapRecycleView.Companion.ButtonType.USER -> {
+                            TweetWrapRecyclerView.Companion.ButtonType.USER -> {
                                 val intent = Intent(applicationContext, UserTimeLineActivity::class.java).apply {
                                     putExtra("user_id", commonId)
                                 }
                                 startActivity(intent)
                             }
-                            TweetWrapRecycleView.Companion.ButtonType.OTHER_MY -> {
-                                val test = this@HomeTimeLineActivity.findViewById<LinearLayout>(R.id.message_layout)
-                                ObjectAnimator.ofFloat(test, "translationY", test.height * -1.0f).apply {
-                                    duration = resources.getInteger(android.R.integer.config_shortAnimTime).toLong()
-                                    start()
+                            TweetWrapRecyclerView.Companion.ButtonType.OTHER_MY -> {
+//                                val messageLayout = this@HomeTimeLineActivity.findViewById<LinearLayout>(R.id.message1_layout)
+//                                ObjectAnimator.ofFloat(messageLayout, "translationY", messageLayout.height * -1.0f).apply {
+//                                    duration = resources.getInteger(android.R.integer.config_shortAnimTime).toLong()
+//                                    start()
+//                                }
+                                val mainLayout = this@HomeTimeLineActivity.findViewById<RecyclerView>(R.id.tweet_wrap_recycler_view)
+                                val overlayView = layoutInflater.inflate(R.layout.overlay_view, null).apply {
+                                    findViewById<LinearLayout>(R.id.message1_gray_layout).setBackgroundColor(Color.argb(127, 0, 63, 255))
                                 }
-                                Log.e(TAG, test.height.toString())
-                                /*
-                                val animation = AnimationUtils.loadAnimation(applicationContext, R.anim.show)
+//                                val overlayView = FrameLayout(applicationContext).apply {
+//                                    setBackgroundColor(Color.argb(127, 0, 63, 255))
+//                                    this.layoutInflater
+//                                }
 
-                                animation.setAnimationListener(object : AnimationListener {
-                                    override fun onAnimationStart(p0: Animation?)
-                                    {
-                                    }
 
-                                    override fun onAnimationEnd(p0: Animation?)
-                                    {
-                                        Log.e(TAG, "aaaaaaaaa")
-                                        test.visibility = View.INVISIBLE
-                                    }
 
-                                    override fun onAnimationRepeat(p0: Animation?)
-                                    {
-                                    }
-
-                                })
-                                test.startAnimation(animation)
-
-                                */
+                                val params = WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY, WindowManager.LayoutParams.FLAGS_CHANGED, PixelFormat.TRANSLUCENT)
+                                windowManager.addView(overlayView, params)
+                                overlayView.setOnClickListener {
+                                    windowManager.removeView(it)
+                                }
                             }
                         }
                     }
@@ -210,10 +196,10 @@ class HomeTimeLineActivity : RootActivity()
                             val prevData = getCurrentHomeTweet(userId)
                             getNextHomeTweet(userId, false) {
                                 runOnUiThread {
-                                    (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
+                                    (adapter as TweetWrapRecyclerView).tweetObjects = getCurrentHomeTweet(userId)
                                     var insets = 0
-                                    for (i in 0 until (adapter as TweetWrapRecycleView).tweetObjects.size) {
-                                        if ((adapter as TweetWrapRecycleView).tweetObjects[i][0].id > prevData[0][0].id) {
+                                    for (i in 0 until (adapter as TweetWrapRecyclerView).tweetObjects.size) {
+                                        if ((adapter as TweetWrapRecyclerView).tweetObjects[i][0].id > prevData[0][0].id) {
                                             ++insets
                                         }
                                         else {
@@ -225,10 +211,10 @@ class HomeTimeLineActivity : RootActivity()
                                         Toast.makeText(applicationContext, getString(R.string.next_tweet), Toast.LENGTH_LONG).show()
                                     }
 
-                                    for (i in 0 until (adapter as TweetWrapRecycleView).tweetObjects.size) {
+                                    for (i in 0 until (adapter as TweetWrapRecyclerView).tweetObjects.size) {
                                         for (j in 0 until prevData.size) {
-                                            if ((adapter as TweetWrapRecycleView).tweetObjects[i][0].id == prevData[j][0].id) {
-                                                if ((adapter as TweetWrapRecycleView).tweetObjects[i].size != prevData[j].size) {
+                                            if ((adapter as TweetWrapRecyclerView).tweetObjects[i][0].id == prevData[j][0].id) {
+                                                if ((adapter as TweetWrapRecyclerView).tweetObjects[i].size != prevData[j].size) {
                                                     adapter?.notifyItemChanged(i)
                                                 }
                                             }
@@ -242,10 +228,10 @@ class HomeTimeLineActivity : RootActivity()
                             val prevData = getCurrentHomeTweet(userId)
                             getPrevHomeTweet(userId, false) {
                                 runOnUiThread {
-                                    (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
+                                    (adapter as TweetWrapRecyclerView).tweetObjects = getCurrentHomeTweet(userId)
                                     var insets = 0
-                                    for (i in 0 until (adapter as TweetWrapRecycleView).tweetObjects.size) {
-                                        if ((adapter as TweetWrapRecycleView).tweetObjects[i][0].id < prevData[prevData.size - 1][0].id) {
+                                    for (i in 0 until (adapter as TweetWrapRecyclerView).tweetObjects.size) {
+                                        if ((adapter as TweetWrapRecyclerView).tweetObjects[i][0].id < prevData[prevData.size - 1][0].id) {
                                             ++insets
                                         }
                                         else {
@@ -256,10 +242,10 @@ class HomeTimeLineActivity : RootActivity()
                                         adapter?.notifyItemRangeInserted(prevData.size - 1, insets)
                                         Toast.makeText(applicationContext, getString(R.string.next_tweet), Toast.LENGTH_LONG).show()
                                     }
-                                    for (i in 0 until (adapter as TweetWrapRecycleView).tweetObjects.size) {
+                                    for (i in 0 until (adapter as TweetWrapRecyclerView).tweetObjects.size) {
                                         for (j in 0 until prevData.size) {
-                                            if ((adapter as TweetWrapRecycleView).tweetObjects[i][0].id == prevData[j][0].id) {
-                                                if ((adapter as TweetWrapRecycleView).tweetObjects[i].size != prevData[j].size) {
+                                            if ((adapter as TweetWrapRecyclerView).tweetObjects[i][0].id == prevData[j][0].id) {
+                                                if ((adapter as TweetWrapRecyclerView).tweetObjects[i].size != prevData[j].size) {
                                                     adapter?.notifyItemChanged(i)
                                                 }
                                             }
@@ -271,12 +257,12 @@ class HomeTimeLineActivity : RootActivity()
                         }
                     ))
                     runOnUiThread {
-                        (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
+                        (adapter as TweetWrapRecyclerView).tweetObjects = getCurrentHomeTweet(userId)
                         adapter?.notifyDataSetChanged()
-                        if ((adapter as TweetWrapRecycleView).tweetObjects.isEmpty() == true) {
+                        if ((adapter as TweetWrapRecyclerView).tweetObjects.isEmpty() == true) {
                             getNextHomeTweet(userId, false) {
                                 runOnUiThread {
-                                    (adapter as TweetWrapRecycleView).tweetObjects = getCurrentHomeTweet(userId)
+                                    (adapter as TweetWrapRecyclerView).tweetObjects = getCurrentHomeTweet(userId)
                                     adapter?.notifyDataSetChanged()
                                 }
                             }

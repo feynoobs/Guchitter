@@ -3,15 +3,23 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.1425" />
+        <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.1425" />
         <entry key="app/src/main/res/layout/home_time_line_activity.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/overlay1_view.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/overlay_view.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/overlay_view_item.xml" value="0.1" />
         <entry key="app/src/main/res/layout/post_tweet_activity.xml" value="0.12228260869565218" />
         <entry key="app/src/main/res/layout/root_activity.xml" value="0.12462006079027356" />
         <entry key="app/src/main/res/layout/test.xml" value="0.35280797101449274" />
         <entry key="app/src/main/res/layout/tweet_recycle_view.xml" value="0.12462006079027356" />
         <entry key="app/src/main/res/layout/tweet_recycle_view_item.xml" value="0.11043566362715299" />
+        <entry key="app/src/main/res/layout/tweet_recycle_view_item_one_photo.xml" value="0.1" />
         <entry key="app/src/main/res/layout/tweet_recycle_view_item_three_photo.xml" value="0.1" />
         <entry key="app/src/main/res/layout/tweet_recycle_view_item_two_photo.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/tweet_recycler_view_item_four_photo.xml" value="0.1" />
         <entry key="app/src/main/res/layout/user_time_line_activity.xml" value="0.2" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.1425" />
       </map>
     </option>
   </component>
