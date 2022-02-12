@@ -9,4 +9,8 @@
     <string name="channel_name">いまどうしてる？</string>
     <string name="dot">・</string>
     <string name="next_tweet">新しいツィートがあります</string>
+    <string name="remove_tweet_title">ツィートを削除しますか?</string>
+    <string name="remove_tweet_body">この操作は取り消せません。削除してよろしいですか?</string>
+    <string name="common_remove_btn">削除</string>
+    <string name="common_cancel_btn">キャンセル</string>
 </resources>

@@ -1,11 +1,13 @@
 package jp.co.fssoft.guchitter.activity
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.view.WindowManager
 import android.widget.*
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -15,6 +17,7 @@ import jp.co.fssoft.guchitter.R
 import jp.co.fssoft.guchitter.api.*
 import jp.co.fssoft.guchitter.utility.Json
 import jp.co.fssoft.guchitter.utility.Utility
+import jp.co.fssoft.guchitter.widget.OverlayMenuRecyclerView
 import jp.co.fssoft.guchitter.widget.TweetScrollEvent
 import jp.co.fssoft.guchitter.widget.TweetWrapRecyclerView
 
@@ -41,6 +44,23 @@ class HomeTimeLineActivity : RootActivity()
      *
      */
     private var offset = 0
+
+    /**
+     * Keep id
+     */
+    private var keepId = 0L
+
+    /**
+     * Keep parent position
+     */
+    private var keepParentPosition = 0
+
+    /**
+     * Keep child position
+     */
+    private var keepChildPosition = 0
+
+    private var keepOverlayView: View? = null
 
     /**
      * TODO
@@ -100,6 +120,10 @@ class HomeTimeLineActivity : RootActivity()
                     layoutManager = LinearLayoutManager(this@HomeTimeLineActivity, LinearLayoutManager.VERTICAL, false)
                     (layoutManager as LinearLayoutManager).scrollToPositionWithOffset(scroll, offset)
                     adapter = TweetWrapRecyclerView(userId) {commonId, type, parentPosition, childPosition ->
+                        keepId = commonId
+                        keepParentPosition = parentPosition
+                        keepChildPosition = childPosition
+
                         when (type) {
                             TweetWrapRecyclerView.Companion.ButtonType.REPLY -> {
                                 val intent = Intent(applicationContext, PostTweetActivity::class.java).apply {
@@ -165,22 +189,37 @@ class HomeTimeLineActivity : RootActivity()
                                 startActivity(intent)
                             }
                             TweetWrapRecyclerView.Companion.ButtonType.OTHER_MY -> {
-//                                val messageLayout = this@HomeTimeLineActivity.findViewById<LinearLayout>(R.id.message1_layout)
-//                                ObjectAnimator.ofFloat(messageLayout, "translationY", messageLayout.height * -1.0f).apply {
-//                                    duration = resources.getInteger(android.R.integer.config_shortAnimTime).toLong()
-//                                    start()
-//                                }
-                                val mainLayout = this@HomeTimeLineActivity.findViewById<RecyclerView>(R.id.tweet_wrap_recycler_view)
                                 val overlayView = layoutInflater.inflate(R.layout.overlay_view, null).apply {
                                     findViewById<LinearLayout>(R.id.message1_gray_layout).setBackgroundColor(Color.argb(127, 0, 63, 255))
+                                    findViewById<RecyclerView>(R.id.overlay_menu_recycler_view).apply {
+                                        setHasFixedSize(true)
+                                        layoutManager = LinearLayoutManager(this@HomeTimeLineActivity, LinearLayoutManager.VERTICAL, false)
+                                        adapter = OverlayMenuRecyclerView {
+                                            when (it) {
+                                                1 -> {
+                                                    AlertDialog.Builder(this@HomeTimeLineActivity).apply {
+                                                        title = getString(R.string.remove_tweet_title)
+                                                        setMessage(R.string.remove_tweet_body)
+                                                        setPositiveButton(R.string.common_remove_btn) { dialog, which ->
+                                                            TwitterApiStatusesDestroy(keepId, db).start(mapOf()).callback = {
+                                                                db.delete("t_users", "current = ?", arrayOf(keepId.toString()))
+                                                                runOnUiThread {
+                                                                    adapter?.notifyItemRangeChanged(parentPosition, 1)
+                                                                }
+                                                            }
+                                                        }
+                                                        setNegativeButton(R.string.common_cancel_btn) { dialog, which ->
+                                                        }
+                                                        show()
+                                                    }
+                                                }
+                                            }
+                                            windowManager.removeView(keepOverlayView)
+                                        }
+                                        (adapter as OverlayMenuRecyclerView).overlayMenuObjects = listOf(OverlayMenuRecyclerView.OverlayMenuData(1, R.drawable.trash, "削除"))
+                                    }
                                 }
-//                                val overlayView = FrameLayout(applicationContext).apply {
-//                                    setBackgroundColor(Color.argb(127, 0, 63, 255))
-//                                    this.layoutInflater
-//                                }
-
-
-
+                                keepOverlayView = overlayView
                                 val params = WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY, WindowManager.LayoutParams.FLAGS_CHANGED, PixelFormat.TRANSLUCENT)
                                 windowManager.addView(overlayView, params)
                                 overlayView.setOnClickListener {

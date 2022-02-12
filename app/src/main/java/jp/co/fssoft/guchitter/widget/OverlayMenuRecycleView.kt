@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import jp.co.fssoft.guchitter.R
@@ -35,6 +36,12 @@ class OverlayMenuViewHolder(view: View) : RecyclerView.ViewHolder(view)
      * Text
      */
     public val text: TextView = view.findViewById(R.id.overlay_recycle_view_text)
+
+    /**
+     * Layout
+     */
+    public val layout: LinearLayout = view.findViewById(R.id.overlay_recycle_view_layout)
+
 }
 
 /**
@@ -43,7 +50,7 @@ class OverlayMenuViewHolder(view: View) : RecyclerView.ViewHolder(view)
  * @property callback
  * @constructor Create empty Overlay menu recycle view
  */
-class OverlayMenuRecyclerView(private val callback: (Long)->Unit) : RecyclerView.Adapter<OverlayMenuViewHolder>()
+class OverlayMenuRecyclerView(private val callback: (Int)->Unit) : RecyclerView.Adapter<OverlayMenuViewHolder>()
 {
 
     companion object
@@ -62,7 +69,7 @@ class OverlayMenuRecyclerView(private val callback: (Long)->Unit) : RecyclerView
      * @property text
      * @constructor Create empty Overlay menu data
      */
-    data class OverlayMenuData(val id: Long, val resourceId: Int, val text: String)
+    data class OverlayMenuData(val id: Int, val resourceId: Int, val text: String)
 
     public var overlayMenuObjects: List<OverlayMenuData> = mutableListOf()
 
@@ -90,6 +97,10 @@ class OverlayMenuRecyclerView(private val callback: (Long)->Unit) : RecyclerView
         Log.d(TAG, "[START]onBindViewHolder(${holder}, ${position})")
         holder.image.setImageResource(overlayMenuObjects[position].resourceId)
         holder.text.text = overlayMenuObjects[position].text
+        holder.layout.id = overlayMenuObjects[position].id
+        holder.layout.setOnClickListener {
+            callback(it.id)
+        }
     }
 
     /**
