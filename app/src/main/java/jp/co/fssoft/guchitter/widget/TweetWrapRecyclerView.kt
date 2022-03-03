@@ -76,7 +76,21 @@ class TweetWrapRecyclerView(private val userId: Long, private val callback: (Lon
     /**
      *
      */
-    public var tweetObjects: List<List<TweetObject>> = mutableListOf()
+    private var tweetObjects: List<List<TweetObject>> = listOf()
+
+    private var childAdapters: MutableList<RecyclerView.Adapter<TweetViewHolder>> = mutableListOf()
+
+    public fun setTweetObjects(tweetObjects: List<List<TweetObject>>)
+    {
+        if (this.tweetObjects.isEmpty() == false) {
+            tweetObjects.forEach { inList ->
+                this.tweetObjects.forEach { list ->
+
+                }
+            }
+        }
+        this.tweetObjects = tweetObjects
+    }
 
     /**
      * TODO
@@ -101,7 +115,9 @@ class TweetWrapRecyclerView(private val userId: Long, private val callback: (Lon
         Log.d(TAG, "[START]onBindViewHolder(${holder}, ${position})")
         holder.tweetsView.findViewById<RecyclerView>(R.id.tweet_recycler_view).apply {
             setHasFixedSize(true)
-            adapter = TweetRecycleView(position, context, callback, userId)
+            val adp = TweetRecycleView(position, callback, userId)
+            childAdapters.add(adp)
+            adapter = adp
             (adapter as TweetRecycleView).tweetObjects = tweetObjects[position]
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         }
@@ -119,7 +135,6 @@ class TweetWrapRecyclerView(private val userId: Long, private val callback: (Lon
         return tweetObjects.count()
     }
 }
-
 
 /**
  * Tweet view holder
@@ -289,7 +304,7 @@ internal class TweetViewHolder(private val view: View) : RecyclerView.ViewHolder
  * @property parentPosition
  * @property callback
  */
-internal class TweetRecycleView(private val parentPosition: Int, private val context: Context, private val callback: (Long, TweetWrapRecyclerView.Companion.ButtonType, Int, Int)->Unit, private val userId: Long ) : RecyclerView.Adapter<TweetViewHolder>()
+internal class TweetRecycleView(private val parentPosition: Int, private val callback: (Long, TweetWrapRecyclerView.Companion.ButtonType, Int, Int)->Unit, private val userId: Long ) : RecyclerView.Adapter<TweetViewHolder>()
 {
     companion object
     {
